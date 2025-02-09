@@ -2677,7 +2677,7 @@ main() {
         warning_banner
         data_entry
         [[ ${args[utils]} == "false" ]] && installation_of_utilities
-        [[ ${args[dns]} == "false" ]] && dns_encryption
+        [[ ${args[dns]} == "true" ]] && dns_encryption
         [[ ${args[autoupd]} == "false" ]] && setup_auto_updates
         [[ ${args[bbr]} == "false" ]] && enable_bbr
         [[ ${args[ipv6]} == "false" ]] && disable_ipv6
