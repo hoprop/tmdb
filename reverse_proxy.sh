@@ -2676,23 +2676,23 @@ main() {
         banner_xray
         warning_banner
         data_entry
-        [[ ${args[utils]} == "false" ]] && installation_of_utilities
+        [[ ${args[utils]} == "true" ]] && installation_of_utilities
         [[ ${args[dns]} == "true" ]] && dns_encryption
-        [[ ${args[autoupd]} == "false" ]] && setup_auto_updates
-        [[ ${args[bbr]} == "false" ]] && enable_bbr
-        [[ ${args[ipv6]} == "false" ]] && disable_ipv6
+        [[ ${args[autoupd]} == "true" ]] && setup_auto_updates
+        [[ ${args[bbr]} == "true" ]] && enable_bbr
+        [[ ${args[ipv6]} == "true" ]] && disable_ipv6
       	[[ ${args[warp]} == "true" ]] && warp
-        [[ ${args[cert]} == "false" ]] && issuance_of_certificates
-        [[ ${args[mon]} == "false" ]] && monitoring
-        [[ ${args[shell]} == "false" ]] && shellinabox
+        [[ ${args[cert]} == "true" ]] && issuance_of_certificates
+        [[ ${args[mon]} == "true" ]] && monitoring
+        [[ ${args[shell]} == "true" ]] && shellinabox
         write_defaults_to_file
         update_reverse_proxy
 	random_site
-        [[ ${args[nginx]} == "false" ]] && nginx_setup
-        [[ ${args[panel]} == "false" ]] && install_panel
-        [[ ${args[firewall]} == "false" ]] && enabling_security
-        [[ ${args[ssh]} == "false" ]] && ssh_setup
-        [[ ${args[tgbot]} == "false" ]] && install_bot
+        [[ ${args[nginx]} == "true" ]] && nginx_setup
+        [[ ${args[panel]} == "true" ]] && install_panel
+        [[ ${args[firewall]} == "true" ]] && enabling_security
+        [[ ${args[ssh]} == "true" ]] && ssh_setup
+        [[ ${args[tgbot]} == "true" ]] && install_bot
         data_output
         ;;
 #      2)
