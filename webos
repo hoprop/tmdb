@@ -10,6 +10,7 @@ WEBOS_CUSTOM_HOME_SCREEN_ENABLED=true
 TOP_SHELF_ENABLED=true
 AI_BOARD_ENABLED=true
 RECOMMENDED_ENABLED=true
+RECENT_BG_ENABLED=true
 ############ END User Customizable ENV Variables. Advanced users only past this point.
 
 # This is the directory we will mount override files from.
@@ -20,6 +21,7 @@ AI_BOARD_SOURCE="/usr/palm/applications/com.webos.app.home/qml/UserInterfaceLaye
 RECOMMENDED_SOURCE="/usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/Recommended.qml"
 TOP_SHELF_SOURCE="/usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/TopShelf.qml"
 APP_INTERFACES_SOURCE="/usr/palm/applications/com.webos.app.home/qml/Interfaces/AppInterfaces/AppInterfaces.qml"
+RECENT_BG_SOURCE="/usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/RecentBG.qml"
 
 check_war_enabled() {
     # This can be used to disable the script while keeping it in place. Set WEBOS_CUSTOM_HOME_SCREEN_ENABLED to false in the env variables above.
@@ -74,6 +76,22 @@ check_target_sums() {
             fi
             echo "Checksum matched!"
         ;;
+        RECENT_BG_SUM="47043051e15f1bf9a2ac4062cd622eaf59b5c195a25d42d7f3b15a81971130772aabd7d7f98312e2b47ac6c2fa4179f809035a4f1b6f653996aaaa40988aa91d  /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/RecentBG.qml"
+        RECENT_BG_CHECK=$(sha512sum $RECENT_BG_SOURCE)
+
+        if [ "$RECENT_BG_SUM" != "$RECENT_BG_CHECK" ]; then
+            echo "Shasum did not match for RecentBG.qml! Script will not proceed!"
+            exit 1
+        fi
+        echo "Checksum matched!"
+        ;;
+    *)
+        echo "Attempted to check sum with unrecognized argument! Exiting."
+        exit 1
+        ;;
+    esac
+}
+
     "top_shelf")
         TOP_SHELF_SUM="d142a5625a63dd5913afe02c4e216a7b48106025db7b34d89db641a19b7b7e0170a66956c5400af3cc0aa35816a62cad1ce4d8fac8b33f01d49b2652a1461904  /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/TopShelf.qml"
         TOP_SHELF_CHECK=$(sha512sum $TOP_SHELF_SOURCE)
