@@ -221,6 +221,36 @@ remove_recommended() {
 
 
 }
+# Add this to your existing variables
+RECENT_BG_SOURCE="/usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/RecentBG.qml"
+
+create_recent_bg_override() {
+    umount "$RECENT_BG_SOURCE" > /dev/null 2>&1 || :
+    check_target_sums "recent_bg"
+
+    # Copy the RecentBG.qml file to the working directory
+    cp $RECENT_BG_SOURCE "$WORKDIR/RecentBG.qml"
+
+    # Modify the file to include the custom image path
+    sed -i 's|source:.*|source: "file:///media/mountain.jpg"|' "$WORKDIR/RecentBG.qml"
+}
+
+remove_recent_bg() {
+    if [ $RECENT_BG_ENABLED = true ]; then
+        if [ ! -f "$WORKDIR/RecentBG.qml" ]; then
+            echo "RecentBG override file did not exist. Creating one now."
+            create_recent_bg_override
+        else
+            echo "RecentBG override file found at $WORKDIR/RecentBG.qml"
+        fi
+        mount --bind "$WORKDIR/RecentBG.qml" "$RECENT_BG_SOURCE"
+    else
+        echo "RecentBG block disabled. Reverting changes"
+        umount "$RECENT_BG_SOURCE" > /dev/null 2>&1 || :
+        rm -fr $WORKDIR/RecentBG.qml
+    fi
+}
+
 
 init() {
     pkill -f com.webos.app.home
