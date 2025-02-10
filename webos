@@ -1,21 +1,79 @@
-#! /bin/bash
+#!/bin/bash
 
-# Проверяем, установлен ли скрипт
-if [! -f "/var/lib/webosbrew/init.d/homescreen_cleaner" ]; then
- # Загружаем скрипт, если он еще не установлен
- curl -s -L https://github.com/nnmdd/homescreen_cleaner/raw/main/homescreen_cleaner > /var/lib/webosbrew/init.d/homescreen_cleaner
- chmod +x /var/lib/webosbrew/init.d/homescreen_cleaner
- /var/lib/webosbrew/init.d/homescreen_cleaner && exit 0
+if [ ! -f "/var/lib/webosbrew/init.d/homescreen_cleaner" ]; then
+	curl -s -L https://github.com/nnmdd/homescreen_cleaner/raw/main/homescreen_cleaner > /var/lib/webosbrew/init.d/homescreen_cleaner
+	chmod +x /var/lib/webosbrew/init.d/homescreen_cleaner
+	/var/lib/webosbrew/init.d/homescreen_cleaner && exit 0
 fi
 
-# Создаем временную директорию
-mkdir -p /tmp/homescreen_cleaner
 
-# Создаем QML-файлы, которые очищают домашний экран
+mkdir -p /tmp/homescreen_cleaner
 echo "return" > /tmp/homescreen_cleaner/TopShelf.qml
-echo "return" > /tmp/homescreen_cleaner/RecentBG.qml
+echo "/* @@@LICENSE
+ *
+ * Copyright (c) 2018 LG Electronics, Inc.
+ *
+ * Confidential computer software. Valid license from LG required for
+ * possession, use or copying. Consistent with FAR 12.211 and 12.212,
+ * Commercial Computer Software, Computer Software Documentation, and
+ * Technical Data for Commercial Items are licensed to the U.S. Government
+ * under vendor's standard commercial license.
+ *
+ * LICENSE@@@ */
+
+import QtQuick 2.12
+import QtGraphicalEffects 1.12
+
+
+BrightnessContrast {
+
+    id: root
+
+    width: parent ? parent.width : 0
+    height: parent ? parent.height : 0
+
+    visible: false
+
+    layer.enabled: onScreen
+
+    source: Image {
+
+        width: root.width
+        height: root.height
+        sourceSize.width: width
+        sourceSize.height: height
+        source: "file:///media/mountain.jpg"  // Replace with the path to your image
+
+        fillMode: Image.PreserveAspectCrop
+
+        anchors.centerIn: parent
+        asynchronous: true
+        antialiasing: true
+
+        horizontalAlignment: Image.AlignHCenter
+        verticalAlignment: Image.AlignVCenter
+        cache: false
+    }
+
+    brightness: -0.6
+    contrast: 0
+}
+
+file:///usr/bin/com.webos.app.home
+
+" > /tmp/homescreen_cleaner/RecentBG.qml
 echo "return" > /tmp/homescreen_cleaner/AppInterfaces.qml
 echo "return" > /tmp/homescreen_cleaner/Recommended.qml
 echo "return" > /tmp/homescreen_cleaner/CPShelf.qml
 echo "return" > /tmp/homescreen_cleaner/AIBoard.qml
 echo "return" > /tmp/homescreen_cleaner/AdShelf.qml
+
+mount --bind /tmp/homescreen_cleaner/TopShelf.qml /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/TopShelf.qml
+mount --bind /tmp/homescreen_cleaner/RecentBG.qml /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/RecentBG.qml
+mount --bind /tmp/homescreen_cleaner/AppInterfaces.qml /usr/palm/applications/com.webos.app.home/qml/Interfaces/AppInterfaces/AppInterfaces.qml
+mount --bind /tmp/homescreen_cleaner/Recommended.qml /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/Recommended.qml
+mount --bind /tmp/homescreen_cleaner/CPShelf.qml /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/CPShelf.qml
+mount --bind /tmp/homescreen_cleaner/AIBoard.qml /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/AIBoard.qml
+mount --bind /tmp/homescreen_cleaner/AdShelf.qml /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/AdShelf.qml
+
+pkill -f com.webos.app.home
