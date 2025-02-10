@@ -25,7 +25,7 @@ RECENT_BG_SOURCE="/usr/palm/applications/com.webos.app.home/qml/UserInterfaceLay
 
 check_war_enabled() {
     # This can be used to disable the script while keeping it in place. Set WEBOS_CUSTOM_HOME_SCREEN_ENABLED to false in the env variables above.
-    if [ $WEBOS_CUSTOM_HOME_SCREEN_ENABLED = false ]; then
+    if [ "$WEBOS_CUSTOM_HOME_SCREEN_ENABLED" = false ]; then
         echo "WEBOS_CUSTOM_HOME_SCREEN_ENABLED set to false, exiting."
         rm -fr $WORKDIR
         exit 1
@@ -39,13 +39,13 @@ check_install() {
         curl -s -L https://raw.githubusercontent.com/farkmarnum/webos-custom-home-screen/main/webos_custom_home_screen > /var/lib/webosbrew/init.d/webos_custom_home_screen
         chmod +x /var/lib/webosbrew/init.d/webos_custom_home_screen
     else
-    script_name1=`basename $0`
-    script_path1=`dirname $0`
-    script_path_with_name="$script_path1/$script_name1"
+        script_name1=$(basename "$0")
+        script_path1=$(dirname "$0")
+        script_path_with_name="$script_path1/$script_name1"
         if [ "$script_path_with_name" = "/var/lib/webosbrew/init.d/webos_custom_home_screen" ]; then
             echo "Script installed and started from right location, executing."
         else
-            echo "Runnning Script from right location."
+            echo "Running Script from right location."
             (/var/lib/webosbrew/init.d/webos_custom_home_screen)
             exit 1
         fi
@@ -58,26 +58,37 @@ check_target_sums() {
     case $1 in
     "ai_board")
         AI_BOARD_SUM="4cff08f7438bc55fe6f5010aebc4132c3da3a083dbf8baa7490c15a18a79be15b122516b579a5b0c2fcaa6359b712f3bf664975e87cfffec66efc9667fe14e5e  /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/AIBoard.qml"
-        AI_BOARD_CHECK=$(sha512sum $AI_BOARD_SOURCE)
+        AI_BOARD_CHECK=$(sha512sum "$AI_BOARD_SOURCE")
 
         if [ "$AI_BOARD_SUM" != "$AI_BOARD_CHECK" ]; then
             echo "Shasum did not match for AIBoard.qml! Script will not proceed!"
             exit 1
         fi
-            echo "Checksum matched!"
+        echo "Checksum matched!"
         ;;
     "recommended")
         RECOMMENDED_SUM="ba877634207a03d2e58868f452b84b5f91985763463fd6d1db506f2d80cc4a9fd0c91e564976df9df04fc5dcc1ff5e36b3c8ff7d2213f747e321d00ae1511d62  /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/Recommended.qml"
-        RECOMMENDED_CHECK=$(sha512sum $RECOMMENDED_SOURCE)
+        RECOMMENDED_CHECK=$(sha512sum "$RECOMMENDED_SOURCE")
 
-            if [ "$RECOMMENDED_SUM" != "$RECOMMENDED_CHECK" ]; then
-                echo "Shasum did not match for Recommended.qml! Script will not proceed!"
-                exit 1
-            fi
-            echo "Checksum matched!"
+        if [ "$RECOMMENDED_SUM" != "$RECOMMENDED_CHECK" ]; then
+            echo "Shasum did not match for Recommended.qml! Script will not proceed!"
+            exit 1
+        fi
+        echo "Checksum matched!"
         ;;
+    "top_shelf")
+        TOP_SHELF_SUM="d142a5625a63dd5913afe02c4e216a7b48106025db7b34d89db641a19b7b7e0170a66956c5400af3cc0aa35816a62cad1ce4d8fac8b33f01d49b2652a1461904  /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/TopShelf.qml"
+        TOP_SHELF_CHECK=$(sha512sum "$TOP_SHELF_SOURCE")
+
+        if [ "$TOP_SHELF_SUM" != "$TOP_SHELF_CHECK" ]; then
+            echo "Shasum did not match for TopShelf.qml! Script will not proceed!"
+            exit 1
+        fi
+        echo "Checksum matched!"
+        ;;
+    "recent_bg")
         RECENT_BG_SUM="47043051e15f1bf9a2ac4062cd622eaf59b5c195a25d42d7f3b15a81971130772aabd7d7f98312e2b47ac6c2fa4179f809035a4f1b6f653996aaaa40988aa91d  /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/RecentBG.qml"
-        RECENT_BG_CHECK=$(sha512sum $RECENT_BG_SOURCE)
+        RECENT_BG_CHECK=$(sha512sum "$RECENT_BG_SOURCE")
 
         if [ "$RECENT_BG_SUM" != "$RECENT_BG_CHECK" ]; then
             echo "Shasum did not match for RecentBG.qml! Script will not proceed!"
@@ -92,27 +103,10 @@ check_target_sums() {
     esac
 }
 
-    "top_shelf")
-        TOP_SHELF_SUM="d142a5625a63dd5913afe02c4e216a7b48106025db7b34d89db641a19b7b7e0170a66956c5400af3cc0aa35816a62cad1ce4d8fac8b33f01d49b2652a1461904  /usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/TopShelf.qml"
-        TOP_SHELF_CHECK=$(sha512sum $TOP_SHELF_SOURCE)
-
-        if [ "$TOP_SHELF_SUM" != "$TOP_SHELF_CHECK" ]; then
-            echo "Shasum did not match for TopShelf.qml! Script will not proceed!"
-            exit 1
-        fi
-            echo "Checksum matched!"
-        ;;
-    *)
-        echo "Attempted to check sum with unrecognized argument! Exiting."
-        exit 1
-        ;;
-    esac
-}
-
 check_workdir() {
     # Del workimg directory and recreate it every script run.
     if [ ! -d "$WORKDIR" ]; then
-        mkdir -p $WORKDIR
+        mkdir -p "$WORKDIR"
     fi
 }
 
@@ -120,46 +114,40 @@ create_top_shelf_override() {
     umount "$TOP_SHELF_SOURCE" > /dev/null 2>&1 || :
     check_target_sums "top_shelf"
 
-    # This runs if the modified file is not found.
-    # Then we copy the AIBoard.qml file to our workdir.
-    cp $TOP_SHELF_SOURCE "$WORKDIR/TopShelf.qml"
+    # Copy the TopShelf.qml file to the working directory
+    cp "$TOP_SHELF_SOURCE" "$WORKDIR/TopShelf.qml"
 
-    # Finally we modify the file.
+    # Modify the file.
     sed -i '17 i return' "$WORKDIR/TopShelf.qml"
 }
 
 remove_top_shelf() {
-    # First we check if the AIBoard.qml file exists on the USB. If it does not we create it.
-    if [ $TOP_SHELF_ENABLED = true ]; then
+    if [ "$TOP_SHELF_ENABLED" = true ]; then
         if [ ! -f "$WORKDIR/TopShelf.qml" ]; then
             echo "TopShelf override file did not exist. Creating one now."
             create_top_shelf_override
         else
             echo "TopShelf override file found at $WORKDIR/TopShelf.qml"
         fi
-        # Then we mount --bind the TopShelf.qml override file. This is a non destructive action that can be reset with a reboot or umount.
-        mount --bind "$WORKDIR/TopShelf.qml" "$AI_BOARD_SOURCE"
+        mount --bind "$WORKDIR/TopShelf.qml" "$TOP_SHELF_SOURCE"
     else
         echo "TopShelf block disabled. Reverting changes"
         umount "$TOP_SHELF_SOURCE" > /dev/null 2>&1 || :
-        rm -fr $WORKDIR/TopShelf.qml
+        rm -fr "$WORKDIR/TopShelf.qml"
     fi
 }
 
 create_app_interfaces_override() {
     umount "$APP_INTERFACES_SOURCE" > /dev/null 2>&1 || :
-    # check_target_sums "app_interfaces"
 
-    # This runs if the modified file is not found.
-    # Then we copy the AIBoard.qml file to our workdir.
-    cp $APP_INTERFACES_SOURCE "$WORKDIR/AppInterfaces.qml"
+    # Copy the AppInterfaces.qml file to the working directory
+    cp "$APP_INTERFACES_SOURCE" "$WORKDIR/AppInterfaces.qml"
 
-    # Finally we modify the file.
+    # Modify the file.
     sed -i '312 i console.log("HERE", item)' "$WORKDIR/AppInterfaces.qml"
 }
 
 debug_app_interfaces() {
-    # First we check if the AIBoard.qml file exists on the USB. If it does not we create it.
     if [ 1 = 1 ]; then
         if [ ! -f "$WORKDIR/AppInterfaces.qml" ]; then
             echo "AppInterfaces override file did not exist. Creating one now."
@@ -167,94 +155,81 @@ debug_app_interfaces() {
         else
             echo "AppInterfaces override file found at $WORKDIR/AppInterfaces.qml"
         fi
-        # Then we mount --bind the AppInterfaces.qml override file. This is a non destructive action that can be reset with a reboot or umount.
         mount --bind "$WORKDIR/AppInterfaces.qml" "$APP_INTERFACES_SOURCE"
     else
         echo "AppInterfaces block disabled. Reverting changes"
         umount "$APP_INTERFACES_SOURCE" > /dev/null 2>&1 || :
-        rm -fr $WORKDIR/AppInterfaces.qml
+        rm -fr "$WORKDIR/AppInterfaces.qml"
     fi
 }
 
 create_ai_board_override() {
-    #! mountpoint -q "$AI_BOARD_SOURCE" || umount "$AI_BOARD_SOURCE"
     umount "$AI_BOARD_SOURCE" > /dev/null 2>&1 || :
     check_target_sums "ai_board"
-    # This runs if the modified file is not found.
-    # Then we copy the AIBoard.qml file to our workdir.
-    cp $AI_BOARD_SOURCE "$WORKDIR/AIBoard.qml"
 
-    # Finally we modify the file.
+    # Copy the AIBoard.qml file to the working directory
+    cp "$AI_BOARD_SOURCE" "$WORKDIR/AIBoard.qml"
+
+    # Modify the file.
     sed -i '17 i return' "$WORKDIR/AIBoard.qml"
 }
 
 remove_ai_board() {
-    # First we check if the AIBoard.qml file exists on the USB. If it does not we create it.
-    if [ $AI_BOARD_ENABLED = true ]; then
+    if [ "$AI_BOARD_ENABLED" = true ]; then
         if [ ! -f "$WORKDIR/AIBoard.qml" ]; then
             echo "AIBoard override file did not exist. Creating one now."
             create_ai_board_override
         else
             echo "AIBoard override file found at $WORKDIR/AIBoard.qml"
         fi
-        # Then we mount --bind the AIBoard.qml override file. This is a non destructive action that can be reset with a reboot or umount.
         mount --bind "$WORKDIR/AIBoard.qml" "$AI_BOARD_SOURCE"
     else
         echo "AIBoard block disabled. Reverting changes"
-        #! mountpoint -q "$AI_BOARD_SOURCE" || umount "$AI_BOARD_SOURCE"
         umount "$AI_BOARD_SOURCE" > /dev/null 2>&1 || :
-        rm -fr $WORKDIR/AIBoard.qml
+        rm -fr "$WORKDIR/AIBoard.qml"
     fi
 }
 
 create_recommended_override() {
-    #! mountpoint -q "$RECOMMENDED_SOURCE" || umount "$RECOMMENDED_SOURCE"
     umount "$RECOMMENDED_SOURCE" > /dev/null 2>&1 || :
     check_target_sums "recommended"
-    # This runs if the modified file is not found.
-    # Then we copy the Recommended.qml file to our workdir.
-    cp $RECOMMENDED_SOURCE "$WORKDIR/Recommended.qml"
 
-    # Finally we modify the file.
+    # Copy the Recommended.qml file to the working directory
+    cp "$RECOMMENDED_SOURCE" "$WORKDIR/Recommended.qml"
+
+    # Modify the file.
     sed -i '17 i return' "$WORKDIR/Recommended.qml"
 }
 
 remove_recommended() {
-    # First we check if the Recommended.qml file exists on the USB.
-    if [ $RECOMMENDED_ENABLED = true ]; then
+    if [ "$RECOMMENDED_ENABLED" = true ]; then
         if [ ! -f "$WORKDIR/Recommended.qml" ]; then
             echo "Recommended override file did not exist. Creating one now."
             create_recommended_override
         else
             echo "Recommended override file found at $WORKDIR/Recommended.qml"
         fi
-        # Then we mount --bind the Recommended.qml override file. This is a non destructive action that can be reset with a reboot or umount.
         mount --bind "$WORKDIR/Recommended.qml" "$RECOMMENDED_SOURCE"
     else
         echo "Recommended block disabled. Reverting changes"
-        #! mountpoint -q "$RECOMMENDED_SOURCE" || umount "$RECOMMENDED_SOURCE"
         umount "$RECOMMENDED_SOURCE" > /dev/null 2>&1 || :
-        rm -fr $WORKDIR/Recommended.qml
+        rm -fr "$WORKDIR/Recommended.qml"
     fi
-
-
 }
-# Add this to your existing variables
-RECENT_BG_SOURCE="/usr/palm/applications/com.webos.app.home/qml/UserInterfaceLayer/Containers/Main/RecentBG.qml"
 
 create_recent_bg_override() {
     umount "$RECENT_BG_SOURCE" > /dev/null 2>&1 || :
     check_target_sums "recent_bg"
 
     # Copy the RecentBG.qml file to the working directory
-    cp $RECENT_BG_SOURCE "$WORKDIR/RecentBG.qml"
+    cp "$RECENT_BG_SOURCE" "$WORKDIR/RecentBG.qml"
 
     # Modify the file to include the custom image path
     sed -i 's|source:.*|source: "file:///media/mountain.jpg"|' "$WORKDIR/RecentBG.qml"
 }
 
 remove_recent_bg() {
-    if [ $RECENT_BG_ENABLED = true ]; then
+    if [ "$RECENT_BG_ENABLED" = true ]; then
         if [ ! -f "$WORKDIR/RecentBG.qml" ]; then
             echo "RecentBG override file did not exist. Creating one now."
             create_recent_bg_override
@@ -265,10 +240,9 @@ remove_recent_bg() {
     else
         echo "RecentBG block disabled. Reverting changes"
         umount "$RECENT_BG_SOURCE" > /dev/null 2>&1 || :
-        rm -fr $WORKDIR/RecentBG.qml
+        rm -fr "$WORKDIR/RecentBG.qml"
     fi
 }
-
 
 init() {
     pkill -f com.webos.app.home
@@ -284,6 +258,9 @@ init() {
 
     # Optional. This removes the trending section
     remove_recommended
+
+    # Optional. This enables new bg
+    remove_recent_bg
 
     # Removes the whole top shelf container
     remove_top_shelf
