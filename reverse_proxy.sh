@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# wget -N https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/reverse_proxy.sh && bash reverse_proxy.sh d
 
 ###################################
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.1
+VERSION_MANAGER='1.4.3'
+VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
-PATH_DB="/etc/x-ui/x-ui.db"
+DEST_DB="/etc/x-ui/x-ui.db"
+DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/reverse_proxy.sh"
 DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/database/x-ui.db"
 
@@ -93,12 +94,12 @@ E[19]="Enter SNI for Reality (do not enter your domain):"
 R[19]="Введите SNI для Reality (не вводите ваш домен):"
 E[20]="Error: failed to connect to WARP. Manual acceptance of the terms of service is required."
 R[20]="Ошибка: не удалось подключиться к WARP. Требуется вручную согласиться с условиями использования."
-E[21]=""
-R[21]=""
-E[22]=""
-R[22]=""
-E[23]=""
-R[23]=""
+E[21]="Access link to node exporter:"
+R[21]="Доступ по ссылке к node exporter:"
+E[22]="Access link to shell in a box:"
+R[22]="Доступ по ссылке к shell in a box:"
+E[23]="Creating a backup and rotation."
+R[23]="Создание резевной копии и ротация."
 E[24]="Enter Node Exporter path:"
 R[24]="Введите путь к Node Exporter:"
 E[25]="Enter Adguard-home path:"
@@ -227,21 +228,44 @@ E[86]="Reverse proxy manager $VERSION_MANAGER"
 R[86]="Reverse proxy manager $VERSION_MANAGER"
 E[87]="1. Standard installation"
 R[87]="1. Стандартная установка"
-E[88]="2. Migration to a new version with client retention."
-R[88]="2. Миграция на новую версию с сохранением клиентов."
-E[89]="3. Change the domain name for the proxy."
-R[89]="3. Изменить доменное имя для прокси."
-E[90]="4. Forced reissue of certificates."
-R[90]="4. Принудительный перевыпуск сертификатов."
-E[91]="5. Copy someone else's website to your server."
-R[91]="5. Скопировать чужой сайт на ваш сервер."
-E[92]="6. Disable IPv6."
-R[92]="6. Отключение IPv6."
-E[93]="7. Enable IPv6."
-R[93]="7. Включение IPv6."
-E[94]="8. Find out the size of the directory."
-R[94]="8. Узнать размер директории."
-
+E[88]="2. Restore from a rescue copy."
+R[88]="2. Восстановление из резевной копии."
+E[89]="3. Migration to a new version with client retention."
+R[89]="3. Миграция на новую версию с сохранением клиентов."
+E[90]="4. Change the domain name for the proxy."
+R[90]="4. Изменить доменное имя для прокси."
+E[91]="5. Forced reissue of certificates."
+R[91]="5. Принудительный перевыпуск сертификатов."
+E[92]="6. Integrate custom JSON subscription."
+R[92]="6. Интеграция кастомной JSON подписки."
+E[93]="7. Copy someone else's website to your server."
+R[93]="7. Скопировать чужой сайт на ваш сервер."
+E[94]="8. Disable IPv6."
+R[94]="8. Отключение IPv6."
+E[95]="9. Enable IPv6."
+R[95]="9. Включение IPv6."
+E[96]="10. Find out the size of the directory."
+R[96]="10. Узнать размер директории."
+E[97]="Client migration initiation (experimental feature)."
+R[97]="Начало миграции клиентов (экспериментальная функция)."
+E[98]="Client migration is complete."
+R[98]="Миграция клиентов завершена."
+E[99]="Settings custom JSON subscription."
+R[99]="Настройки пользовательской JSON-подписки."
+E[100]="Restore from backup."
+R[100]="Восстановление из резервной копии."
+E[101]="Backups:"
+R[101]="Резервные копии:"
+E[102]="Enter the number of the archive to restore:"
+R[102]="Введите номер архива для восстановления:"
+E[103]="Restoration is complete."
+R[103]="Восстановление завершено."
+E[104]="Restoration is complete."
+R[104]="Выбран архив:"
+E[105]="11. Traffic statistics."
+R[105]="11. Статистика трафика."
+E[106]="Traffic statistics:\n  1. By years \n  2. By months \n  3. By days \n  4. By hours"
+R[106]="Статистика трафика:\n  1. По годам \n  2. По месяцам \n  3. По дням \n  4. По часам"
 
 ###################################
 ### Help output
@@ -251,9 +275,9 @@ show_help() {
   echo "Usage: reverse_proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]"
   echo "         [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]"
   echo "         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>]"
-  echo "         [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]"
-  echo "         [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [--update]"
-  echo "         [-h|--help]"
+  echo "         [-p|--panel <true|false>] [--custom <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>]"
+  echo "         [-t|--tgbot <true|false>] [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>]"
+  echo "         [--update] [-h|--help]"
   echo
   echo "  -u, --utils <true|false>       Additional utilities                             (default: ${defaults[utils]})"
   echo "                                 Дополнительные утилиты"
@@ -279,6 +303,8 @@ show_help() {
   echo "                                 Установка NGINX"
   echo "  -p, --panel <true|false>       Panel installation for user management           (default: ${defaults[panel]})"
   echo "                                 Установка панели для управления пользователями"
+  echo "      --custom <true|false>      Custom JSON subscription                         (default: ${defaults[custom]})"
+  echo "                                 Кастомная JSON-подписка"  
   echo "  -f, --firewall <true|false>    Firewall configuration                           (default: ${defaults[firewall]})"
   echo "                                 Настройка файрвола"
   echo "  -s, --ssh <true|false>         SSH access                                       (default: ${defaults[ssh]})"
@@ -291,8 +317,8 @@ show_help() {
   echo "                                 Отключение проверки"
   echo "  -o, --subdomain <true|false>   Support for subdomains                           (default: ${defaults[subdomain]})"
   echo "                                 Поддержка субдоменов"
-  echo "      --update                   Updating the script version (Version on github: ${VERSION_MANAGER})"
-  echo "                                 Обновление версии скрипта (Версия на github: ${VERSION_MANAGER})"
+  echo "      --update                   Update version of Reverse-proxy manager (Version on github: ${VERSION_MANAGER})"
+  echo "                                 Обновить версию Reverse-proxy manager (Версия на github: ${VERSION_MANAGER})"
   echo "  -h, --help                     Display this help message"
   echo "                                 Показать это сообщение помощи"
   echo
@@ -303,19 +329,17 @@ show_help() {
 ### Reverse_proxy manager
 ###################################
 update_reverse_proxy() {
-  # Путь к файлу обновления
-  UPDATE_SCRIPT="/usr/local/reverse_proxy/reverse_proxy"
+  info "Script update and integration."
 
-  # Скрипт обновления
+  CURRENT_VERSION=$(wget -qO- $SCRIPT_URL | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
+  warning "Script version: $CURRENT_VERSION"
+  UPDATE_SCRIPT="${DIR_REVERSE_PROXY}reverse_proxy"
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
-  chmod +x $UPDATE_SCRIPT
-
-  # Сделать файл исполнимым
   chmod +x "$UPDATE_SCRIPT"
-  # Добавление задачи в crontab для выполнения каждый день в полночь
-  CRON_RULE2="0 0 * * * reverse_proxy --update"
-  ( crontab -l | grep -Fxq "$CRON_RULE2" ) || ( crontab -l; echo "$CRON_RULE2" ) | crontab -
+  add_cron_rule "0 0 * * * reverse_proxy --update"
+
+  tilda "\n|-----------------------------------------------------------------------------|\n"
 }
 
 ###################################
@@ -337,12 +361,13 @@ read_defaults_from_file() {
     defaults[autoupd]=true
     defaults[bbr]=true
     defaults[ipv6]=true
-    defaults[warp]=true
+    defaults[warp]=false
     defaults[cert]=true
     defaults[mon]=false
     defaults[shell]=false
     defaults[nginx]=true
     defaults[panel]=true
+    defaults[custom]=true
     defaults[firewall]=true
     defaults[ssh]=true
     defaults[tgbot]=false
@@ -369,6 +394,7 @@ defaults[mon]=false
 defaults[shell]=false
 defaults[nginx]=true
 defaults[panel]=true
+defaults[custom]=true
 defaults[firewall]=false
 defaults[ssh]=false
 defaults[tgbot]=false
@@ -409,133 +435,47 @@ validate_true_false() {
 ###################################
 ### Parse args
 ###################################
+declare -A arg_map=(
+  [-u]=utils      [--utils]=utils
+  [-d]=dns        [--dns]=dns
+  [-a]=addu       [--addu]=addu
+  [-r]=autoupd    [--autoupd]=autoupd
+  [-b]=bbr        [--bbr]=bbr
+  [-i]=ipv6       [--ipv6]=ipv6
+  [-w]=warp       [--warp]=warp
+  [-c]=cert       [--cert]=cert
+  [-m]=mon        [--mon]=mon
+  [-l]=shell      [--shell]=shell
+  [-n]=nginx      [--nginx]=nginx
+  [-p]=panel      [--panel]=panel
+                  [--custom]=custom
+  [-f]=firewall   [--firewall]=firewall
+  [-s]=ssh        [--ssh]=ssh
+  [-t]=tgbot      [--tgbot]=tgbot
+  [-g]=generate   [--generate]=generate
+  [-x]=skip-check [--skip-check]=skip-check
+  [-o]=subdomain  [--subdomain]=subdomain
+)
+
 parse_args() {
   local opts
-  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update,depers,help -- "$@")
+  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,custom:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update,depers,help -- "$@")
+
   if [[ $? -ne 0 ]]; then
     return 1
   fi
+
   eval set -- "$opts"
   while true; do
     case $1 in
-      -u|--utils)
-        args[utils]="$2"
-        normalize_case utils
-        validate_true_false utils "$2" || return 1
-        shift 2
-        ;;
-      -d|--dns)
-        args[dns]="$2"
-        normalize_case dns
-        validate_true_false dns "$2" || return 1
-        shift 2
-        ;;
-      -a|--addu)
-        args[addu]="$2"
-        normalize_case addu
-        validate_true_false addu "$2" || return 1
-        shift 2
-        ;;
-      -r|--autoupd)
-        args[autoupd]="$2"
-        normalize_case autoupd
-        validate_true_false autoupd "$2" || return 1
-        shift 2
-        ;;
-      -b|--bbr)
-        args[bbr]="$2"
-        normalize_case bbr
-        validate_true_false bbr "$2" || return 1
-        shift 2
-        ;;
-      -i|--ipv6)
-        args[ipv6]="$2"
-        normalize_case ipv6
-        validate_true_false ipv6 "$2" || return 1
-        shift 2
-        ;;
-      -w|--warp)
-        args[warp]="$2"
-        normalize_case warp
-        validate_true_false warp "$2" || return 1
-        shift 2
-        ;;
-      -c|--cert)
-        args[cert]="$2"
-        normalize_case cert
-        validate_true_false cert "$2" || return 1
-        shift 2
-        ;;
-      -m|--mon)
-        args[mon]="$2"
-        normalize_case mon
-        validate_true_false mon "$2" || return 1
-        shift 2
-        ;;
-      -l|--shell)
-        args[shell]="$2"
-        normalize_case shell
-        validate_true_false shell "$2" || return 1
-        shift 2
-        ;;
-      -n|--nginx)
-        args[nginx]="$2"
-        normalize_case nginx
-        validate_true_false nginx "$2" || return 1
-        shift 2
-        ;;
-      -p|--panel)
-        args[panel]="$2"
-        normalize_case panel
-        validate_true_false panel "$2" || return 1
-        shift 2
-        ;;
-      -f|--firewall)
-        args[firewall]="$2"
-        normalize_case firewall
-        validate_true_false firewall "$2" || return 1
-        shift 2
-        ;;
-      -s|--ssh)
-        args[ssh]="$2"
-        normalize_case ssh
-        validate_true_false ssh "$2" || return 1
-        shift 2
-        ;;
-      -t|--tgbot)
-        args[tgbot]="$2"
-        normalize_case tgbot
-        validate_true_false tgbot "$2" || return 1
-        shift 2
-        ;;
-      -g|--generate)
-        args[generate]="$2"
-        normalize_case generate
-        validate_true_false generate "$2" || return 1
-        shift 2
-        ;;
-      -x|--skip-check)
-        args[skip-check]="$2"
-        normalize_case skip-check
-        validate_true_false skip-check "$2" || return 1
-        shift 2
-        ;;
-      -o|--subdomain)
-        args[subdomain]="$2"
-        normalize_case subdomain
-        validate_true_false subdomain "$2" || return 1
-        shift 2
-        ;;
       --update)
-        CURRENT_VERSION=$(wget -qO- $SCRIPT_URL | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
-        warning "Script update version: $CURRENT_VERSION"
         echo
         update_reverse_proxy
         exit 0
         ;;
       --depers)
         echo "Depersonalization database..."
-	      depersonalization_db
+        depersonalization_db
         exit 0
         ;;
       -h|--help)
@@ -546,6 +486,14 @@ parse_args() {
         break
         ;;
       *)
+        if [[ -n "${arg_map[$1]}" ]]; then
+          local key="${arg_map[$1]}"
+          args[$key]="$2"
+          normalize_case "$key"
+          validate_true_false "$key" "$2" || return 1
+          shift 2
+          continue
+        fi
         warning " $(text 76) "
         return 1
         ;;
@@ -563,8 +511,8 @@ parse_args() {
 ### Logging
 ###################################
 log_entry() {
-  mkdir -p /usr/local/reverse_proxy/
-  LOGFILE="/usr/local/reverse_proxy/reverse_proxy.log"
+  mkdir -p ${DIR_REVERSE_PROXY}
+  LOGFILE="${DIR_REVERSE_PROXY}reverse_proxy.log"
   exec > >(tee -a "$LOGFILE") 2>&1
 }
 
@@ -578,11 +526,11 @@ select_language() {
 
   # Устанавливаем язык в зависимости от выбора
   case "$LANGUAGE" in
-  1) L=E ;;   # Если выбран английский
-  2) L=R ;;   # Если выбран русский
-#  3) L=C ;;   # Если выбран китайский
-#  4) L=F ;;   # Если выбран персидский
-  *) L=E ;;   # По умолчанию — английский
+    1) L=E ;;   # Если выбран английский
+    2) L=R ;;   # Если выбран русский
+#    3) L=C ;;   # Если выбран китайский
+#    4) L=F ;;   # Если выбран персидский
+    *) L=E ;;   # По умолчанию — английский
   esac
 }
 
@@ -661,6 +609,23 @@ check_root() {
 }
 
 ###################################
+### Obtaining your external IP address
+###################################
+check_ip() {
+  IP4_REGEX="^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$"
+  IP4=$(ip route get 8.8.8.8 2>/dev/null | grep -Po -- 'src \K\S*')
+
+  if [[ ! $IP4 =~ $IP4_REGEX ]]; then
+      IP4=$(curl -s --max-time 5 ipinfo.io/ip 2>/dev/null)
+  fi
+
+  if [[ ! $IP4 =~ $IP4_REGEX ]]; then
+    echo "Не удалось получить внешний IP."
+    return 1
+  fi
+}
+
+###################################
 ### Banner
 ###################################
 banner_xray() {
@@ -683,20 +648,11 @@ warning_banner() {
 }
 
 ###################################
-### Obtaining your external IP address
+### Cron rules
 ###################################
-check_ip() {
-    IP4_REGEX="^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$"
-    IP4=$(ip route get 8.8.8.8 2>/dev/null | grep -Po -- 'src \K\S*')
-
-    if [[ ! $IP4 =~ $IP4_REGEX ]]; then
-        IP4=$(curl -s --max-time 5 ipinfo.io/ip 2>/dev/null)
-    fi
-
-    if [[ ! $IP4 =~ $IP4_REGEX ]]; then
-      echo "Не удалось получить внешний IP."
-      return 1
-    fi
+add_cron_rule() {
+  local rule="$1"
+  ( crontab -l | grep -Fxq "$rule" ) || ( crontab -l 2>/dev/null; echo "$rule" ) | crontab -
 }
 
 ###################################
@@ -716,46 +672,47 @@ get_test_response() {
 ### Function to clean the URL (removes the protocol, port, and path)
 ###################################
 clean_url() {
-    local INPUT_URL_L="$1"  # Входной URL, который нужно очистить от префикса, порта и пути.
-    # Убираем префикс https:// или http:// и порт/путь
-    local CLEANED_URL_L=$(echo "$INPUT_URL_L" | sed -E 's/^https?:\/\///' | sed -E 's/(:[0-9]+)?(\/[a-zA-Z0-9_\-\/]+)?$//')
-    echo "$CLEANED_URL_L"  # Возвращаем очищенный URL (без префикса, порта и пути).
+  local INPUT_URL_L="$1"  # Входной URL, который нужно очистить от префикса, порта и пути.
+  # Убираем префикс https:// или http:// и порт/путь
+  local CLEANED_URL_L=$(echo "$INPUT_URL_L" | sed -E 's/^https?:\/\///' | sed -E 's/(:[0-9]+)?(\/[a-zA-Z0-9_\-\/]+)?$//')
+  echo "$CLEANED_URL_L"  # Возвращаем очищенный URL (без префикса, порта и пути).
 }
 
 ###################################
 ### Function to crop the domain to the last two parts
 ###################################
 crop_domain() {
-    local DOMAIN_L=$1  # Получаем домен как аргумент
-    IFS='.' read -r -a parts <<< "$DOMAIN_L"  # Разбиваем домен на части по точкам.
+  local DOMAIN_L=$1  # Получаем домен как аргумент
+  IFS='.' read -r -a parts <<< "$DOMAIN_L"  # Разбиваем домен на части по точкам.
 
-    # Если в домене больше двух частей (например, для субдоменов), обрезаем до последних двух.
-    if [ ${#parts[@]} -gt 2 ]; then
-      DOMAIN_L="${parts[${#parts[@]}-2]}.${parts[${#parts[@]}-1]}"  # Берем последние две части домена.
-    else
-      DOMAIN_L="${parts[0]}.${parts[1]}"  # Если домен второго уровня, оставляем только его.
-    fi
+  # Если в домене больше двух частей (например, для субдоменов), обрезаем до последних двух.
+  if [ ${#parts[@]} -gt 2 ]; then
+    DOMAIN_L="${parts[${#parts[@]}-2]}.${parts[${#parts[@]}-1]}"  # Берем последние две части домена.
+  else
+    DOMAIN_L="${parts[0]}.${parts[1]}"  # Если домен второго уровня, оставляем только его.
+  fi
 
-    echo "$DOMAIN_L"  # Возвращаем результат через echo.
+  echo "$DOMAIN_L"  # Возвращаем результат через echo.
 }
 
 ###################################
 ### Domain validation in cloudflare
 ###################################
 check_cf_token() {
-  # Пока не получим правильный ответ, продолжаем выполнение.
   while ! echo "$test_response" | grep -qE "\"${testdomain}\"|\"#dns_records:edit\"|\"#dns_records:read\"|\"#zone:read\""; do
-    local TEMP_DOMAIN_L_L  # Переменная для временного домена
-    DOMAIN=""  # Обнуляем переменную домена
-    SUB_DOMAIN=""  # Обнуляем переменную субдомена
+    local TEMP_DOMAIN_L  # Переменная для временного домена
+    DOMAIN=""
+    SUB_DOMAIN=""
+    EMAIL=""
+    CFTOKEN=""
 
     # Если флаг subdomain равен true, запрашиваем субдомен и домен.
     if [[ ${args[subdomain]} == "true" ]]; then
-      reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем домен
-      DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
+      reading " $(text 13) " TEMP_DOMAIN_L
+      DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
       echo
-      reading " $(text 81) " TEMP_DOMAIN_L  # Запрашиваем субдомен
-      SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
+      reading " $(text 81) " TEMP_DOMAIN_L
+      SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
     else
       # Если subdomain не задан, продолжаем работать с доменом.
       while [[ -z "$TEMP_DOMAIN_L" ]]; do
@@ -775,12 +732,10 @@ check_cf_token() {
 
     echo
 
-    # Запрашиваем email пользователя
     while [[ -z $EMAIL ]]; do
       reading " $(text 15) " EMAIL
       echo
     done
-    # Запрашиваем Cloudflare токен
     while [[ -z $CFTOKEN ]]; do
       reading " $(text 16) " CFTOKEN
     done
@@ -902,22 +857,24 @@ generate_path_cdn(){
 ###################################
 data_entry() {
   tilda "$(text 10)"
+
   reading " $(text 11) " USERNAME
   echo
   reading " $(text 12) " PASSWORD
+
   tilda "$(text 10)"
-  
+
   [[ ${args[addu]} == "true" ]] && add_user
 
   check_cf_token
+
   tilda "$(text 10)"
+
   choise_dns
-  tilda "$(text 10)"
-  reading " $(text 19) " REALITY
+
   generate_path_cdn
 
   if [[ ${args[generate]} == "true" ]]; then
-    echo
     WEB_BASE_PATH=$(eval ${generate[path]})
     SUB_PATH=$(eval ${generate[path]})
     SUB_JSON_PATH=$(eval ${generate[path]})
@@ -929,7 +886,6 @@ data_entry() {
     echo
     validate_path SUB_JSON_PATH
   fi
-
   if [[ ${args[mon]} == "true" ]]; then
     if [[ ${args[generate]} == "true" ]]; then
       METRICS=$(eval ${generate[path]})
@@ -938,7 +894,6 @@ data_entry() {
       validate_path METRICS
     fi
   fi
-
   if [[ ${args[shell]} == "true" ]]; then
     if [[ ${args[generate]} == "true" ]]; then
       SHELLBOX=$(eval ${generate[path]})
@@ -961,7 +916,6 @@ data_entry() {
       out_data " $(text 52)" "type \$env:USERPROFILE\.ssh\id_rsa.pub | ssh -p 22 ${USERNAME}@${IP4} \"cat >> ~/.ssh/authorized_keys\""
       out_data " $(text 53)" "ssh-copy-id -p 22 ${USERNAME}@${IP4}"
       echo
-
       # Цикл проверки наличия ключей
       while true; do
         if [[ -s "/home/${USERNAME}/.ssh/authorized_keys" || -s "/root/.ssh/authorized_keys" ]]; then
@@ -979,7 +933,6 @@ data_entry() {
           fi
         fi
       done
-      tilda "$(text 10)"
     else
       warning " $(text 9) " # Настройка пропущена
       SSH_OK=false
@@ -987,6 +940,7 @@ data_entry() {
   fi
 
   if [[ ${args[tgbot]} == "true" ]]; then
+    tilda "$(text 10)"
     reading " $(text 35) " ADMIN_ID
     echo
     reading " $(text 34) " BOT_TOKEN
@@ -1060,8 +1014,8 @@ installation_of_utilities() {
   info " $(text 36) "
   case "$SYSTEM" in
     Debian|Ubuntu)
-      DEPS_PACK_CHECK=("jq" "ufw" "zip" "wget" "gpg" "nano" "cron" "sqlite3" "certbot" "openssl" "netstat" "htpasswd" "update-ca-certificates" "add-apt-repository" "unattended-upgrades" "certbot-dns-cloudflare")
-      DEPS_PACK_INSTALL=("jq" "ufw" "zip" "wget" "gnupg2" "nano" "cron" "sqlite3" "certbot" "openssl" "net-tools" "apache2-utils" "ca-certificates" "software-properties-common" "unattended-upgrades" "python3-certbot-dns-cloudflare")
+      DEPS_PACK_CHECK=("jq" "ufw" "zip" "wget" "gpg" "nano" "cron" "sqlite3" "certbot" "vnstat" "openssl" "netstat" "htpasswd" "update-ca-certificates" "add-apt-repository" "unattended-upgrades" "certbot-dns-cloudflare")
+      DEPS_PACK_INSTALL=("jq" "ufw" "zip" "wget" "gnupg2" "nano" "cron" "sqlite3" "certbot" "vnstat" "openssl" "net-tools" "apache2-utils" "ca-certificates" "software-properties-common" "unattended-upgrades" "python3-certbot-dns-cloudflare")
 
       for g in "${!DEPS_PACK_CHECK[@]}"; do
         [ ! -x "$(type -p ${DEPS_PACK_CHECK[g]})" ] && [[ ! "${DEPS_PACK[@]}" =~ "${DEPS_PACK_INSTALL[g]}" ]] && DEPS_PACK+=(${DEPS_PACK_INSTALL[g]})
@@ -1170,25 +1124,30 @@ dns_encryption() {
       COMMENT_AGH=""
       tilda "$(text 10)"
       ;;
+
     2)
-      COMMENT_AGH="location /${ADGUARDPATH}/ {
-    if (\$hack = 1) {return 404;}
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header Range \$http_range;
-    proxy_set_header If-Range \$http_if_range;
-    proxy_redirect /login.html /${ADGUARDPATH}/login.html;
-    proxy_pass http://127.0.0.1:8081/;
-    break;
-  }"
+      mkdir -p /etc/nginx/locations/
+
+      cat > /etc/nginx/locations/adguard.conf <<EOF
+location /${ADGUARDPATH}/ {
+  if (\$hack = 1) {return 404;}
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header Range \$http_range;
+  proxy_set_header If-Range \$http_if_range;
+  proxy_redirect /login.html /${ADGUARDPATH}/login.html;
+  proxy_pass http://127.0.0.1:8081/;
+  break;
+}
+EOF
       dns_adguard_home
       dns_systemd_resolved_for_adguard
       tilda "$(text 10)"
       ;;
-    *)
 
+    *)
       warning " $(text 33)"
       dns_encryption
       ;;
@@ -1324,20 +1283,20 @@ swapfile() {
   swapon /swapfile
   swapon --show
 
-  cat > /usr/local/reverse_proxy/restart_warp <<EOF
+  cat > ${DIR_REVERSE_PROXY}restart_warp.sh <<EOF
 #!/bin/bash
 # Получаем количество занятого пространства в swap (в мегабайтах)
-SWAP_USED=$(free -m | grep Swap | awk '{print $3}')
+SWAP_USED=\$(free -m | grep Swap | awk '{print \$3}')
 # Проверяем, больше ли оно 300 Мб
-if [ "$SWAP_USED" -gt 200 ]; then
+if [ "\$SWAP_USED" -gt 200 ]; then
     # Перезапускаем warp-svc.service
     systemctl restart warp-svc.service
     # Записываем дату и время в лог-файл
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - warp-svc.service перезапущен из-за превышения swap" >> /root/warp_restart_time
+    echo "\$(date '+%Y-%m-%d %H:%M:%S') - warp-svc.service перезапущен из-за превышения swap" >> ${DIR_REVERSE_PROXY}warp_restart_time
 fi
 EOF
-  chmod +x /usr/local/reverse_proxy/restart_warp
-  { crontab -l; echo "* * * * * /usr/local/reverse_proxy/restart_warp"; } | crontab -
+  chmod +x ${DIR_REVERSE_PROXY}restart_warp.sh
+  add_cron_rule "* * * * * ${DIR_REVERSE_PROXY}restart_warp.sh"
 }
 
 ###################################
@@ -1368,7 +1327,7 @@ warp() {
 
   warp-cli tunnel stats
   if curl -x socks5h://localhost:40000 https://2ip.io; then
-    "WARP is connected successfully."
+    echo "WARP is connected successfully."
   else
     warning " $(text 20) "
   fi
@@ -1382,7 +1341,7 @@ warp() {
 ###################################
 issuance_of_certificates() {
   info " $(text 44) "
-  CF_CREDENTIALS_PATH="/root/cloudflare.credentials"
+  CF_CREDENTIALS_PATH="/etc/letsencrypt/.cloudflare.credentials"
   touch ${CF_CREDENTIALS_PATH}
   chown root:root ${CF_CREDENTIALS_PATH}
   chmod 600 ${CF_CREDENTIALS_PATH}
@@ -1401,7 +1360,7 @@ EOF
   attempt=0
   max_attempts=2
   while [ $attempt -lt $max_attempts ]; do
-    certbot certonly --dry-run --dns-cloudflare --dns-cloudflare-credentials ${CF_CREDENTIALS_PATH} --dns-cloudflare-propagation-seconds 30 --rsa-key-size 4096 -d ${DOMAIN},*.${DOMAIN} --agree-tos -m ${EMAIL} --cert-name ${DOMAIN} --no-eff-email --non-interactive
+    certbot certonly --dns-cloudflare --dns-cloudflare-credentials ${CF_CREDENTIALS_PATH} --dns-cloudflare-propagation-seconds 30 --rsa-key-size 4096 -d ${DOMAIN},*.${DOMAIN} --agree-tos -m ${EMAIL} --cert-name ${DOMAIN} --no-eff-email --non-interactive
 	  if [ $? -eq 0 ]; then
       break
     else
@@ -1410,8 +1369,7 @@ EOF
     fi
   done
 
-  CRON_RULE1="0 5 1 */2 * certbot -q renew"
-  ( crontab -l | grep -Fxq "$CRON_RULE1" ) || ( crontab -l; echo "$CRON_RULE1" ) | crontab -
+  add_cron_rule "0 5 1 */2 * certbot -q renew"
   tilda "$(text 10)"
 }
 
@@ -1420,19 +1378,22 @@ EOF
 ###################################
 monitoring() {
   info " $(text 66) "
+  mkdir -p /etc/nginx/locations/
   bash <(curl -Ls https://github.com/cortez24rus/grafana-prometheus/raw/refs/heads/main/prometheus_node_exporter.sh)
 
-  COMMENT_METRIC="location /${METRICS} {
-    if (\$hack = 1) {return 404;}
-    auth_basic \"Restricted Content\";
-    auth_basic_user_file /etc/nginx/.htpasswd;
-    proxy_pass http://127.0.0.1:9100/metrics;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    break;
-  }"
+  cat > /etc/nginx/locations/monitoring.conf <<EOF
+location /${METRICS} {
+  if (\$hack = 1) {return 404;}
+  auth_basic "Restricted Content";
+  auth_basic_user_file /etc/nginx/.htpasswd;
+  proxy_pass http://127.0.0.1:9100/metrics;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto \$scheme;
+  break;
+}
+EOF
 
   tilda "$(text 10)"
 }
@@ -1443,6 +1404,7 @@ monitoring() {
 shellinabox() {
   info " $(text 83) "
   apt-get install shellinabox
+  mkdir -p /etc/nginx/locations/
 
   cat > /etc/default/shellinabox <<EOF
 # Should shellinaboxd start automatically
@@ -1461,19 +1423,58 @@ SHELLINABOX_PORT=4200
 SHELLINABOX_ARGS="--no-beep --localhost-only --disable-ssl"
 EOF
 
-  COMMENT_SHELLBOX="location /${SHELLBOX} {
-    if (\$hack = 1) {return 404;}
-    auth_basic \"Restricted Content\";
-    auth_basic_user_file /etc/nginx/.htpasswd;
-    proxy_pass http://127.0.0.1:4200;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    break;
-  }"
+  cat > /etc/nginx/locations/shellinabox.conf <<EOF
+location /${SHELLBOX} {
+  if (\$hack = 1) {return 404;}
+  auth_basic "Restricted Content";
+  auth_basic_user_file /etc/nginx/.htpasswd;
+  proxy_pass http://127.0.0.1:4200;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto \$scheme;
+  break;
+}
+EOF
 
   systemctl restart shellinabox
+  tilda "$(text 10)"
+}
+
+###################################
+### Selecting a random site
+###################################
+random_site() {
+  info " $(text 79) "
+  mkdir -p /var/www/html/ ${DIR_REVERSE_PROXY}
+
+  cd ${DIR_REVERSE_PROXY}
+
+  if [[ ! -d "simple-web-templates-main" ]]; then
+      while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://github.com/cortez24rus/simple-web-templates/archive/refs/heads/main.zip"; do
+        warning " $(text 38) "
+        sleep 3
+      done
+      unzip -q main.zip &>/dev/null && rm -f main.zip
+  fi
+
+  cd simple-web-templates-main || echo "Не удалось перейти в папку с шаблонами"
+
+  rm -rf assets ".gitattributes" "README.md" "_config.yml"
+
+  RandomHTML=$(ls -d */ | shuf -n1)  # Обновил для выбора случайного подкаталога
+  info " $(text 80) ${RandomHTML}"
+
+  # Если шаблон существует, копируем его в /var/www/html
+  if [[ -d "${RandomHTML}" && -d "/var/www/html/" ]]; then
+      echo "Копируем шаблон в /var/www/html/..."
+      rm -rf /var/www/html/*  # Очищаем старую папку
+      cp -a "${RandomHTML}/." /var/www/html/ || echo "Ошибка при копировании шаблона"
+  else
+      echo "Ошибка при извлечении шаблона!"
+  fi
+
+  cd ~
   tilda "$(text 10)"
 }
 
@@ -1559,20 +1560,16 @@ stream_conf() {
 map \$ssl_preread_server_name \$backend {
   ${DOMAIN}                            web;
   ${SUB_DOMAIN}                        xtls;
-  ${REALITY}                           reality;
   default                              block;
-}
-upstream block {
-  server 127.0.0.1:36076;
 }
 upstream web {
   server 127.0.0.1:7443;
 }
-upstream reality {
+upstream xtls {
   server 127.0.0.1:8443;
 }
-upstream xtls {
-  server 127.0.0.1:9443;
+upstream block {
+  server 127.0.0.1:36076;
 }
 server {
   listen 443                           reuseport;
@@ -1592,14 +1589,14 @@ server {
   listen                               80;
   server_name                          ${DOMAIN} *.${DOMAIN};
   location / {
-    return 301                         https://${DOMAIN}\$request_uri;
+    return 301                         https://\$host\$request_uri;
   }
 }
 server {
   listen                               9090 default_server;
   server_name                          ${DOMAIN} *.${DOMAIN};
   location / {
-    return 301                         https://${DOMAIN}\$request_uri;
+    return 301                         https://\$host\$request_uri;
   }
 }
 server {
@@ -1632,119 +1629,103 @@ server {
   error_page 400 402 403 500 501 502 503 504 =404 /404;
   proxy_intercept_errors on;
 
-  # PANEL
-  location /${WEB_BASE_PATH} {
-    if (\$hack = 1) {return 404;}
-    proxy_redirect off;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header Range \$http_range;
-    proxy_set_header If-Range \$http_if_range;
-    proxy_pass http://127.0.0.1:36075/${WEB_BASE_PATH};
-    break;
-  }
-  # SUB
-  location /${SUB_PATH} {
-    if (\$hack = 1) {return 404;}
-    proxy_redirect off;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_pass http://127.0.0.1:36074/${SUB_PATH};
-    break;
-  }
-  # SUB JSON
-  location /${SUB_JSON_PATH} {
-    if (\$hack = 1) {return 404;}
-    proxy_redirect off;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_pass http://127.0.0.1:36074/${SUB_JSON_PATH};
-    break;
-  }
-  # XHTTP
-  location /${CDNXHTTP} {
-    grpc_pass grpc://unix:/dev/shm/uds2023.sock;
-    grpc_buffer_size         16k;
-    grpc_socket_keepalive    on;
-    grpc_read_timeout        1h;
-    grpc_send_timeout        1h;
-
-    grpc_set_header Connection         "";
-    grpc_set_header X-Forwarded-For    \$proxy_add_x_forwarded_for;
-    grpc_set_header X-Forwarded-Proto  \$scheme;
-    grpc_set_header X-Forwarded-Port   \$server_port;
-    grpc_set_header Host               \$host;
-    grpc_set_header X-Forwarded-Host   \$host;
-  }
-  # GRPC WEBSOCKET HTTPUpgrade
-  location ~ ^/(?<fwdport>\d+)/(?<fwdpath>.*)\$ {
-    if (\$hack = 1) {return 404;}
-    client_max_body_size 0;
-    client_body_timeout 1d;
-    grpc_read_timeout 1d;
-    grpc_socket_keepalive on;
-    proxy_read_timeout 1d;
-    proxy_http_version 1.1;
-    proxy_buffering off;
-    proxy_request_buffering off;
-    proxy_socket_keepalive on;
-    proxy_set_header Upgrade \$http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    if (\$content_type ~* "GRPC") { grpc_pass grpc://127.0.0.1:\$fwdport\$is_args\$args; break; }
-    proxy_pass http://127.0.0.1:\$fwdport\$is_args\$args;
-    break;
-  }
-  # Node exporter
-  ${COMMENT_METRIC}
-  # SHELLBOX
-  ${COMMENT_SHELLBOX}
-  # Adguard Home
-  ${COMMENT_AGH}
+  # Enable locations
+  include /etc/nginx/locations/*.conf;
 }
 EOF
 }
 
-###################################
-### Selecting a random site
-###################################
-random_site() {
-  info " $(text 79) "
-  mkdir -p /var/www/html/ /usr/local/reverse_proxy/
+location_panel() {
+  cat > /etc/nginx/locations/panel.conf <<EOF
+# PANEL
+location /${WEB_BASE_PATH} {
+  if (\$hack = 1) {return 404;}
+  proxy_redirect off;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header Range \$http_range;
+  proxy_set_header If-Range \$http_if_range;
+  proxy_pass http://127.0.0.1:36075/${WEB_BASE_PATH};
+  break;
+}
+EOF
+}
 
-  cd /usr/local/reverse_proxy/ || echo "Не удалось перейти в /usr/local/reverse_proxy/"
+location_sub() {
+  cat > /etc/nginx/locations/sub.conf <<EOF
+# SUB
+location /${SUB_PATH} {
+  if (\$hack = 1) {return 404;}
+  proxy_redirect off;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_pass http://127.0.0.1:36074/${SUB_PATH};
+  break;
+}
+EOF
+}
 
-  if [[ ! -d "simple-web-templates-main" ]]; then
-      while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://github.com/cortez24rus/simple-web-templates/archive/refs/heads/main.zip"; do
-        warning " $(text 38) "
-        sleep 3
-      done
-      unzip -q main.zip &>/dev/null && rm -f main.zip
-  fi
+location_sub_json() {
+  cat > /etc/nginx/locations/sub_json.conf <<EOF
+# SUB JSON
+location /${SUB_JSON_PATH} {
+  if (\$hack = 1) {return 404;}
+  proxy_redirect off;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_pass http://127.0.0.1:36074/${SUB_JSON_PATH};
+  break;
+}
+EOF
+}
 
-  cd simple-web-templates-main || echo "Не удалось перейти в папку с шаблонами"
+location_xhttp() {
+  cat > /etc/nginx/locations/xhttp.conf <<EOF
+# XHTTP
+location /${CDNXHTTP} {
+  grpc_pass grpc://unix:/dev/shm/uds2023.sock;
+  grpc_buffer_size         16k;
+  grpc_socket_keepalive    on;
+  grpc_read_timeout        1h;
+  grpc_send_timeout        1h;
+  grpc_set_header Connection         "";
+  grpc_set_header X-Forwarded-For    \$proxy_add_x_forwarded_for;
+  grpc_set_header X-Forwarded-Proto  \$scheme;
+  grpc_set_header X-Forwarded-Port   \$server_port;
+  grpc_set_header Host               \$host;
+  grpc_set_header X-Forwarded-Host   \$host;
+}
+EOF
+}
 
-  rm -rf assets ".gitattributes" "README.md" "_config.yml"
-
-  RandomHTML=$(ls -d */ | shuf -n1)  # Обновил для выбора случайного подкаталога
-  info " $(text 80) ${RandomHTML}"
-
-  # Если шаблон существует, копируем его в /var/www/html
-  if [[ -d "${RandomHTML}" && -d "/var/www/html/" ]]; then
-      echo "Копируем шаблон в /var/www/html/..."
-      rm -rf /var/www/html/*  # Очищаем старую папку
-      cp -a "${RandomHTML}/." /var/www/html/ || echo "Ошибка при копировании шаблона"
-  else
-      echo "Ошибка при извлечении шаблона!"
-  fi
-
-  cd ~
+location_cdn() {
+  cat > /etc/nginx/locations/grpc_ws.conf <<EOF
+# GRPC WEBSOCKET HTTPUpgrade
+location ~ ^/(?<fwdport>\d+)/(?<fwdpath>.*)\$ {
+  if (\$hack = 1) {return 404;}
+  client_max_body_size 0;
+  client_body_timeout 1d;
+  grpc_read_timeout 1d;
+  grpc_socket_keepalive on;
+  proxy_read_timeout 1d;
+  proxy_http_version 1.1;
+  proxy_buffering off;
+  proxy_request_buffering off;
+  proxy_socket_keepalive on;
+  proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header Connection "upgrade";
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  if (\$content_type ~* "GRPC") { grpc_pass grpc://127.0.0.1:\$fwdport\$is_args\$args; break; }
+  proxy_pass http://127.0.0.1:\$fwdport\$is_args\$args;
+  break;
+}
+EOF
 }
 
 ###################################
@@ -1755,6 +1736,7 @@ nginx_setup() {
 
   mkdir -p /etc/nginx/stream-enabled/
   mkdir -p /etc/nginx/conf.d/
+  mkdir -p /etc/nginx/locations/
   rm -rf /etc/nginx/conf.d/default.conf
   touch /etc/nginx/.htpasswd
   htpasswd -nb "$USERNAME" "$PASSWORD" > /etc/nginx/.htpasswd
@@ -1773,7 +1755,12 @@ nginx_setup() {
   nginx_conf
   stream_conf
   local_conf
-  
+  location_panel
+  location_sub
+  location_sub_json
+  location_xhttp
+  location_cdn
+
   systemctl daemon-reload
   systemctl restart nginx
   nginx -s reload
@@ -1980,62 +1967,6 @@ EOF
 }
 
 ###################################
-### Settings reality
-###################################
-settings_reality() {
-  read PRIVATE_KEY1 PUBLIC_KEY1 <<< "$(generate_keys)"
-  STREAM_SETTINGS_REALITY=$(cat <<EOF
-{
-  "network": "tcp",
-  "security": "reality",
-  "externalProxy": [
-  {
-    "forceTls": "same",
-    "dest": "${SUB_DOMAIN}",
-    "port": 443,
-    "remark": ""
-  }
-  ],
-  "realitySettings": {
-  "show": false,
-  "xver": 0,
-  "dest": "${REALITY}:443",
-  "serverNames": [
-    "${REALITY}"
-  ],
-  "privateKey": "${PRIVATE_KEY1}",
-  "minClient": "",
-  "maxClient": "",
-  "maxTimediff": 0,
-  "shortIds": [
-    "c7c487",
-    "cf",
-    "248c16289e",
-    "ae60608a67d1a367",
-    "21221b811591",
-    "648bc6ab5ba1bc",
-    "73d1",
-    "3028618d"
-  ],
-  "settings": {
-    "publicKey": "${PUBLIC_KEY1}",
-    "fingerprint": "chrome",
-    "serverName": "",
-    "spiderX": "/"
-  }
-  },
-  "tcpSettings": {
-  "acceptProxyProtocol": true,
-  "header": {
-    "type": "none"
-  }
-  }
-}
-EOF
-  )
-}
-
-###################################
 ### Settings xtls
 ###################################
 settings_xtls() {
@@ -2109,10 +2040,181 @@ EOF
 }
 
 ###################################
+### Json routing rules
+###################################
+json_rules() {
+  # [{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+  SUB_JSON_RULES=$(cat <<EOF
+[{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:apple","geosite:google"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+EOF
+)
+}
+
+###################################
+### Xray template json
+###################################
+xray_template() {
+  if [[ ${args[warp]} == "true" ]]; then
+    RULES="warp"
+  else
+    RULES="IPv4"
+  fi
+  XRAY_TEMPLATE_CONFIG=$(cat <<EOF
+{
+  "log": {
+    "access": "./access.log",
+    "dnsLog": false,
+    "error": "./error.log",
+    "loglevel": "warning",
+    "maskAddress": ""
+  },
+  "api": {
+    "tag": "api",
+    "services": [
+      "HandlerService",
+      "LoggerService",
+      "StatsService"
+    ]
+  },
+  "inbounds": [
+    {
+      "tag": "api",
+      "listen": "127.0.0.1",
+      "port": 62789,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "ForceIPv4",
+        "redirect": "",
+        "noises": []
+      }
+    },
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    },
+    {
+      "tag": "IPv4",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIPv4"
+      }
+    },
+    {
+      "tag": "warp",
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "127.0.0.1",
+            "port": 40000,
+            "users": []
+          }
+        ]
+      }
+    }
+  ],
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserDownlink": true,
+        "statsUserUplink": true
+      }
+    },
+    "system": {
+      "statsInboundDownlink": true,
+      "statsInboundUplink": true,
+      "statsOutboundDownlink": true,
+      "statsOutboundUplink": true
+    }
+  },
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:category-ads-all",
+          "ext:geosite_IR.dat:category-ads-all",
+          "ext:geosite_IR.dat:malware",
+          "ext:geosite_IR.dat:phishing",
+          "ext:geosite_IR.dat:cryptominers"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:google"
+        ],
+        "outboundTag": "${RULES}"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "domain:gemini.google.com"
+        ],
+        "outboundTag": "${RULES}"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "keyword:xn--"
+        ],
+        "outboundTag": "${RULES}"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:intel",
+          "category-ru"
+        ],
+        "outboundTag": "${RULES}"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "geoip:ru"
+        ],
+        "outboundTag": "${RULES}"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "regexp:.*\\\\.ru$",
+          "regexp:.*\\\\.su$"
+        ],
+        "outboundTag": "${RULES}"
+      }
+    ]
+  },
+  "stats": {}
+}
+EOF
+  )
+}
+
+###################################
 ### Updating username, password in users
 ###################################
 update_user_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE users SET username = '$USERNAME', password = '$PASSWORD' WHERE id = 1;
 EOF
 }
@@ -2121,13 +2223,12 @@ EOF
 ### Updating stream_settings in inbound
 ###################################
 update_stream_settings_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_GRPC' WHERE LOWER(remark) LIKE '%grpc%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_WS' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_STEAL' WHERE LOWER(remark) LIKE '%steal%';
-UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_REALITY' WHERE LOWER(remark) LIKE '%reality%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XTLS' WHERE LOWER(remark) LIKE '%xtls%';
 EOF
 }
@@ -2136,13 +2237,12 @@ EOF
 ### Updating sniffing in inbound
 ###################################
 update_sniffing_settings_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%grpc%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%steal%';
-UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%reality%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xtls%';
 EOF
 }
@@ -2151,30 +2251,32 @@ EOF
 ### Updating value in settings
 ###################################
 update_settings_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE settings SET value = '/${WEB_BASE_PATH}/' WHERE LOWER(key) LIKE '%webbasepath%';
 UPDATE settings SET value = '/${SUB_PATH}/' WHERE LOWER(key) LIKE '%subpath%';
 UPDATE settings SET value = '${SUB_URI}' WHERE LOWER(key) LIKE '%suburi%';
 UPDATE settings SET value = '/${SUB_JSON_PATH}/' WHERE LOWER(key) LIKE '%subjsonpath%';
 UPDATE settings SET value = '${SUB_JSON_URI}' WHERE LOWER(key) LIKE '%subjsonuri%';
+UPDATE settings SET value = '${XRAY_TEMPLATE_CONFIG}' WHERE LOWER(key) LIKE '%xraytemplateconfig%';
 EOF
 }
 
 ###################################
-### Json routing rules
+### Setting bot
 ###################################
-json_rules() {
-  SUB_JSON_RULES=$(cat <<EOF
-[{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+update_settings_tgbot_db() {
+  sqlite3 $DEST_DB <<EOF
+UPDATE settings SET value = 'true' WHERE LOWER(key) LIKE '%tgbotenable%';
+UPDATE settings SET value = '${ADMIN_ID}' WHERE LOWER(key) LIKE '%tgbottoken%';
+UPDATE settings SET value = '${BOT_TOKEN}' WHERE LOWER(key) LIKE '%tgbotchatid%';
 EOF
-)
 }
 
 ###################################
 ### Updating json rules in the database
 ###################################
 update_json_rules_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE settings SET value = '${SUB_JSON_RULES}' WHERE LOWER(key) LIKE '%subjsonrules%';
 EOF
 }
@@ -2188,15 +2290,18 @@ change_db() {
   settings_httpu
   settings_ws
   settings_steal
-  settings_reality
   settings_xtls
   sniffing_inbounds
   json_rules
+  xray_template
 
   update_user_db
   update_stream_settings_db
   update_sniffing_settings_db
   update_settings_db
+  if [[ ${args[tgbot]} == "true" ]]; then
+    update_settings_tgbot_db
+  fi
   update_json_rules_db
 }
 
@@ -2208,26 +2313,182 @@ install_panel() {
   SUB_URI=https://${DOMAIN}/${SUB_PATH}/
   SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
 
-  while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused $DB_SCRIPT_URL; do
+  echo -e "n" | bash <(curl -sS "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION >/dev/null 2>&1
+  if ! systemctl is-active fail2ban.service; then
+    echo -e "20\n1" | x-ui
+  fi
+  x-ui stop
+
+  mv -f "$DEST_DB" "$DEST_DB.backup"
+  while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused -O "$DEST_DB" "$DB_SCRIPT_URL"; do
     warning " $(text 38) "
     sleep 3
   done
 
-  echo -e "n" | bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) > /dev/null 2>&1
-  sleep 1
-  if ! systemctl is-active fail2ban.service; then
-    echo -e "20\n1" | x-ui
-  fi
-  sleep 2
-
-  x-ui stop
-  rm -rf ${PATH_DB}.backup
-  [ -f ${PATH_DB} ] && mv ${PATH_DB} ${PATH_DB}.backup
-  mv x-ui.db /etc/x-ui/
-
   change_db
 
   x-ui start
+  tilda "$(text 10)"
+}
+
+###################################
+### Custom subscription json
+###################################
+custom_sub_json(){
+  cat > /etc/nginx/locations/webpagesub.conf <<EOF
+# Web Page Subscription Path
+location ~ ^/${WEB_SUB_PATH} {
+  default_type application/json;
+  root /var/www/subpage;
+  index index.html;
+  try_files /index.html =404;
+}
+EOF
+
+  cat > /etc/nginx/locations/subsingbox.conf <<EOF
+# Sub2sing-box
+location /${SUB2_SINGBOX_PATH}/ {
+  proxy_redirect off;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_pass http://127.0.0.1:8080/;
+}
+EOF
+}
+
+###################################
+### Settings web sub page
+###################################
+settings_web(){
+  DEST_DIR_SUB_PAGE="/var/www/subpage"
+  DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
+  sudo mkdir -p "$DEST_DIR_SUB_PAGE"
+
+  URL_SUB_PAGE="https://github.com/legiz-ru/x-ui-pro/raw/master/sub-3x-ui.html"
+  sudo curl -L "$URL_SUB_PAGE" -o "$DEST_FILE_SUB_PAGE"
+
+  sed -i "s/\${DOMAIN}/$DOMAIN/g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s#\${SUB_JSON_PATH}#$SUB_JSON_PATH#g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s#\${SUB_PATH}#$SUB_PATH#g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s|sub.legiz.ru|$DOMAIN/$SUB2_SINGBOX_PATH|g" "$DEST_FILE_SUB_PAGE"
+}
+
+###################################
+### Install sing-box converter
+###################################
+install_singbox_converter(){
+  wget -q -P /root/ https://github.com/nitezs/sub2sing-box/releases/download/v0.0.9-beta.2/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
+  tar -xvzf /root/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz -C /root/ --strip-components=1 sub2sing-box_0.0.9-beta.2_linux_amd64/sub2sing-box
+  mv /root/sub2sing-box /usr/bin/
+  chmod +x /usr/bin/sub2sing-box
+  rm /root/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
+  su -c "/usr/bin/sub2sing-box server & disown" root
+}
+
+###################################
+### Update subscription json uri database
+###################################
+update_subjsonuri_db() {
+  sqlite3 $DEST_DB <<EOF
+UPDATE settings SET value = '${SUB_JSON_URI}' WHERE LOWER(key) LIKE '%subjsonuri%';
+EOF
+}
+
+###################################
+### Settings custom json
+###################################
+settings_custom_json(){
+  info " $(text 99) "
+  mkdir -p /etc/nginx/locations/
+
+  while [[ -z "$DOMAIN" ]]; do
+    reading " $(text 13) " DOMAIN  # Запрашиваем домен
+    DOMAIN=$(clean_url "$DOMAIN")  # Очищаем домен
+  done
+
+  select_from_db
+  WEB_SUB_PATH=$(eval ${generate[path]})
+  SUB2_SINGBOX_PATH=$(eval ${generate[path]})
+  SUB_JSON_URI=https://${DOMAIN}/${WEB_SUB_PATH}?name=
+
+  custom_sub_json
+  install_singbox_converter
+  settings_web
+
+  update_subjsonuri_db
+  if ! grep -Fq "include /etc/nginx/locations/*.conf;" /etc/nginx/conf.d/local.conf; then
+    sed -i '$ s/}/\n  # Enable locations\n  include \/etc\/nginx\/locations\/\*.conf;\n}/' /etc/nginx/conf.d/local.conf
+  fi
+  nginx -s reload
+
+  add_cron_rule "@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
+  tilda "$(text 10)"
+}
+
+###################################
+### BACKUP DIRECTORIES
+###################################
+backup_dir() {
+  cat > ${DIR_REVERSE_PROXY}backup_dir.sh <<EOF
+#!/bin/bash
+
+# Путь к директории резервного копирования
+DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
+BACKUP_DIR="\${DIR_REVERSE_PROXY}backup"
+CURRENT_DATE=\$(date +"%y-%m-%d")
+ARCHIVE_NAME="\${BACKUP_DIR}/backup_\${CURRENT_DATE}.7z"
+
+# Создаем директорию для резервных копий, если её нет
+mkdir -p "\$BACKUP_DIR"
+
+# Архивируем все три директории в один архив
+7za a -mx9 "\$ARCHIVE_NAME" "/etc/nginx" "/etc/x-ui" "/etc/letsencrypt" || echo "Ошибка при создании архива"
+
+# Проверка успешного создания архива
+if [[ -f "\$ARCHIVE_NAME" ]]; then
+  echo "Архив успешно создан: \$ARCHIVE_NAME"
+else
+  echo "Ошибка при создании архива"
+fi
+
+EOF
+  chmod +x ${DIR_REVERSE_PROXY}backup_dir.sh
+  bash "${DIR_REVERSE_PROXY}backup_dir.sh"
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh"
+}
+
+###################################
+### ROTATE BACKUPS
+###################################
+rotation_backup() {
+  cat > ${DIR_REVERSE_PROXY}rotation_backup.sh <<EOF
+#!/bin/bash
+
+# Путь к директории резервного копирования
+DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
+BACKUP_DIR="${DIR_REVERSE_PROXY}backup"
+
+# Количество дней хранения архивов
+days_to_keep=6
+
+# Удаление архивов старше 7 дней
+find "\$BACKUP_DIR" -type f -name "backup_*.7z" -mtime +\$days_to_keep -exec rm -f {} \;
+EOF
+  chmod +X ${DIR_REVERSE_PROXY}rotation_backup.sh
+  bash "${DIR_REVERSE_PROXY}rotation_backup.sh"
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
+}
+
+###################################
+### BACKUP & ROTATION SCHEDULER
+###################################
+rotation_and_archiving() {
+  info " $(text 23) "
+  ${PACKAGE_UPDATE[int]}
+  ${PACKAGE_INSTALL[int]} p7zip-full
+  backup_dir
+  rotation_backup
   tilda "$(text 10)"
 }
 
@@ -2241,8 +2502,8 @@ enabling_security() {
   case "$SYSTEM" in
     Debian|Ubuntu)
       ufw --force reset
-      ufw allow 22/tcp
-      ufw allow 443/tcp
+      ufw limit 22/tcp comment 'SSH'
+      ufw allow 443/tcp comment 'WEB'
       ufw insert 1 deny from "$BLOCK_ZONE_IP"
       ufw --force enable
       ;;
@@ -2278,56 +2539,10 @@ ssh_setup() {
       s/PermitEmptyPasswords yes/PermitEmptyPasswords no/g;
     " /etc/ssh/sshd_config
 
-    # Настройка баннера
-    cat > /etc/motd <<EOF
-
-
-################################################################################
-                        WARNING: AUTHORIZED ACCESS ONLY
-################################################################################
-
-This system is for the use of authorized users only. Individuals using this
-computer system without authority, or in excess of their authority, are subject
-to having all of their activities on this system monitored and recorded.
-
-Any unauthorized access or use of this system is prohibited and may be subject
-to criminal and/or civil penalties. All activities on this system are logged
-and monitored. By accessing this system, you agree to comply with all applicable
-company policies, and you consent to the monitoring and recording of your
-activities.
-
-If you are not an authorized user, you must disconnect immediately.
-
-Unauthorized access to this device is strictly prohibited and will be prosecuted
-to the fullest extent of the law.
-
-################################################################################
-
-            +----------------------------------------------------+
-            | █████ █████ ███████████     █████████   █████ █████|
-            |░░███ ░░███ ░░███░░░░░███   ███░░░░░███ ░░███ ░░███ |
-            | ░░███ ███   ░███    ░███  ░███    ░███  ░░███ ███  |
-            |  ░░█████    ░██████████   ░███████████   ░░█████   |
-            |   ███░███   ░███░░░░░███  ░███░░░░░███    ░░███    |
-            |  ███ ░░███  ░███    ░███  ░███    ░███     ░███    |
-            | █████ █████ █████   █████ █████   █████    █████   |
-            |░░░░░ ░░░░░ ░░░░░   ░░░░░ ░░░░░   ░░░░░    ░░░░░    |
-            +----------------------------------------------------+
-
-
-EOF
+    bash <(curl -Ls https://raw.githubusercontent.com/cortez24rus/motd/refs/heads/main/install.sh)
     systemctl restart ssh
     tilda "$(text 10)"
   fi
-}
-
-###################################
-### Installing bot
-###################################
-install_bot() {
-  info " $(text 57) "
-  bash <(curl -Ls https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/main/reverse_proxy_bot.sh) "$BOT_TOKEN" "$ADMIN_ID" "$DOMAIN"
-  tilda "$(text 10)"
 }
 
 ###################################
@@ -2335,14 +2550,24 @@ install_bot() {
 ###################################
 data_output() {
   info " $(text 58) "
+  echo
   printf '0\n' | x-ui | grep --color=never -i ':'
   echo
   out_data " $(text 59) " "https://${DOMAIN}/${WEB_BASE_PATH}/"
   out_data " $(text 60) " "${SUB_URI}user"
+  echo
   if [[ $CHOISE_DNS = "2" ]]; then
     out_data " $(text 61) " "https://${DOMAIN}/${ADGUARDPATH}/login.html"
+    echo
   fi
-  echo
+  if [[ ${args[mon]} == "true" ]]; then
+    out_data " $(text 21) " "https://${DOMAIN}/${METRICS}/"
+    echo
+  fi
+  if [[ ${args[shell]} == "true" ]]; then
+    out_data " $(text 22) " "https://${DOMAIN}/${SHELLBOX}/"
+    echo
+  fi
   out_data " $(text 62) " "ssh -p 22 ${USERNAME}@${IP4}"
   echo
   out_data " $(text 63) " "$USERNAME"
@@ -2418,7 +2643,7 @@ create_cert_backup() {
 ### Database change in domain
 ###################################
 database_change_domain() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE settings
 SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN')
 WHERE value LIKE '%$OLD_DOMAIN%';
@@ -2484,10 +2709,10 @@ renew_cert() {
 ### Depersonalization of the database
 ###################################
 depersonalization_db() {
-  cp ${PATH_DB} ${PATH_DB}.temp
+  cp ${DEST_DB} ${DEST_DB}.temp
   change_db
-  mv ${PATH_DB} /root/
-  mv ${PATH_DB}.temp ${PATH_DB}
+  mv ${DEST_DB} /root/
+  mv ${DEST_DB}.temp ${DEST_DB}
 }
 
 ###################################
@@ -2506,11 +2731,11 @@ directory_size() {
 ### Query from database
 ###################################
 select_from_db(){
-  result1=$(sqlite3 "$PATH_DB" "SELECT username, password FROM users WHERE id = 1;")
+  result1=$(sqlite3 "$DEST_DB" "SELECT username, password FROM users WHERE id = 1;")
   USERNAME=$(echo "$result1" | cut -d '|' -f 1)  # Первая часть (username)
   PASSWORD=$(echo "$result1" | cut -d '|' -f 2)  # Вторая часть (password)
 
-  result2=$(sqlite3 "$PATH_DB" "SELECT value FROM settings WHERE key IN ('webBasePath', 'subPath', 'subJsonPath');")
+  result2=$(sqlite3 "$DEST_DB" "SELECT value FROM settings WHERE key IN ('webBasePath', 'subPath', 'subJsonPath');")
   WEB_BASE_PATH=$(echo "$result2" | sed -n '1p' | sed 's/^\/\(.*\)\/$/\1/')
   SUB_PATH=$(echo "$result2" | sed -n '2p' | sed 's/^\/\(.*\)\/$/\1/')
   SUB_JSON_PATH=$(echo "$result2" | sed -n '3p' | sed 's/^\/\(.*\)\/$/\1/')
@@ -2520,7 +2745,7 @@ select_from_db(){
 ### Client traffic migration
 ###################################
 client_traffics_migration_db(){
-  sqlite3 "$PATH_DB" <<EOF
+  sqlite3 "$DEST_DB" <<EOF
 ATTACH '$SOURCE_DB' AS source_db;
 INSERT OR REPLACE INTO client_traffics SELECT * FROM source_db.client_traffics;
 DETACH source_db;
@@ -2531,7 +2756,7 @@ EOF
 ### Settings migration
 ###################################
 settings_migration_db(){
-  sqlite3 "$PATH_DB" <<EOF
+  sqlite3 "$DEST_DB" <<EOF
 ATTACH '$SOURCE_DB' AS source_db;
 INSERT OR REPLACE INTO settings SELECT * FROM source_db.settings;
 DETACH source_db;
@@ -2542,20 +2767,28 @@ EOF
 ### Inbounds settings migration
 ###################################
 inbounds_settings_migration_db(){
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 "$DEST_DB" <<EOF
 ATTACH DATABASE '$SOURCE_DB' AS source_db;
 
-UPDATE new_db.inbounds
+UPDATE inbounds
+SET settings = NULL
+WHERE remark IN (
+  SELECT remark
+  FROM source_db.inbounds
+  WHERE source_db.inbounds.remark = inbounds.remark
+);
+
+UPDATE inbounds
 SET settings = (
-  SELECT source_db.inbounds.settings
-  FROM source_db.inbounds
-  WHERE source_db.inbounds.remark = new_db.inbounds.remark
-  LIMIT 1
+  SELECT CASE 
+    WHEN source_db.settings IS NOT NULL THEN source_db.settings 
+    ELSE inbounds.settings
+  END
+  FROM source_db.inbounds AS source_db
+  WHERE source_db.remark = inbounds.remark
 )
-WHERE EXISTS (
-  SELECT 1
-  FROM source_db.inbounds
-  WHERE source_db.inbounds.remark = new_db.inbounds.remark
+WHERE remark IN (
+  SELECT remark FROM source_db.inbounds
 );
 
 DETACH DATABASE source_db;
@@ -2566,64 +2799,137 @@ EOF
 ### Migration to a new version
 ###################################
 migration(){
-  PATH_DB="/etc/x-ui/x-ui.db"
-  SOURCE_DB=${PATH_DB}.mgr
-  echo ${PATH_DB}
-  echo ${SOURCE_DB}
-  cp -r /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.mgr
-  cp -r /etc/nginx /etc/nginx.mgr
+  info " $(text 97) "
+  SOURCE_DB="/etc/x-ui/source.db"
+
+  rotation_and_archiving
+  select_from_db
+  generate_path_cdn
+
+  x-ui stop
+
+  cp "$DEST_DB" "/root/source.db"
+  mv -f "$DEST_DB" "$SOURCE_DB"
+  cp -r /etc/nginx /root/source.nginx
 
   DOMAIN=""
   SUB_DOMAIN=""
-  REALITY=""
 
-  select_from_db
-  generate_path_cdn
-  read -rp "A запись: " TEMP_DOMAIN_L  # Запрашиваем домен
-  DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
   echo
-  read -rp "CNAME запись: " TEMP_DOMAIN_L  # Запрашиваем субдомен
-  SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
+  reading " $(text 13) " TEMP_DOMAIN_L
+  DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
   echo
-  read -rp "REALITY: " TEMP_REALITY_L
-  REALITY=$(clean_url "$TEMP_REALITY_L")
-  
+  reading " $(text 81) " TEMP_DOMAIN_L
+  SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
+  echo
+
   nginx_setup
   install_panel
+
   x-ui stop
-  
   client_traffics_migration_db
   settings_migration_db
   inbounds_settings_migration_db
-
-  sleep 1
   x-ui start
-  sleep 1
-  
-  echo "5"
-  
-  output=$(/usr/local/x-ui/bin/xray*)
-  echo $output
-  if echo "$output" | grep -q "Failed to start: main: failed to load config files"; then
-    echo "6"
-    x-ui stop
-    sleep 1
-    rm -rf /etc/x-ui/x-ui.db
-    rm -rf /etc/x-ui/x-ui.db.backup
-    rm -rf /etc/x-ui/x-ui.db.1
-    mv -f /etc/x-ui/x-ui.db.mgr /etc/x-ui/x-ui.db
-    sleep 1
-    x-ui start
-  else
-    echo "Xray успешно запущен."
+
+  info " $(text 98) "
+}
+
+###################################
+### Unzips the selected backup
+###################################
+unzip_backup() {
+  BACKUP_DIR="${DIR_REVERSE_PROXY}backup"
+
+  if [[ ! -d "$BACKUP_DIR" ]]; then
+    echo "Ошибка: Директория $BACKUP_DIR не существует."
+    exit 1
   fi
 
-  if ! systemctl is-active --quiet nginx.service; then
-    echo "7"
-    mv -f /etc/nginx.mgr /etc/nginx
-    systemctl daemon-reload
-    systemctl restart nginx
+  echo
+  hint " $(text 101) "
+  mapfile -t backups < <(ls "$BACKUP_DIR"/backup_*.7z 2>/dev/null)
+  if [[ ${#backups[@]} -eq 0 ]]; then
+    echo "Нет доступных резервных копий."
+    exit 1
   fi
+  for i in "${!backups[@]}"; do
+    hint " $((i + 1))) $(basename "${backups[i]}")"
+  done
+
+  echo
+  reading " $(text 102) " CHOICE_BACKUP
+  if [[ ! "$CHOICE_BACKUP" =~ ^[0-9]+$ ]] || (( CHOICE_BACKUP < 1 || CHOICE_BACKUP > ${#backups[@]} )); then
+    echo "Ошибка: Неверный ввод."
+    exit 1
+  fi
+
+  SELECTED_ARCHIVE="${backups[CHOICE_BACKUP - 1]}"
+  info " $(text 104) $(basename "$SELECTED_ARCHIVE")"
+
+  mkdir -p "$RESTORE_DIR"
+  7za x "$SELECTED_ARCHIVE" -o"$RESTORE_DIR" -y > /dev/null 2>&1 || { echo "Ошибка при разархивировании!"; exit 1; }
+}
+
+###################################
+### Migrates backup files to the system directories
+###################################
+backup_migration() {
+  echo
+  x-ui stop
+  
+  rm -rf /etc/x-ui/
+  rm -rf /etc/nginx/
+  rm -rf /etc/letsencrypt/
+
+  mv /tmp/restore/x-ui/ /etc/
+  mv /tmp/restore/nginx/ /etc/
+  mv /tmp/restore/letsencrypt/ /etc/
+
+  systemctl restart nginx
+  x-ui restart
+  echo
+}
+
+###################################
+### Restores the backup by first unzipping and then migrating
+###################################
+restore_backup() {
+  info " $(text 100) "
+  RESTORE_DIR="/tmp/restore"
+  unzip_backup
+  backup_migration
+  info " $(text 103) "
+}
+
+###################################
+### Displays traffic statistics
+###################################
+traffic_stats() {
+  ${PACKAGE_UPDATE[int]} >/dev/null 2>&1
+  ${PACKAGE_INSTALL[int]} vnstat >/dev/null 2>&1
+
+  hint " $(text 106) \n"  # Показывает информацию о доступных языках
+  reading " $(text 1) " CHOICE_STATS  # Запрашивает выбор языка
+
+  case $CHOICE_STATS in
+    1)
+      vnstat -m
+      ;;
+    2)
+      vnstat -m
+      ;;
+    3)
+      vnstat -d
+      ;;
+    4)
+      vnstat -h
+      ;;
+    *)
+      vnstat -m
+      ;;
+  esac
+  echo
 }
 
 ###################################
@@ -2655,14 +2961,19 @@ main() {
     tilda "|-----------------------------------------------------------------------------|"
     info " $(text 86) "                      # MENU
     tilda "|-----------------------------------------------------------------------------|"
-    info " $(text 87) "                      # Install
-#    info " $(text 88) "                      # Migration
-    info " $(text 89) "                      # Change domain
-    info " $(text 90) "                      # Renew cert
-    info " $(text 91) "                      # Steal web site
-    info " $(text 92) "                      # Disable IPv6
-    info " $(text 93) "                      # Enable IPv6
-    info " $(text 94) "                      # Directory size
+    info " $(text 87) "                      # 1. Install
+    echo
+    info " $(text 88) "                      # 2. Restore backup
+    info " $(text 89) "                      # 3. Migration
+    info " $(text 90) "                      # 4. Change domain
+    info " $(text 91) "                      # 5. Renew cert
+    echo
+    info " $(text 92) "                      # 6. Custom json
+    info " $(text 93) "                      # 7. Steal web site
+    info " $(text 94) "                      # 8. Disable IPv6
+    info " $(text 95) "                      # 9. Enable IPv6
+    info " $(text 96) "                      # 10. Directory size
+    info " $(text 105) "                     # 11. Traffic statistics
     echo
     info " $(text 84) "                      # Exit
     tilda "|-----------------------------------------------------------------------------|"
@@ -2687,34 +2998,47 @@ main() {
         [[ ${args[shell]} == "true" ]] && shellinabox
         write_defaults_to_file
         update_reverse_proxy
-	random_site
+        random_site
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
+        [[ ${args[custom]} == "true" ]] && settings_custom_json
+        rotation_and_archiving
         [[ ${args[firewall]} == "true" ]] && enabling_security
         [[ ${args[ssh]} == "true" ]] && ssh_setup
-        [[ ${args[tgbot]} == "true" ]] && install_bot
         data_output
         ;;
-#      2)
-#        migration
-#        ;;
+      2)
+        if [ ! -d "/usr/local/reverse_proxy/backup" ]; then
+          rotation_and_archiving
+        fi
+        restore_backup
+        ;;
       3)
-        change_domain
+        migration
         ;;
       4)
-        renew_cert
+        change_domain
         ;;
       5)
-        download_website
+        renew_cert
         ;;
       6)
-        disable_ipv6
+        settings_custom_json
         ;;
       7)
-        enable_ipv6
+        download_website
         ;;
       8)
+        enable_ipv6
+        ;;
+      9)
+        disable_ipv6
+        ;;
+      10)
         directory_size
+        ;;
+      11)
+        traffic_stats
         ;;
       0)
         clear
