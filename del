@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Directory containing the PDF files
+directory="/home/c/cy81300/public_html/upload/iblock/"
+
+# Date range
+start_date="2020-01-01"
+end_date="2023-01-01"
+
+# Find and delete PDF files within the date range
+find "$directory" -type f -name "*.pdf" -newermt "$start_date" ! -newermt "$end_date" -exec rm -f {} \;
