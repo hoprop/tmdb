@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Directory containing the PDF files
+directory="/home/c/cy81300/public_html/webhooks"
+
+# Date range
+start_date="2020-01-01"
+end_date="2023-01-01"
+
+# Find and delete PDF files within the date range
+pdf_files=$(find "$directory" -type f -name "*.pdf" -newermt "$start_date" ! -newermt "$end_date")
+total_files=$(echo "$pdf_files" | wc -l)
+
+if [ "$total_files" -eq 0 ]; then
+  echo "No PDF files found within the specified date range."
+  exit 0
+fi
+
+echo "Deleting $total_files PDF files..."
+
+count=0
+for file_path in $pdf_files; do
+  ((count++))
+  echo -ne "Deleting file $count/$total_files: $file_path\r"
+  rm -f "$file_path"
+  echo -ne "Deleted file $count/$total_files: $file_path\r"
+done
+
+echo -e "\nAll specified PDF files have been deleted."
