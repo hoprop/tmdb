@@ -1,91 +1,101 @@
-(function () {
+(function() {
     'use strict';
 
-    var domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru"]; // 🔹 Replace with your custom domains
-    var default_domain = "cub.red";
+    var server_protocol = location.protocol === "https:" ? 'https://' : 'http://';
+    var icon_server_redirect = '<svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3V13M12 13L16 9M12 13L8 9M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-    // Load saved domain or use the first one in the list
-    var selectedDomain = Lampa.Storage.get('selected_cub_domain', domains[0]);
+    function startPlugin() {
+        $('#REDIRECT').remove();
 
-    function replaceDomain(url) {
-        if (url.includes(default_domain)) {
-            return url.replace(default_domain, selectedDomain);
-        }
-        return url;
-    }
+        var domainButton = '<div id="REDIRECT" class="head__action selector redirect-screen">' + icon_server_redirect + '</div>';
+        $('.head__actions').append(domainButton);
+        $('#REDIRECT').insertAfter('.open--settings');
 
-    // ✅ Override fetch to replace `cub.red`
-    var originalFetch = window.fetch;
-    window.fetch = function (url, options) {
-        if (typeof url === "string") {
-            url = replaceDomain(url);
-        }
-        return originalFetch.apply(this, arguments);
-    };
-
-    // ✅ Override XMLHttpRequest to replace `cub.red`
-    var originalXMLHttpRequestOpen = XMLHttpRequest.prototype.open;
-    XMLHttpRequest.prototype.open = function (method, url) {
-        if (typeof url === "string") {
-            arguments[1] = replaceDomain(url);
-        }
-        return originalXMLHttpRequestOpen.apply(this, arguments);
-    };
-
-    // ✅ Function to safely add settings once Lampa is fully loaded
-    function addSettingsMenu() {
-        if (typeof Lampa.Settings === "undefined" || typeof Lampa.Component === "undefined") {
-            console.log("⏳ Waiting for Lampa to load...");
-            setTimeout(addSettingsMenu, 1000); // Retry every 1 second
-            return;
+        if (!Lampa.Storage.get('proxy_domain')) {
+            setTimeout(function() {
+                $('#REDIRECT').remove();
+            }, 10);
         }
 
-        console.log("✅ Lampa is ready. Registering settings menu...");
-
-        // ✅ Register the settings component
-        Lampa.Component.add('cub_domain_selector', function () {
-            this.create = function () {
-                var html = $('<div class="settings-folder"></div>');
-                var list = $('<div class="settings-folder__list"></div>');
-
-                domains.forEach(function (domain) {
-                    var item = $('<div class="settings-item selector"></div>').text(domain);
-
-                    if (domain === selectedDomain) {
-                        item.addClass('active');
-                    }
-
-                    item.on('hover:enter', function () {
-                        selectedDomain = domain;
-                        Lampa.Storage.set('selected_cub_domain', domain);
-                        Lampa.Noty.show('✅ Selected: ' + domain);
-                        Lampa.Settings.update();
-                    });
-
-                    list.append(item);
-                });
-
-                html.append(list);
-                this.render = function () {
-                    return html;
-                };
-            };
-        });
-
-        // ✅ Now safely add settings
-        Lampa.Settings.add({
-            title: '🔗 Choose Proxy Domain',
-            group: 'cub_proxy',
-            component: 'cub_domain_selector',
-            onBack: function () {
-                Lampa.Settings.main();
+        $('#REDIRECT').on('hover:enter', function() {
+            var selectedDomain = Lampa.Storage.get('proxy_domain', '');
+            if (selectedDomain) {
+                window.location.href = server_protocol + selectedDomain;
+            } else {
+                Lampa.Noty.show('⚠️ Please set a domain in settings first.');
             }
         });
 
-        console.log("✅ Proxy domain selection added to settings.");
+        // ✅ Add settings section for domain input
+        Lampa.SettingsApi.addComponent({
+            component: 'proxy_redirect',
+            name: '🌐 Proxy Server Settings',
+            icon: icon_server_redirect
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'proxy_redirect',
+            param: {
+                name: 'proxy_domain',
+                type: 'input',
+                values: '',
+                placeholder: 'e.g., proxy.yourdomain.com',
+                default: ''
+            },
+            field: {
+                name: 'Proxy Server URL',
+                description: 'cubs.hoprop.xyz'
+            },
+            onChange: function(value) {
+                if (!value) {
+                    $('#REDIRECT').remove();
+                } else {
+                    startPlugin();
+                }
+            }
+        });
+
+        // ✅ Add setting for permanent redirect toggle
+        Lampa.SettingsApi.addParam({
+            component: 'proxy_redirect',
+            param: {
+                name: 'const_redirect',
+                type: 'trigger',
+                default: false
+            },
+            field: {
+                name: 'Permanent Redirect',
+                description: 'Enable this to always redirect on app start. Hold DOWN key to disable.'
+            }
+        });
+
+        // ✅ Listen for DOWN key (to disable permanent redirect)
+        Lampa.Keypad.listener.follow("keydown", function(e) {
+            if (e.code === "ArrowDown" || e.code === 40) {
+                Lampa.Storage.set('const_redirect', false);
+                Lampa.Noty.show('🚫 Permanent redirect disabled.');
+            }
+        });
+
+        // ✅ Automatic redirect if enabled
+        setTimeout(function() {
+            if (Lampa.Storage.field('const_redirect')) {
+                var autoRedirectDomain = Lampa.Storage.get('proxy_domain', '');
+                if (autoRedirectDomain) {
+                    window.location.href = server_protocol + autoRedirectDomain;
+                }
+            }
+        }, 300);
     }
 
-    // ✅ Start checking for Lampa's initialization
-    setTimeout(addSettingsMenu, 1000);
+    if (window.appready) {
+        startPlugin();
+    } else {
+        Lampa.Listener.follow('app', function(e) {
+            if (e.type == 'ready') {
+                startPlugin();
+            }
+        });
+    }
 
 })();
