@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru"]; // 🔹 Replace with your domains
+    var domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru"]; // 🔹 Replace with your custom domains
     var default_domain = "cub.red";
 
     // Load saved domain or use the first one in the list
@@ -32,8 +32,14 @@
         return originalXMLHttpRequestOpen.apply(this, arguments);
     };
 
-    // ✅ Wait for Lampa to be fully ready
-    Lampa.Listener.follow('app', 'ready', function () {
+    // ✅ Function to safely add settings once Lampa is fully loaded
+    function addSettingsMenu() {
+        if (typeof Lampa.Settings === "undefined" || typeof Lampa.Component === "undefined") {
+            console.log("⏳ Waiting for Lampa to load...");
+            setTimeout(addSettingsMenu, 1000); // Retry every 1 second
+            return;
+        }
+
         console.log("✅ Lampa is ready. Registering settings menu...");
 
         // ✅ Register the settings component
@@ -77,6 +83,9 @@
         });
 
         console.log("✅ Proxy domain selection added to settings.");
-    });
+    }
+
+    // ✅ Start checking for Lampa's initialization
+    setTimeout(addSettingsMenu, 1000);
 
 })();
