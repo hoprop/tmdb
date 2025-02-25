@@ -37,32 +37,32 @@
     });
 
     function addDomainSwitcherToMenu() {
-        if (Lampa.Settings) {
-            Lampa.Settings.add({
-                title: 'Выбор домена',
-                component: 'cub_domain_switcher',
-                type: 'select',
-                value: current_domain,
-                values: custom_domains.reduce((acc, domain) => {
-                    acc[domain] = domain;
-                    return acc;
-                }, {}),
-                onChange: function (value) {
-                    localStorage.setItem("selected_domain", value);
-                    current_domain = value;
-                    Lampa.Noty.show("Домен изменен на: " + value + "\nПерезагрузите страницу для применения изменений.");
+        var menu_items = $(
+            '<li class="menu__item selector" data-action="switch_domain">' +
+            '<div class="menu__ico">🌐</div>' +
+            '<div class="menu__text">Выбор домена</div>' +
+            '</li>'
+        );
+
+        menu_items.on("hover:enter", function () {
+            Lampa.Select.show({
+                title: "Выбор домена",
+                items: custom_domains.map(domain => ({
+                    title: domain,
+                    domain: domain
+                })),
+                onSelect: function (selected) {
+                    localStorage.setItem("selected_domain", selected.domain);
+                    current_domain = selected.domain;
+                    Lampa.Noty.show("Домен изменен на: " + selected.domain + "\nПерезагрузите страницу для применения изменений.");
                 }
             });
-        } else {
-            console.warn("Lampa.Settings не найден");
-        }
+        });
+        
+        $(".menu .menu__list").eq(1).append(menu_items);
     }
 
-    Lampa.Listener.follow('settings', function (e) {
-        if (e.type === 'open') {
-            addDomainSwitcherToMenu();
-        }
-    });
+    document.addEventListener("DOMContentLoaded", addDomainSwitcherToMenu);
 
     console.log("🚀 Lampa Plugin Loaded: `cub.red` is now replaced with:", current_domain);
 })();
