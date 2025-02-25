@@ -1,7 +1,7 @@
    (function () {
     'use strict';
 
-    var domains = [""cubs.hoprop.xyz", "cub.rip", "lampadev.ru""]; // Replace with your custom domains
+    var domains = ["cubs.hoprop.xyz, cub.rip, lampadev.ru"]; // Replace with your custom domains
     var default_domain = "cub.red";
 
     (function () {
