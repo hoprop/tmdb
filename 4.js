@@ -36,40 +36,33 @@
         }
     });
 
-    function createDomainSwitcher() {
-        var menu = document.createElement("div");
-        menu.style.position = "fixed";
-        menu.style.top = "10px";
-        menu.style.right = "10px";
-        menu.style.background = "rgba(0, 0, 0, 0.8)";
-        menu.style.color = "white";
-        menu.style.padding = "10px";
-        menu.style.borderRadius = "5px";
-        menu.style.zIndex = "9999";
-
-        var select = document.createElement("select");
-        select.style.padding = "5px";
-        select.style.fontSize = "14px";
-
-        custom_domains.forEach(domain => {
-            var option = document.createElement("option");
-            option.value = domain;
-            option.textContent = domain;
-            if (domain === current_domain) option.selected = true;
-            select.appendChild(option);
-        });
-
-        select.addEventListener("change", function () {
-            localStorage.setItem("selected_domain", this.value);
-            current_domain = this.value;
-            alert("Домен изменен на: " + this.value + "\nПерезагрузите страницу для применения изменений.");
-        });
-
-        menu.appendChild(select);
-        document.body.appendChild(menu);
+    function addDomainSwitcherToMenu() {
+        if (Lampa.Settings) {
+            Lampa.Settings.add({
+                title: 'Выбор домена',
+                component: 'cub_domain_switcher',
+                type: 'select',
+                value: current_domain,
+                values: custom_domains.reduce((acc, domain) => {
+                    acc[domain] = domain;
+                    return acc;
+                }, {}),
+                onChange: function (value) {
+                    localStorage.setItem("selected_domain", value);
+                    current_domain = value;
+                    Lampa.Noty.show("Домен изменен на: " + value + "\nПерезагрузите страницу для применения изменений.");
+                }
+            });
+        } else {
+            console.warn("Lampa.Settings не найден");
+        }
     }
 
-    document.addEventListener("DOMContentLoaded", createDomainSwitcher);
+    Lampa.Listener.follow('settings', function (e) {
+        if (e.type === 'open') {
+            addDomainSwitcherToMenu();
+        }
+    });
 
     console.log("🚀 Lampa Plugin Loaded: `cub.red` is now replaced with:", current_domain);
 })();
