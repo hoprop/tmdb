@@ -1,9 +1,4 @@
-   (function () {
-    'use strict';
-
-    var domains = ["cubs.hoprop.xyz, cub.rip, lampadev.ru"]; // Replace with your custom domains
-    var default_domain = "cub.red";
-
+     
     (function () {
     'use strict';
 
@@ -85,9 +80,5 @@
             setTimeout(arguments.callee, 2000); // Retry after 2 seconds if Lampa isn't ready
         }
     }, 1000);
-
-})();
-
-    console.log(" Lampa Plugin Loaded: Domain selection enabled. Current domain:", selectedDomain);
 
 })();
