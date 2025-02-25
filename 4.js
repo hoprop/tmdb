@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    var custom_domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru"];
+    var custom_domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru", "cub.abmsx.tech"];
     var default_domain = "cub.red";
     var current_domain = localStorage.getItem("selected_domain") || custom_domains[0];
 
@@ -52,7 +52,10 @@
                 onSelect: function (selected) {
                     localStorage.setItem("selected_domain", selected.domain);
                     current_domain = selected.domain;
-                    Lampa.Noty.show("Домен изменен на: " + selected.domain + "\nПерезагрузите страницу для применения изменений.");
+                    Lampa.Noty.show("Домен изменен на: " + selected.domain + "\nПерезагрузка...");
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
                 }
             });
         });
