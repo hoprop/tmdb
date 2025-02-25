@@ -1,7 +1,7 @@
    (function () {
     'use strict';
 
-    var domains = [""cubs.hoprop.xyz", "cub.rip", "lampadev.ru""]; // 🔹 Replace with your custom domains
+    var domains = [""cubs.hoprop.xyz", "cub.rip", "lampadev.ru""]; // Replace with your custom domains
     var default_domain = "cub.red";
 
     // Load saved domain or use the first one in the list
@@ -34,7 +34,7 @@
 
     // Add settings menu item
     Lampa.Settings.add({
-        title: '🔗 Choose Proxy Domain',
+        title: 'Choose Proxy Domain',
         group: 'cub_proxy',
         component: 'cub_domain_selector',
         onBack: function () {
@@ -57,7 +57,7 @@
             item.on('hover:enter', function () {
                 selectedDomain = domain;
                 Lampa.Storage.set('selected_cub_domain', domain);
-                Lampa.Noty.show('✅ Selected: ' + domain);
+                Lampa.Noty.show(' Selected: ' + domain);
                 Lampa.Settings.update();
             });
 
@@ -68,6 +68,6 @@
         return html;
     });
 
-    console.log("🚀 Lampa Plugin Loaded: Domain selection enabled. Current domain:", selectedDomain);
+    console.log(" Lampa Plugin Loaded: Domain selection enabled. Current domain:", selectedDomain);
 
 })();
