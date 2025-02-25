@@ -1,7 +1,7 @@
 (function () {
-    'use strict';
+    "use strict";
 
-    var custom_domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru"]; // 🔹 Replace with your domains
+    var custom_domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru"];
     var default_domain = "cub.red";
     var current_domain = localStorage.getItem("selected_domain") || custom_domains[0];
 
@@ -12,7 +12,6 @@
         return url;
     }
 
-    // Override URL-related methods
     var originalFetch = window.fetch;
     window.fetch = function (url, options) {
         if (typeof url === "string") {
@@ -29,14 +28,13 @@
         return originalXMLHttpRequestOpen.apply(this, arguments);
     };
 
-    // Modify storage settings for domains
-    Lampa.Storage.listener.follow('open', function (e) {
-        if (e.name === 'tmdb') {
-            e.body.find('[data-parent="proxy"]').remove();
+    Lampa.Storage.listener.follow("open", function (e) {
+        if (e.name === "tmdb") {
+            e.body.find("[data-parent='proxy']").remove();
         }
     });
 
-    function addDomainSwitcherToMenu() {
+    function domainSwitcherMenu() {
         var menu_items = $(
             '<li class="menu__item selector" data-action="switch_domain">' +
             '<div class="menu__ico">🌐</div>' +
@@ -58,11 +56,21 @@
                 }
             });
         });
-        
+
         $(".menu .menu__list").eq(1).append(menu_items);
     }
 
-    document.addEventListener("DOMContentLoaded", addDomainSwitcherToMenu);
+    function createDomainMenu() {
+        window.plugin_domain_switcher_ready = true;
+        if (window.appready) domainSwitcherMenu();
+        else {
+            Lampa.Listener.follow("app", function (e) {
+                if (e.type == "ready") domainSwitcherMenu();
+            });
+        }
+    }
+
+    if (!window.plugin_domain_switcher_ready) createDomainMenu();
 
     console.log("🚀 Lampa Plugin Loaded: `cub.red` is now replaced with:", current_domain);
 })();
