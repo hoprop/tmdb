@@ -6,21 +6,20 @@
     var tmdb = {
         name: 'TMDB My Proxy',
         version: '1.0.1',
-        description: 'ÐŸÑ€Ð¾ÐºÑÐ¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¿Ð¾ÑÑ‚ÐµÑ€Ð¾Ð² Ð¸ API ÑÐ°Ð¹Ñ‚Ð° TMDB',
-        path_image: Lampa.Utils.protocol() + 'tmdbimg.rootu.top/',
-        path_api: Lampa.Utils.protocol() + 'tmdbapi.rootu.top/3/'
+        description: 'Проксирование постеров и API сайта TMDB',
+        path_image: 'https://img.hoprop.xyz/',
+        path_api: 'https://tmdb.hoprop.xyz/3/'
     };
 
     if (enableProxy) {
-
         Lampa.TMDB.image = function (url) {
-            var base = Lampa.Utils.protocol() + 'image.tmdb.org/' + url;
-            return Lampa.Storage.field('proxy_tmdb') ? tmdb.path_image + url : base;
+            var base = 'https://image.tmdb.org/t/p/' + url;
+            return Lampa.Storage.field('proxy_tmdb') ? tmdb.path_image + 't/p/' + url : base;
         };
 
         Lampa.TMDB.api = function (url) {
-            var base = Lampa.Utils.protocol() + 'api.themoviedb.org/3/' + url;
-            return Lampa.Storage.field('proxy_tmdb') ? tmdb.path_api + url : base;
+            var base = 'https://api.themoviedb.org/3/' + url;
+            return Lampa.Storage.field('proxy_tmdb') ? tmdb.path_api.replace(/\/3\/$/, '/') + url : base;
         };
 
         Lampa.Settings.listener.follow('open', function (e) {
@@ -29,33 +28,23 @@
             }
         });
     } else {
-        var pluginsUpdate = false;
-        var addCubProxy = true;
         var plugins = Lampa.Storage.get('plugins', '[]');
+        var pluginsUpdate = false;
+        var addCubProxy = !plugins.some(p => p.url.includes('cub.red/plugin/tmdb-proxy'));
 
-        for (var i=0; i < plugins.length; i++) {
-            if (plugins[i].url.indexOf('://cub.red/plugin/tmdb-proxy') > 0) {
-                addCubProxy = false;
-                plugins[i].status = 1;
-            }
-            if (plugins[i].url.indexOf('.rootu.top/tmdb.js') > 0) {
-                // Delete proxy plugins
-                plugins.splice(i--, 1);
-                pluginsUpdate = true;
-            }
+        plugins = plugins.filter(p => !p.url.includes('.hoprop.xyz/tmdb.js')); // Remove old proxy
+
+        if (addCubProxy) {
+            plugins.unshift({
+                url: 'https://cub.red/plugin/tmdb-proxy',
+                status: 1,
+                name: 'TMDB Proxy',
+                author: '@lampa'
+            });
+            pluginsUpdate = true;
         }
 
         if (pluginsUpdate) {
-            if (addCubProxy) {
-                // Add cub tmdb proxy plugin
-                plugins.unshift({
-                    'url': Lampa.Utils.protocol() + 'cub.red/plugin/tmdb-proxy',
-                    'status': 1,
-                    'name': 'TMDB Proxy',
-                    'author': '@lampa'
-                });
-            }
-            // Save plugin
             Lampa.Storage.set('plugins', plugins);
         }
     }
