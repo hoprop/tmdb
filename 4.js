@@ -1,19 +1,20 @@
 (function () {
     'use strict';
 
-    var custom_domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru"]; // 🔹 Replace with your domains
+    var domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru"]; //
     var default_domain = "cub.red";
 
+    // Load saved domain or use the first one
+    var selectedDomain = Lampa.Storage.get('selected_cub_domain', domains[0]);
+
     function replaceDomain(url) {
-        for (let domain of custom_domains) {
-            if (url.includes(default_domain)) {
-                return url.replace(default_domain, domain);
-            }
+        if (url.includes(default_domain)) {
+            return url.replace(default_domain, selectedDomain);
         }
         return url;
     }
 
-    // Override URL-related methods
+    // Override fetch and XMLHttpRequest to replace domains dynamically
     var originalFetch = window.fetch;
     window.fetch = function (url, options) {
         if (typeof url === "string") {
@@ -30,13 +31,42 @@
         return originalXMLHttpRequestOpen.apply(this, arguments);
     };
 
-    // Modify storage settings for domains
-    Lampa.Storage.listener.follow('open', function (e) {
-        if (e.name === 'tmdb') {
-            e.body.find('[data-parent="proxy"]').remove();
+    // Add settings menu
+    Lampa.Settings.add({
+        title: '🔗 Choose Proxy Domain',
+        component: 'cub_domain_selector',
+        onBack: function () {
+            Lampa.Settings.main();
         }
     });
 
-    console.log("🚀 Lampa Plugin Loaded: `cub.red` is now replaced with:", custom_domains);
+    Lampa.Component.add('cub_domain_selector', {
+        render: function () {
+            var html = $('<div class="settings-folder"></div>');
+            var list = $('<div class="settings-folder__list"></div>');
+
+            domains.forEach(function (domain) {
+                var item = $('<div class="settings-item selector"></div>').text(domain);
+
+                if (domain === selectedDomain) {
+                    item.addClass('active');
+                }
+
+                item.on('hover:enter', function () {
+                    selectedDomain = domain;
+                    Lampa.Storage.set('selected_cub_domain', domain);
+                    Lampa.Settings.update();
+                    Lampa.Noty.show(' Selected: ' + domain);
+                });
+
+                list.append(item);
+            });
+
+            html.append(list);
+            return html;
+        }
+    });
+
+    console.log(" Lampa Plugin Loaded: Domain selection enabled. Current: ", selectedDomain);
 
 })();
