@@ -8,7 +8,7 @@
         version: '1.1.1',
         description: 'Проксирование постеров и API сайта TMDB',
         path_image: Lampa.Utils.protocol() + 'img.hoprop.xyz/',
-        path_api: Lampa.Utils.protocol() + 'tmdb.hoprop.xyz/'
+        path_api: Lampa.Utils.protocol() + 'tmdb.hoprop.xyz/3/'
     };
 
     (function() {
