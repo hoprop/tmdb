@@ -1,18 +1,3 @@
-(function () {
-    'use strict';
-
-    var tmdb_proxy = {
-      name: 'TMDB Proxy',
-      version: '1.0.4',
-      description: 'Proxying TMDB Posters and API',
-      path_image: 'https://img.hoprop.xyz/',  //  Image Proxy
-      path_api: 'https://tmdb.hoprop.xyz/'  //  API Proxy
-    };
-
-
-
-
-
  (function () {
     'use strict';
 
@@ -22,8 +7,8 @@
         name: 'TMDB My Proxy',
         version: '1.1.1',
         description: 'Проксирование постеров и API сайта TMDB',
-        path_image: Lampa.Utils.protocol() + 'img.hoprop.xyz//',
-        path_api: Lampa.Utils.protocol() + 'tmdb.hoprop.xyz'
+        path_image: Lampa.Utils.protocol() + 'img.hoprop.xyz/',
+        path_api: Lampa.Utils.protocol() + 'tmdb.hoprop.xyz/'
     };
 
     (function() {
