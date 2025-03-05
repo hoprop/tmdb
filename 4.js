@@ -2,24 +2,35 @@
     "use strict";
 
     var custom_domains = ["cubs.hoprop.xyz", "cub.rip", "lampadev.ru", "cub.abmsx.tech"];
-    var default_domain = "cub.red";
+    var default_domain = "cub.red"; // Оригинальный (изначальный) домен
     var current_domain = localStorage.getItem("selected_domain") || custom_domains[0];
 
     function replaceDomain(url) {
-        if (url.includes(default_domain)) {
-            return url.replace(default_domain, current_domain);
+        try {
+            let parsedUrl = new URL(url);
+            // Проверяем, есть ли текущий домен в списке известных доменов
+            if ([default_domain, ...custom_domains].includes(parsedUrl.host)) {
+                parsedUrl.host = current_domain; // Меняем домен на выбранный
+            }
+            return parsedUrl.toString();
+        } catch (e) {
+            return url; // Если URL некорректен, возвращаем как есть
         }
-        return url;
     }
 
+    // Перехват запросов fetch()
     var originalFetch = window.fetch;
-    window.fetch = function (url, options) {
-        if (typeof url === "string") {
-            url = replaceDomain(url);
+    window.fetch = function (input, options) {
+        if (typeof input === "string") {
+            input = replaceDomain(input);
+        } else if (input instanceof Request) {
+            let newUrl = replaceDomain(input.url);
+            input = new Request(newUrl, input); // Создаем новый Request
         }
         return originalFetch.apply(this, arguments);
     };
 
+    // Перехват XMLHttpRequest
     var originalXMLHttpRequestOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url) {
         if (typeof url === "string") {
@@ -28,12 +39,14 @@
         return originalXMLHttpRequestOpen.apply(this, arguments);
     };
 
+    // Удаление прокси-опций в интерфейсе TMDb
     Lampa.Storage.listener.follow("open", function (e) {
         if (e.name === "tmdb") {
             e.body.find("[data-parent='proxy']").remove();
         }
     });
 
+    // Создание меню выбора домена
     function domainSwitcherMenu() {
         var menu_items = $(
             '<li class="menu__item selector" data-action="switch_domain">' +
@@ -64,16 +77,19 @@
     }
 
     function createDomainMenu() {
+        if (window.plugin_domain_switcher_ready) return; // Предотвращаем дублирование
         window.plugin_domain_switcher_ready = true;
-        if (window.appready) domainSwitcherMenu();
-        else {
+
+        if (window.appready) {
+            domainSwitcherMenu();
+        } else {
             Lampa.Listener.follow("app", function (e) {
                 if (e.type == "ready") domainSwitcherMenu();
             });
         }
     }
 
-    if (!window.plugin_domain_switcher_ready) createDomainMenu();
+    createDomainMenu();
 
-    console.log("🚀 Lampa Plugin Loaded: `cub.red` is now replaced with:", current_domain);
+    console.log("🚀 Lampa Plugin Loaded: `cub.red` теперь заменяется на:", current_domain);
 })();
