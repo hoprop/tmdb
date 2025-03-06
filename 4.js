@@ -46,7 +46,7 @@
     function createDomainSwitcherButton() {
         var domainButton = $('<div>', {
             'class': 'head__action selector domain-switcher',
-            'html': '<div class="source-logo" style="text-align: center; font-weight: bold;">🌐 ' + current_domain + '</div>'
+            'html': '<div class="source-logo" style="text-align: center; font-weight: bold;">🌐</div>'
         });
 
         // Добавляем кнопку в верхнюю панель
