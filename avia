@@ -1,15 +1,15 @@
 (function () {
     "use strict";
 
-    var sources = ["cub", "tmdb", "AVIAMOVIE", "AVIAMOVIE RUS"]; // Доступные источники
-    var sourceNames = {
-        "cub": "CUB",
-        "tmdb": "TMDB",
-        "AVIAMOVIE": "AVIA",
+    var sources = ["cub", "tmdb", "AVIAMOVIE",  "AVIAMOVIE RUS"];
+    var sourceNames = { 
+        "cub": "CUB", 
+        "tmdb": "TMDB", 
+        "AVIAMOVIE": "AVIA",         
         "AVIAMOVIE RUS": "RUS"
     };
 
-    var currentSource = Lampa.Storage.get("source") || "cub"; // Получаем текущий источник
+    var currentSource = Lampa.Storage.get("source") || "cub";
 
     function createSourceSwitcher() {
         var sourceDiv = $('<div>', {
@@ -32,99 +32,134 @@
         });
     }
 
-    function startProfileListener() {
-        Lampa.Listener.follow('profile', function(event) {
-            if (event.type !== 'changed') return;
-            if (event.params.rus) {
-                changeSource('AVIAMOVIE RUS', true);
-            } else {
-                changeSource('AVIAMOVIE', true);
-            }
-        });
-
-        Lampa.Storage.listener.follow('change', function(event) {
-            if (event.name === "source" && !sourceChangedByProfile) {
-                if (event.value === 'AVIAMOVIE' || event.value === 'AVIAMOVIE RUS') {
-                    softRefresh(event.value, true);
-                }
-            }
-        });
-    }
-
-    var sourceChangedByProfile = false;
-    function changeSource(newSource, isProfileChanged) {
-        if (typeof isProfileChanged === 'undefined') {
-            isProfileChanged = false;
-        }
-
-        var currentSource = Lampa.Storage.get('source');
-        if (currentSource !== newSource) {
-            sourceChangedByProfile = true;
-            Lampa.Storage.set('source', newSource);
-
-            setTimeout(function() {
-                softRefresh(newSource, false);
-                sourceChangedByProfile = false;
-            }, 10);
-        }
-    }
-
-    function softRefresh(source, isFromSourceChange) {
-        Lampa.Activity.push({
-            title: source.toUpperCase(),
-            component: 'main',
-            source: source
-        });
-
-        if (isFromSourceChange) {
-            setTimeout(function() {
-                Lampa.Controller.toggle('settings');
-            }, 100);
-        }
-    }
-
-    function addSources() {
-        var tmdb_mod = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
-        var tmdb_mod_rus = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
-
-        Lampa.Api.sources.tmdb_mod = tmdb_mod;
-        Lampa.Api.sources.tmdb_mod_rus = tmdb_mod_rus;
-
-        Object.defineProperty(Lampa.Api.sources, 'AVIAMOVIE', {
-            get: function() {
-                return tmdb_mod;
-            }
-        });
-
-        Object.defineProperty(Lampa.Api.sources, 'AVIAMOVIE RUS', {
-            get: function() {
-                return tmdb_mod_rus;
-            }
-        });
-
-        Lampa.Params.select('source', Object.assign({}, Lampa.Params.values['source'], {
-            'AVIAMOVIE': 'AVIAMOVIE',
-            'AVIAMOVIE RUS': 'AVIAMOVIE RUS'
-        }), 'tmdb');
-    }
-
     function initPlugin() {
         if (window.plugin_source_switcher_ready) return;
         window.plugin_source_switcher_ready = true;
 
         if (window.appready) {
             createSourceSwitcher();
-            addSources();
         } else {
             Lampa.Listener.follow("app", function (e) {
-                if (e.type === "ready") {
-                    createSourceSwitcher();
-                    addSources();
-                }
+                if (e.type === "ready") createSourceSwitcher();
             });
         }
     }
 
     initPlugin();
-    startProfileListener();
+})();
+
+(function () {
+    'use strict';
+
+    function startPlugin() {
+        window.plugin_tmdb_mod_ready = true;
+
+        var SourceTMDB = function (parent) {
+            this.network = new Lampa.Reguest();
+            this.discovery = false;
+
+            this.main = function (params = {}, onComplete, onError) {
+                var owner = this;
+                var partsLimit = 6;
+
+                var sortOptions = [
+                    { key: 'vote_count.desc', title: 'Много голосов' },
+                    { key: 'first_air_date.desc', title: 'Новинки' },
+                    { key: 'popularity.desc', title: 'Популярные' },
+                    { key: 'revenue.desc', title: 'Интерес зрителей' }
+                ];
+
+                var genres = [
+                    { id: 28, title: 'боевики' },
+                    { id: 35, title: 'комедии' },
+                    { id: 18, title: 'драмы' },
+                    { id: 10749, title: 'мелодрамы' },
+                    { id: 16, title: 'мультфильмы' },
+                    { id: 12, title: 'приключения' },
+                    { id: 80, title: 'криминал' },
+                    { id: 9648, title: 'детективы' },
+                    { id: 878, title: 'фантастика' },
+                    { id: 14, title: 'фэнтези' }
+                ];
+
+                var streamingServices = [
+                    { id: 49, title: 'HBO' },
+                    { id: 2552, title: 'Apple TV+' },
+                    { id: 453, title: 'Hulu' },
+                    { id: 1024, title: 'Amazon Prime' }
+                ];
+
+                function shuffleArray(array) {
+                    for (var i = array.length - 1; i > 0; i--) {
+                        var j = Math.floor(Math.random() * (i + 1));
+                        var temp = array[i];
+                        array[i] = array[j];
+                        array[j] = temp;
+                    }
+                }
+
+                var partsData = [
+                    function (callback) {
+                        owner.get('movie/now_playing', params, function (json) {
+                            json.title = Lampa.Lang.translate('Сейчас смотрят');
+                            callback(json);
+                        }, callback);
+                    }
+                ];
+
+                streamingServices.forEach(function (service) {
+                    partsData.push(function (callback) {
+                        owner.get('discover/tv?with_networks=' + service.id, params, function (json) {
+                            json.title = Lampa.Lang.translate(service.title);
+                            callback(json);
+                        }, callback);
+                    });
+                });
+
+                genres.forEach(function (genre) {
+                    partsData.push(function (callback) {
+                        owner.get('discover/movie?with_genres=' + genre.id, params, function (json) {
+                            json.title = Lampa.Lang.translate(genre.title);
+                            callback(json);
+                        }, callback);
+                    });
+                });
+
+                shuffleArray(partsData);
+                function loadPart(partLoaded, partEmpty) {
+                    Lampa.Api.partNext(partsData, partsLimit, partLoaded, partEmpty);
+                }
+
+                loadPart(onComplete, onError);
+                return loadPart;
+            };
+        };
+
+        function add() {
+            var tmdb_mod = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
+            var tmdb_mod_rus = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
+
+            Lampa.Api.sources.tmdb_mod = tmdb_mod;
+            Lampa.Api.sources.tmdb_mod_rus = tmdb_mod_rus;
+
+            Object.defineProperty(Lampa.Api.sources, 'AVIAMOVIE', {
+                get: function() {
+                    return tmdb_mod;
+                }
+            });
+            Object.defineProperty(Lampa.Api.sources, 'AVIAMOVIE RUS', {
+                get: function() {
+                    return tmdb_mod_rus;
+                }
+            });
+        }
+
+        if (window.appready) add(); else {
+            Lampa.Listener.follow('app', function (e) {
+                if (e.type == 'ready') { add(); }
+            });
+        }
+    }
+
+    if (!window.plugin_tmdb_mod_ready) startPlugin();
 })();
