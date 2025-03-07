@@ -1,0 +1,130 @@
+(function () {
+    "use strict";
+
+    var sources = ["cub", "tmdb", "AVIAMOVIE", "AVIAMOVIE RUS"]; // Доступные источники
+    var sourceNames = {
+        "cub": "CUB",
+        "tmdb": "TMDB",
+        "AVIAMOVIE": "AVIA",
+        "AVIAMOVIE RUS": "RUS"
+    };
+
+    var currentSource = Lampa.Storage.get("source") || "cub"; // Получаем текущий источник
+
+    function createSourceSwitcher() {
+        var sourceDiv = $('<div>', {
+            'class': 'head__action selector sources',
+            'html': `<div class="source-logo" style="text-align: center; font-weight: bold;">${sourceNames[currentSource]}</div>`
+        });
+
+        $(".head__actions").prepend(sourceDiv);
+
+        sourceDiv.on("hover:enter", function () {
+            var currentIndex = sources.indexOf(currentSource);
+            currentSource = sources[(currentIndex + 1) % sources.length];
+            Lampa.Storage.set("source", currentSource);
+            sourceDiv.find(".source-logo").text(sourceNames[currentSource]);
+
+            Lampa.Activity.replace({
+                source: currentSource,
+                title: Lampa.Lang.translate("title_main") + " - " + sourceNames[currentSource]
+            });
+        });
+    }
+
+    function startProfileListener() {
+        Lampa.Listener.follow('profile', function(event) {
+            if (event.type !== 'changed') return;
+            if (event.params.rus) {
+                changeSource('AVIAMOVIE RUS', true);
+            } else {
+                changeSource('AVIAMOVIE', true);
+            }
+        });
+
+        Lampa.Storage.listener.follow('change', function(event) {
+            if (event.name === "source" && !sourceChangedByProfile) {
+                if (event.value === 'AVIAMOVIE' || event.value === 'AVIAMOVIE RUS') {
+                    softRefresh(event.value, true);
+                }
+            }
+        });
+    }
+
+    var sourceChangedByProfile = false;
+    function changeSource(newSource, isProfileChanged) {
+        if (typeof isProfileChanged === 'undefined') {
+            isProfileChanged = false;
+        }
+
+        var currentSource = Lampa.Storage.get('source');
+        if (currentSource !== newSource) {
+            sourceChangedByProfile = true;
+            Lampa.Storage.set('source', newSource);
+
+            setTimeout(function() {
+                softRefresh(newSource, false);
+                sourceChangedByProfile = false;
+            }, 10);
+        }
+    }
+
+    function softRefresh(source, isFromSourceChange) {
+        Lampa.Activity.push({
+            title: source.toUpperCase(),
+            component: 'main',
+            source: source
+        });
+
+        if (isFromSourceChange) {
+            setTimeout(function() {
+                Lampa.Controller.toggle('settings');
+            }, 100);
+        }
+    }
+
+    function addSources() {
+        var tmdb_mod = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
+        var tmdb_mod_rus = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
+
+        Lampa.Api.sources.tmdb_mod = tmdb_mod;
+        Lampa.Api.sources.tmdb_mod_rus = tmdb_mod_rus;
+
+        Object.defineProperty(Lampa.Api.sources, 'AVIAMOVIE', {
+            get: function() {
+                return tmdb_mod;
+            }
+        });
+
+        Object.defineProperty(Lampa.Api.sources, 'AVIAMOVIE RUS', {
+            get: function() {
+                return tmdb_mod_rus;
+            }
+        });
+
+        Lampa.Params.select('source', Object.assign({}, Lampa.Params.values['source'], {
+            'AVIAMOVIE': 'AVIAMOVIE',
+            'AVIAMOVIE RUS': 'AVIAMOVIE RUS'
+        }), 'tmdb');
+    }
+
+    function initPlugin() {
+        if (window.plugin_source_switcher_ready) return;
+        window.plugin_source_switcher_ready = true;
+
+        if (window.appready) {
+            createSourceSwitcher();
+            addSources();
+        } else {
+            Lampa.Listener.follow("app", function (e) {
+                if (e.type === "ready") {
+                    createSourceSwitcher();
+                    addSources();
+                }
+            });
+        }
+    }
+
+    initPlugin();
+    startProfileListener();
+})();
