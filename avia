@@ -2,13 +2,12 @@
 (function () { 
     "use strict";
 
-    var sources = ["cub", "tmdb", "AVIAMOVIE", "AVIAMOVIE KIDS", "AVIAMOVIE RUS"]; // Доступные источники
+    var sources = ["cub", "tmdb", "AVIAMOVIE", "AVIAMOVIE RUS"]; // Доступные источники
     var sourceNames = { 
         "cub": "CUB", 
         "tmdb": "TMDB", 
         "AVIAMOVIE": "AVIA",
-        "AVIAMOVIE KIDS": "KIDS",
-        "AVIAMOVIE RUS": "RUS"
+         "AVIAMOVIE RUS": "RUS"
     };
 
     var currentSource = Lampa.Storage.get("source") || "cub"; // Получаем текущий источник
@@ -421,183 +420,6 @@ partsData.push(getPopularRussianTV);
     };
 };
 
-
-
-
-
-
-/* для детей */
-
-
-
-var SourceTMDBkids = function (parent) {
-    this.network = new Lampa.Reguest();
-    this.discovery = false;
-
-    // Переменная для ограничения рейтинга
-    var ratingLimit = 'PG'; // Можно поменять на любой нужный рейтинг, например, 'PG', 'G', 'R'
-
-    this.main = function () {
-        var owner = this;
-        var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        var onComplete = arguments.length > 1 ? arguments[1] : undefined;
-        var onError = arguments.length > 2 ? arguments[2] : undefined;
-        var partsLimit = 6;
-
-        var sortOptions = [
-            { key: 'vote_count.desc', title: 'Много голосов' },
-            { key: 'first_air_date.desc', title: 'Новинки' },
-            { key: 'popularity.desc', title: 'Популярные' },
-            { key: 'revenue.desc', title: 'Интерес зрителей' }
-        ];
-
-        var kidsGenres = [
-            { id: 16, title: 'мультфильмы' },
-            { id: 10751, title: 'семейные' },
-            { id: 14, title: 'фэнтези' },
-            { id: 28, title: 'боевики' },
-            { id: 35, title: 'комедии' },
-            { id: 12, title: 'приключения' },
-            { id: 878, title: 'фантастика' },
-            { id: 14, title: 'фэнтези' },
-            { id: 10751, title: 'семейные' }
-        ];
-
-        var forKids = [
-            { id: 101, title: 'Lego' },
-            { id: 102, title: 'Том и джерри' },
-            { id: 103, title: 'Микки маус' },
-       
-        ];
-
-        var streamingServices = [
-            { id: 49, title: 'HBO' },
-            { id: 2552, title: 'Apple TV+' },
-            { id: 453, title: 'Hulu' },
-            { id: 1024, title: 'Amazon Prime' },
-            { id: 213, title: 'Netflix' },
-            { id: 2493, title: 'Start' },
-            { id: 2859, title: 'Premier' },
-            { id: 4085, title: 'KION' },
-            { id: 3923, title: 'ИВИ' },
-            { id: 3871, title: 'Okko' },
-            { id: 3827, title: 'Кинопоиск' },
-            { id: 5806, title: 'Wink' },
-            { id: 806, title: 'СТС' },
-            { id: 1191, title: 'ТНТ' },
-            { id: 3186, title: 'HBO Max' },
-            { id: 2076, title: 'Paramount+' },
-            { id: 3353, title: 'Peacock' }
-        ];
-
-        var kidsStudios = [
-            { id: 2, title: 'Disney' },
-            { id: 3, title: 'Pixar' },
-            { id: 521, title: 'DreamWorks Animation' },
-            { id: 9383, title: 'Blue Sky Studios' },
-            { id: 6704, title: 'Illumination Entertainment' }
-        ];
-
-        // Изменяем рейтинг на переменную для удобства редактирования
-        var ratingFilter = 'certification_country=US&certification.lte=' + ratingLimit;
-
-        function shuffleArray(array) {
-            for (var i = array.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
-        function createRequest(endpoint, titleSuffix, callback) {
-            var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
-            owner.get(endpoint + '&sort_by=' + sort.key + '&' + ratingFilter, params, function (json) {
-                json.title = Lampa.Lang.translate(sort.title + ' ' + titleSuffix);
-
-
-                callback(json);
-            }, callback);
-        }
-
-        function getStreaming(serviceName, serviceId) {
-            return function (callback) {
-                createRequest(
-                    'discover/tv?with_networks=' + serviceId + '&with_genres=16,10751',
-                    'на ' + serviceName,
-                    callback
-                );
-            };
-        }
-
-        function getStudioMovies(studioName, studioId) {
-            return function (callback) {
-                var endpoint = 'discover/movie?with_companies=' + studioId;
-                createRequest(endpoint, 'от студии ' + studioName, function (json) {
-                    callback(json);
-                });
-            };
-        }
-
-        // Новый запрос для фильмов без жанра, но с сортировкой и рейтингом
-        function getMoviesWithoutGenre() {
-            return function (callback) {
-                createRequest(
-                    'discover/movie?' + ratingFilter,
-                    'Фильмы',
-                    callback
-                );
-            };
-        }
-        
-        
-function searchByKeyword() {
-            return function (callback) {
-                forKids.forEach(function (keyword) {
-                    var endpoint = 'search/movie?query=' + encodeURIComponent(keyword.title);
-                    createRequest(endpoint, '(' + keyword.title + ')', callback);
-                });
-            };
-        }
-
-    
-        var partsData = [
-            function (callback) {
-                createRequest('discover/movie?with_genres=10751,16&with_original_language=ru', 'русские мультфильмы', callback);
-            },
-            function (callback) {
-                createRequest('discover/movie?with_genres=10751,16&with_original_language=uk|en|be|zh|cn', 'иностранные мультфильмы', callback);
-            }
-        ];
-
-        streamingServices.forEach(function (service) {
-            partsData.push(getStreaming(service.title, service.id));
-        });
-
-        kidsGenres.forEach(function (genre) {
-            partsData.push(function (callback) {
-                createRequest('discover/movie?with_genres=' + genre.id, '(' + genre.title + ')', callback);
-            });
-        });
-
-        kidsStudios.forEach(function (studio) {
-            partsData.push(getStudioMovies(studio.title, studio.id));
-        });
-
-        partsData.push(searchByKeyword());
-        partsData.push(getMoviesWithoutGenre());
-
-        shuffleArray(partsData);
-
-        function loadPart(partLoaded, partEmpty) {
-            Lampa.Api.partNext(partsData, partsLimit, partLoaded, partEmpty);
-        }
-
-        loadPart(onComplete, onError);
-        return loadPart;
-    };
-};
-
-
-
 /*Профиль, где в основном российское*/
 var SourceTMDBrus = function (parent) {
     // Создаем сетевой запрос
@@ -833,15 +655,14 @@ partsData.push(getPopularRussianTV);
 
 
 function add() {
-    // Создаем три отдельных источника
+    // Создаем два отдельных источника
     var tmdb_mod = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
-    var tmdb_mod_kids = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
+    
       var tmdb_mod_rus = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
 
 
     Lampa.Api.sources.tmdb_mod = tmdb_mod;
-    Lampa.Api.sources.tmdb_mod_kids = tmdb_mod_kids;
-    Lampa.Api.sources.tmdb_mod_kids = tmdb_mod_rus;
+   
 
 
     Object.defineProperty(Lampa.Api.sources, 'AVIAMOVIE', {
@@ -850,21 +671,16 @@ function add() {
         }
     });
 
-    Object.defineProperty(Lampa.Api.sources, 'AVIAMOVIE KIDS', {
-        get: function() {
-            return tmdb_mod_kids;
-        }
-    });
+
         Object.defineProperty(Lampa.Api.sources, 'AVIAMOVIE RUS', {
         get: function() {
             return tmdb_mod_rus;
         }
     });
 
-    // Добавляем три источника в меню
+    // Добавляем два источника в меню
     Lampa.Params.select('source', Object.assign({}, Lampa.Params.values['source'], {
-        'AVIAMOVIE': 'AVIAMOVIE',
-        'AVIAMOVIE KIDS': 'AVIAMOVIE KIDS',
+        'AVIAMOVIE': 'AVIAMOVIE',       
         'AVIAMOVIE RUS': 'AVIAMOVIE RUS'
     }), 'tmdb');
 }
@@ -880,15 +696,13 @@ function startProfileListener() {
             } else {
                 changeSource('AVIAMOVIE', true);
             }
-        } else {
-            changeSource('AVIAMOVIE KIDS', true);
-        }
+     
     });
 
 
     Lampa.Storage.listener.follow('change', function(event) {
         if (event.name === "source" && !sourceChangedByProfile) {
-            if (event.value === 'AVIAMOVIE' || event.value === 'AVIAMOVIE KIDS' || event.value === 'AVIAMOVIE RUS') {
+            if (event.value === 'AVIAMOVIE' || event.value === 'AVIAMOVIE RUS') {
                 softRefresh(event.value, true); 
                
             }
