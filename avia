@@ -18,17 +18,28 @@
             'html': `<div class="source-logo" style="text-align: center; font-weight: bold;">${sourceNames[currentSource]}</div>`
         });
 
+        // Добавляем кнопку переключения источников в верхнюю панель Lampa
         $(".head__actions").prepend(sourceDiv);
 
+        // Обработчик нажатия на кнопку выбора источника
         sourceDiv.on("hover:enter", function () {
-            var currentIndex = sources.indexOf(currentSource);
-            currentSource = sources[(currentIndex + 1) % sources.length]; // Переключаем на следующий источник
-            Lampa.Storage.set("source", currentSource); // Сохраняем выбор
-            sourceDiv.find(".source-logo").text(sourceNames[currentSource]); // Обновляем текст кнопки
+            Lampa.Select.show({
+                title: "Выбор источника",
+                items: sources.map(source => ({
+                    title: sourceNames[source],
+                    source: source
+                })),
+                onSelect: function (selected) {
+                    currentSource = selected.source;
+                    Lampa.Storage.set("source", currentSource);
+                    sourceDiv.find(".source-logo").text(sourceNames[currentSource]);
+                    Lampa.Noty.show("Источник изменен на: " + sourceNames[currentSource]);
 
-            Lampa.Activity.replace({
-                source: currentSource,
-                title: Lampa.Lang.translate("title_main") + " - " + sourceNames[currentSource]
+                    Lampa.Activity.replace({
+                        source: currentSource,
+                        title: Lampa.Lang.translate("title_main") + " - " + sourceNames[currentSource]
+                    });
+                }
             });
         });
     }
