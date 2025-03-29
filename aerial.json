@@ -2,17 +2,17 @@
   {
     "id": "2F72BC1E-3D76-456C-81EB-842EBA488C27",
     "accessibilityLabel": "Africa and the Middle East",
-    "name": "Африка и Ближний Восток",
+    "name": "Africa and the Middle East",
     "pointsOfInterest": {
-      "0": "Через Африканский Рог в направлении залива Адено",
-      "45": "Юго-восточная часть Аравийского полуострова",
-      "115": "Оманский залив приближается к побережью Макрана",
-      "145": "Побережье Макрана в Иране и Пакистане",
-      "160": "Над Ираном движется в сторону Афганистана и Пакистана",
-      "180": "Над Афганистаном и Пакистаном, продвигаясь к Каракорумскому хребту",
-      "235": "Через Каракорумский хребет в Китай",
-      "280": "Пустыня Такла-Макан в западном Китае",
-      "315": "Горы Тянь-Шань в Центральной Азии"
+      "0": "Over the Horn of Africa traveling toward the Gulf of Adeno",
+      "45": "The southeastern Arabian Peninsula",
+      "115": "The Gulf of Oman approaching the Makran Coast",
+      "145": "The Makran Coast of Iran and Pakistan",
+      "160": "Over Iran moving toward Afghanistan and Pakistan",
+      "180": "Over Afghanistan and Pakistan moving toward the Karakoram Range",
+      "235": "Over the Karakoram Range traveling into China",
+      "280": "The Takla Makan Desert in western China",
+      "315": "The Tian Shan mountains in Central Asia"
     },
     "type": "space",
     "timeOfDay": "day",
@@ -26,17 +26,17 @@
   {
     "id": "A837FA8C-C643-4705-AE92-074EFDD067F7",
     "accessibilityLabel": "Africa Night",
-    "name": "Африканская ночь",
+    "name": "Africa Night",
     "pointsOfInterest": {
-      "0": "Ночное путешествие на северо-восток над Сахарой",
-      "70": "Над Гранд Эрг Ориенталь по направлению к Средиземному морю",
-      "100": "Средиземноморское побережье Туниса и Ливии",
-      "120": "Движется над Средиземным морем в сторону Италии",
-      "140": "Над южной Италией, приближающейся к Балканскому полуострову с Турцией вдали",
-      "165": "Над Балканским полуостровом, движется к Черному морю",
-      "180": "Над Балканским полуостровом, приближающимся к Черному морю",
-      "210": "Путешествие через Черное море в сторону Украины",
-      "230": "Движение над Украиной в сторону России"
+      "0": "Traveling northeast over the Sahara at night",
+      "70": "Over the Grand Erg Oriental heading toward the Mediterranean Sea",
+      "100": "The Mediterranean coast of Tunisia and Libya",
+      "120": "Moving over the Mediterranean Sea toward Italy",
+      "140": "Over southern Italy approaching the Balkan Peninsula with Turkey in the distance",
+      "165": "Over the Balkan Peninsula moving toward the Black Sea",
+      "180": "Over the Balkan Peninsula approaching the Black Sea",
+      "210": "Traveling over the Black Sea toward Ukraine",
+      "230": "Traveling over Ukraine toward Russia"
     },
     "type": "space",
     "timeOfDay": "night",
@@ -50,9 +50,9 @@
   {
     "id": "C7AD3D0A-7EDF-412C-A237-B3C9D27381A1",
     "accessibilityLabel": "Alaskan Jellies",
-    "name": "Аляскинские медузы",
+    "name": "Alaskan Jellies 1",
     "pointsOfInterest": {
-      "0": "Дрейфующая над Луной медуза у побережья Аляски Соединенные Штаты Америки"
+      "0": "Drifting over Moon Jellyfish near the coast of Alaska United States"
     },
     "type": "underwater",
     "src": {
@@ -65,9 +65,9 @@
   {
     "id": "C6DC4E54-1130-44F8-AF6F-A551D8E8A181",
     "accessibilityLabel": "Alaskan Jellies",
-    "name": "Аляскинские медузы",
+    "name": "Alaskan Jellies 2",
     "pointsOfInterest": {
-      "0": "Дрейф под лунными медузами у побережья Аляски США"
+      "0": "Drifting under Moon Jellyfish near the coast of Alaska United States"
     },
     "type": "underwater",
     "src": {
@@ -80,9 +80,9 @@
   {
     "id": "03EC0F5E-CCA8-4E0A-9FEC-5BD1CE151182",
     "accessibilityLabel": "Antarctica",
-    "name": "Антарктида",
+    "name": "Antartica",
     "pointsOfInterest": {
-      "0": "Аврора Австралис над Антарктидой"
+      "0": "Aurora Australis over Antarctica"
     },
     "type": "space",
     "timeOfDay": "night",
@@ -96,12 +96,12 @@
   {
     "id": "64D11DAB-3B57-4F14-AD2F-E59A9282FA44",
     "accessibilityLabel": "Atlantic Ocean to Spain and France",
-    "name": "Атлантический океан до Испании и Франции",
+    "name": "Atlantic Ocean to Spain and France",
     "pointsOfInterest": {
-      "0": "Над северной частью Атлантического океана по направлению к Португалии",
-      "115": "Над Португалией и Испанией",
-      "150": "Отходя от Пиренейского полуострова и проходя над Бискайским заливом и Францией",
-      "180": "Над Западной Европой с северной частью Атлантического океана вдали"
+      "0": "Over the North Atlantic Ocean heading toward Portugal",
+      "115": "Over Portugal and Spain",
+      "150": "Moving away from the Iberian Peninsula and passing over the Bay of Biscay and France",
+      "180": "Over Western Europe with the North Atlantic Ocean in the distance"
     },
     "type": "space",
     "src": {
@@ -114,13 +114,13 @@
   {
     "id": "81337355-E156-4242-AAF4-711768D30A54",
     "accessibilityLabel": "Australia",
-    "name": "Австралия",
+    "name": "Australia",
     "pointsOfInterest": {
-      "0": "Над Индийским океаном, направляясь к австралийскому Перту",
-      "50": "Путешествие на северо-восток через Западную Австралию",
-      "170": "Над Западной Австралией, приближающейся к Северной территории",
-      "220": "Над Северной Территорией Австралии, движется к Новой Гвинее",
-      "335": "Над Арафурским морем, направляясь к Новой Гвинее."
+      "0": "Over the Indian Ocean heading toward Perth Australia",
+      "50": "Traveling northeast across Western Australia",
+      "170": "Over Western Australia approaching Northern Territory",
+      "220": "Over Northern Territory Australia moving toward New Guinea",
+      "335": "Over the Arafura Sea traveling toward New Guineao"
     },
     "type": "space",
     "src": {
@@ -135,7 +135,7 @@
     "accessibilityLabel": "Barracuda",
     "name": "Barracuda",
     "pointsOfInterest": {
-      "0": "Школа шевронов-барракуд в водах близ Борна"
+      "0": "A school of Chevron Barracuda in the waters near Borne"
     },
     "type": "underwater",
     "src": {
@@ -148,9 +148,9 @@
   {
     "id": "687D03A2-18A5-4181-8E85-38F3A13409B9",
     "accessibilityLabel": "Bumpheads",
-    "name": "Рыба-попугай",
+    "name": "Bumpheads",
     "pointsOfInterest": {
-      "0": "Рыба-попугай над коралловыми рифами у острова Борнео"
+      "0": "Bumphead Parrotfish over the coral reefs off Borneoo"
     },
     "type": "underwater",
     "src": {
@@ -163,9 +163,9 @@
   {
     "id": "27A37B0F-738D-4644-A7A4-E33E7A6C1175",
     "accessibilityLabel": "California Dolphins",
-    "name": "Калифорнийские дельфины",
+    "name": "California Dolphins",
     "pointsOfInterest": {
-      "0": "Короткоклювые обыкновенные дельфины у побережья Калифорнии, США"
+      "0": "Short-beaked Common Dolphins off the California coast, United States"
     },
     "type": "underwater",
     "src": {
@@ -178,9 +178,9 @@
   {
     "id": "EB3F48E7-D30F-4079-858F-1A61331D5026",
     "accessibilityLabel": "California Kelp Forest",
-    "name": "Калифорнийский келповый лес",
+    "name": "California Kelp Forest",
     "pointsOfInterest": {
-      "0": "Движение через лес ламинарии у побережья Калифорнии, США"
+      "0": "Moving through a kelp forest off of the California coast, United States"
     },
     "type": "underwater",
     "src": {
@@ -193,16 +193,16 @@
   {
     "id": "12318CCB-3F78-43B7-A854-EFDCCE5312CD",
     "accessibilityLabel": "California to Vegas",
-    "name": "Калифорния - Вегас",
+    "name": "California to Vegas",
     "pointsOfInterest": {
-      "0": "Над Тихим океаном, двигаясь к побережью Калифорнии",
-      "70": "Над калифорнийским побережьем, направляясь вглубь страны",
-      "85": "Проходит над Лос-Анджелесом на западном побережье США",
-      "95": "Над Лос-Анджелесом, приближающимся к Лас-Вегасу, в Соединенных Штатах Америки",
-      "110": "Над Лас-Вегасом по направлению к Солт-Лейк-Сити в Соединенных Штатах Америки",
-      "120": "Над западом Соединенных Штатов, приближаясь к Солт-Лейк-Сити",
-      "155": "Проходит между городами Солт-Лейк-Сити и Денвер в Соединенных Штатах Америки",
-      "170": "Над Скалистыми горами в Соединенных Штатах Америки"
+      "0": "Over the Pacific Ocean moving toward the California coast",
+      "70": "Over the California coast traveling inland",
+      "85": "Passing over Los Angeles on the west coast of the United States",
+      "95": "Over Los Angeles approaching Las Vegas in the United States",
+      "110": "Over Las Vegas heading toward Salt Lake City in the United States",
+      "120": "Over the western United States approaching Salt Lake City",
+      "155": "Passing between Salt Lake City and Denver in the United States",
+      "170": "Over the Rocky Mountains in the United States"
     },
     "type": "space",
     "timeOfDay": "night",
@@ -216,15 +216,15 @@
   {
     "id": "1088217C-1410-4CF7-BDE9-8F573A4DBCD9",
     "accessibilityLabel": "Caribbean",
-    "name": "Карибы - Центральная Америка",
+    "name": "Caribbean to Central America",
     "pointsOfInterest": {
-      "0": "Над Тихим океаном, двигаясь в сторону Центральной Америки",
-      "70": "Юго-западное побережье Центральной Америки в направлении Карибского моря",
-      "100": "Пересечение Центральной Америки в направлении Карибского моря",
-      "150": "Над Карибским морем, двигаясь в сторону Кубы",
-      "240": "Над Кубой с Флоридой и Багамами за ее пределами.",
-      "300": "Над Флоридой и Багамскими островами движется к Саргассову морю.",
-      "350": "Над Саргассовым морем, выходящим в Атлантический океан"
+      "0": "Over the Pacific Ocean moving toward Central America",
+      "70": "The southwest coast of Central America heading toward the Caribbean Sea",
+      "100": "Crossing Central America toward the Caribbean Sea",
+      "150": "Over the Caribbean Sea moving toward Cuba",
+      "240": "Over Cuba with Florida and the Bahamas beyond",
+      "300": "Over Florida and the Bahamas traveling toward the Sargasso Seao",
+      "350": "Over the Sargasso Sea heading out into the Atlantic Ocean"
     },
     "type": "space",
     "src": {
@@ -237,16 +237,16 @@
   {
     "id": "D5CFB2FF-5F8C-4637-816B-3E42FC1229B8",
     "accessibilityLabel": "Caribbean",
-    "name": "Карибы",
+    "name": "Caribbean",
     "pointsOfInterest": {
-      "0": "Путешествие над Тихим океаном в сторону Центральной Америки",
-      "35": "Тихоокеанское побережье Никарагуа, Коста-Рики и Панамы",
-      "50": "Прохождение над Центральной Америкой и Южной Америкой вдали",
-      "65": "Москитное побережье Никарагуа",
-      "85": "Над Карибским морем в направлении Кубы",
-      "110": "Мимо покрытой облаками Ямайки в Карибском море",
-      "125": "Пересечение Кубы с видом на Гаити и Доминиканскую Республику",
-      "170": "Путешествие над Багамскими островами в направлении Гаити и Доминиканской Республики"
+      "0": "Traveling over the Pacific Ocean toward Central America",
+      "35": "The Pacific coasts of Nicaragua Costa Rica and Panama",
+      "50": "Passing over Central America with South America in the distance",
+      "65": "The Mosquito Coast of Nicaragua",
+      "85": "Over the Caribbean Sea traveling toward Cuba",
+      "110": "Passing by a cloud-covered Jamaica in the Caribbean Sea",
+      "125": "Crossing over Cuba looking toward Haiti and the Dominican Republic",
+      "170": "Traveling over the Bahamas looking toward Haiti and the Dominican Republic"
     },
     "type": "space",
     "timeOfDay": "day",
@@ -260,16 +260,16 @@
   {
     "id": "4F881F8B-A7D9-4FDB-A917-17BF6AC5A589",
     "accessibilityLabel": "Caribbean Day",
-    "name": "Карибский день",
+    "name": "Caribbean Day",
     "pointsOfInterest": {
-      "0": "Направление на юго-восток над Великими равнинами США",
-      "90": "Направление на юго-восток над Средним Западом США",
-      "120": "Над юго-востоком Соединенных Штатов, направляясь к Флориде",
-      "220": "Над Флоридой в направлении Багамских островов",
-      "240": "Движется на юго-восток над Багамскими островами",
-      "285": "Над Багамскими островами, приближаясь к Доминиканской Республике и Гаити",
-      "300": "Над Доминиканской Республикой и Гаити, приближаясь к Карибскому бассейну",
-      "315": "Над Карибским морем, направляясь на юг к Венесуэле"
+      "0": "Heading southeast over the Great Plains of the United States",
+      "90": "Heading southeast over the Midwest United States",
+      "120": "Over the southeast United States heading toward Florida",
+      "220": "Over Florida traveling toward the Bahamas",
+      "240": "Moving southeast over the Bahamas",
+      "285": "Over the Bahamas approaching the Dominican Republic and Haiti",
+      "300": "Over the Dominican Republic and Haiti approaching the Caribbean",
+      "315": "Over the Caribbean Sea heading south toward Venezuela"
     },
     "type": "space",
     "timeOfDay": "day",
@@ -283,9 +283,9 @@
   {
     "id": "9CCB8297-E9F5-4699-AE1F-890CFBD5E29C",
     "accessibilityLabel": "China",
-    "name": "Рисовые террасы Лонгджи",
+    "name": "Longji Rice Terraces",
     "pointsOfInterest": {
-      "0": "Проезжая по рисовым террасам Лонгджи в китайской провинции Гуанси"
+      "0": "Passing over the Longji rice terraces in Guangxi Province China"
     },
     "type": "cityscape",
     "src": {
@@ -298,9 +298,9 @@
   {
     "id": "D5E76230-81A3-4F65-A1BA-51B8CADED625",
     "accessibilityLabel": "China",
-    "name": "Национальный парк Вулинъюань",
+    "name": "Wulingyuan National Park 2",
     "pointsOfInterest": {
-      "0": "Знакомство с Национальным парком Вулинъюань в Китае"
+      "0": "Exploring Wulingyuan National Park in China"
     },
     "type": "landscape",
     "src": {
@@ -313,9 +313,9 @@
   {
     "id": "044AD56C-A107-41B2-90CC-E60CCACFBCF5",
     "accessibilityLabel": "China",
-    "name": "Великая стена",
+    "name": "Great Wall 3",
     "pointsOfInterest": {
-      "0": "Участок Великой стены Мутяньюй в районе Хуайроу в Китае"
+      "0": "The Mutianyu section of the Great Wall in Huairou District China"
     },
     "type": "landscape",
     "src": {
@@ -328,13 +328,13 @@
   {
     "id": "6324F6EB-E0F1-468F-AC2E-A983EBDDD53B",
     "accessibilityLabel": "China",
-    "name": "Китай",
+    "name": "China",
     "pointsOfInterest": {
-      "0": "Над Центральной Азией, движется к прибрежным районам Китая",
-      "10": "Над центральным Китаем, направляясь к Шанхаю",
-      "30": "Направляясь над восточной частью Китая, приближаясь к Шанхаю",
-      "45": "Приближаемся к Шанхаю, направляясь к Восточно-Китайскому морю",
-      "50": "Над Шанхаем движется в сторону Восточно-Китайского моря"
+      "0": "Over central Asia traveling toward coastal China",
+      "10": "Over central China traveling toward Shanghai",
+      "30": "Heading over eastern China approaching Shanghai",
+      "45": "Approaching Shanghai heading toward the East China Sea",
+      "50": "Over Shanghai moving toward the East China Sea"
     },
     "type": "space",
     "src": {
@@ -347,9 +347,9 @@
   {
     "id": "B876B645-3955-420E-99DF-60139E451CF3",
     "accessibilityLabel": "China",
-    "name": "Национальный парк Вулинъюань",
+    "name": "Wulingyuan National Park 1",
     "pointsOfInterest": {
-      "0": "Путешествие по национальному парку Вулинъюань в Китае"
+      "0": "Traveling through Wulingyuan National Park in China"
     },
     "type": "landscape",
     "src": {
@@ -362,9 +362,9 @@
   {
     "id": "F0236EC5-EE72-4058-A6CE-1F7D2E8253BF",
     "accessibilityLabel": "China",
-    "name": "Великая стена",
+    "name": "Great Wall 1",
     "pointsOfInterest": {
-      "0": "Участок Великой стены Мутяньюй в районе Хуайроу, Китай"
+      "0": "The Mutianyu section of the Great Wall in Huairou District, China"
     },
     "type": "landscape",
     "src": {
@@ -377,9 +377,9 @@
   {
     "id": "22162A9B-DB90-4517-867C-C676BC3E8E95",
     "accessibilityLabel": "China",
-    "name": "Великая стена",
+    "name": "Great Wall 2",
     "pointsOfInterest": {
-      "0": "Участок Великой стены Мутяньюй в районе Хуайроу, Китай"
+      "0": "The Mutianyu section of the Great Wall in Huairou District, China"
     },
     "type": "landscape",
     "src": {
@@ -392,9 +392,9 @@
   {
     "id": "CE9B5D5B-B6E7-47C5-8C04-59BF182E98FB",
     "accessibilityLabel": "Costa Rica Dolphins",
-    "name": "Дельфины Коста-Рики",
+    "name": "Costa Rica Dolphins",
     "pointsOfInterest": {
-      "0": "Морские дельфины-спиннеры в водах Коста-Рики"
+      "0": "Sea Spinner Dolphins in the waters off of Costa Rica"
     },
     "type": "underwater",
     "src": {
@@ -407,9 +407,9 @@
   {
     "id": "58C75C62-3290-47B8-849C-56A583173570",
     "accessibilityLabel": "Cownose Rays",
-    "name": "Коровьи лучи",
+    "name": "Cownose Rays",
     "pointsOfInterest": {
-      "0": "Золотые скаты у берегов Мексики"
+      "0": "Golden Cownose Rays off the coast of Mexico"
     },
     "type": "underwater",
     "src": {
@@ -422,11 +422,11 @@
   {
     "id": "9680B8EB-CE2A-4395-AF41-402801F4D6A6",
     "accessibilityLabel": "Dubai",
-    "name": "Приближение к Бурдж-Халифе",
+    "name": "Approaching Burj Khalifa",
     "pointsOfInterest": {
-      "0": "Приближение к Бурдж-Халифе в центре Дубая Объединенные Арабские Эмираты",
-      "280": "Проезжая мимо Бурдж-Халифа в центре Дубая, Объединенные Арабские Эмираты",
-      "330": "Над центром Дубая, приближаясь к побережью"
+      "0": "Approaching Burj Khalifa in Downtown Dubai United Arab Emirates",
+      "280": "Passing by Burj Khalifa in Downtown Dubai, United Arab Emirates",
+      "330": "Over Downtown Dubai approaching the coast"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -440,9 +440,9 @@
   {
     "id": "876D51F4-3D78-4221-8AD2-F9E78C0FD9B9",
     "accessibilityLabel": "Dubai",
-    "name": "Шейх Зайед Роуд",
+    "name": "Sheikh Zayed Road",
     "pointsOfInterest": {
-      "0": "Путешествие по дороге Шейха Зайеда в Дубае Объединенные Арабские Эмираты"
+      "0": "Traveling along Sheikh Zayed Road in Dubai United Arab Emirates"
     },
     "type": "cityscape",
     "src": {
@@ -455,10 +455,10 @@
   {
     "id": "00BA71CD-2C54-415A-A68A-8358E677D750",
     "accessibilityLabel": "Dubai",
-    "name": "Центр города",
+    "name": "Downtown",
     "pointsOfInterest": {
-      "0": "Подъезд к центру Дубая в Объединенных Арабских Эмиратах",
-      "210": "Направление над центром Дубая в Объединенных Арабских Эмиратах"
+      "0": "Approaching Downtown Dubai in the United Arab Emirates",
+      "210": "Heading over Downtown Dubai in the United Arab Emirates"
     },
     "type": "cityscape",
     "src": {
@@ -471,9 +471,9 @@
   {
     "id": "E991AC0C-F272-44D8-88F3-05F44EDFE3AE",
     "accessibilityLabel": "Dubai",
-    "name": "Марина",
+    "name": "Marina 1",
     "pointsOfInterest": {
-      "0": "Полет над Дубай Мариной в Объединенных Арабских Эмиратах"
+      "0": "Flying over Dubai Marina in the United Arab Emirates"
     },
     "type": "cityscape",
     "src": {
@@ -486,9 +486,9 @@
   {
     "id": "3FFA2A97-7D28-49EA-AA39-5BC9051B2745",
     "accessibilityLabel": "Dubai",
-    "name": "Марина",
+    "name": "Marina 2",
     "pointsOfInterest": {
-      "0": "Полет вдоль пристани для яхт Дубая в Объединенных Арабских Эмиратах"
+      "0": "Flying along Dubai Marina in the United Arab Emirates"
     },
     "type": "cityscape",
     "src": {
@@ -501,9 +501,9 @@
   {
     "id": "E334A6D2-7145-47C8-9B00-C20DED08B2D5",
     "accessibilityLabel": "Grand Canyon",
-    "name": "Гранд-Каньон",
+    "name": "Grand Canyon 1",
     "pointsOfInterest": {
-      "0": "Путешествие по реке Колорадо через Гранд-Каньон в США"
+      "0": "Following the Colorado River through the Grand Canyon in the United States"
     },
     "type": "landscape",
     "src": {
@@ -516,9 +516,9 @@
   {
     "id": "DD266E1F-5DF2-4CDB-A2EB-26CE35664657",
     "accessibilityLabel": "Grand Canyon",
-    "name": "Гранд-Каньон",
+    "name": "Grand Canyon 2",
     "pointsOfInterest": {
-      "0": "Полет над Бернт-Каньоном в районе Гранд-Каньона, США"
+      "0": "Flying over the Burnt Canyon area of the Grand Canyon, United States"
     },
     "type": "landscape",
     "src": {
@@ -531,9 +531,9 @@
   {
     "id": "F9F918CD-E15F-4F01-A326-84A44650C5C9",
     "accessibilityLabel": "Grand Canyon",
-    "name": "Гранд-Каньон",
+    "name": "Grand Canyon 3",
     "pointsOfInterest": {
-      "0": "Путешествие через Большой каньон в США"
+      "0": "Traveling over the Grand Canyon in the United States"
     },
     "type": "landscape",
     "src": {
@@ -546,9 +546,9 @@
   {
     "id": "AE0115AE-C53B-4DB9-B12F-CA4B7B630CC9",
     "accessibilityLabel": "Grand Canyon",
-    "name": "Гранд-Каньон",
+    "name": "Grand Canyon 4",
     "pointsOfInterest": {
-      "0": "Путешествие по Большому каньону в США"
+      "0": "Traveling through the Grand Canyon in the United States"
     },
     "type": "landscape",
     "src": {
@@ -561,9 +561,9 @@
   {
     "id": "8002C4C8-C611-4894-A068-3D3A3C03472A",
     "accessibilityLabel": "Grand Canyon",
-    "name": "Гранд-Каньон",
+    "name": "Grand Canyon 5",
     "pointsOfInterest": {
-      "0": "Путешествие по реке Колорадо в Гранд-Каньоне, США"
+      "0": "Traveling along the Colorado River in the Grand Canyon, United States"
     },
     "type": "landscape",
     "src": {
@@ -576,9 +576,9 @@
   {
     "id": "3716DD4B-01C0-4F5B-8DD6-DB771EC472FB",
     "accessibilityLabel": "Gray Reef Sharks",
-    "name": "Серые рифовые акулы",
+    "name": "Gray Reef Sharks",
     "pointsOfInterest": {
-      "0": "Серые рифовые акулы плавают возле Французской Полинезии"
+      "0": "Gray Reef Sharks swimming near French Polynesia"
     },
     "type": "underwater",
     "src": {
@@ -591,9 +591,9 @@
   {
     "id": "2F52E34C-39D4-4AB1-9025-8F7141FAA720",
     "accessibilityLabel": "Greenland",
-    "name": "Айсфьорд Илулиссат",
+    "name": "Ilulissat Icefjord",
     "pointsOfInterest": {
-      "0": "Ледниковый фьорд Илулиссат у берегов Гренландии"
+      "0": "The Ilulissat Icefjord off the coast of Greenland"
     },
     "type": "landscape",
     "src": {
@@ -606,9 +606,9 @@
   {
     "id": "B8F204CE-6024-49AB-85F9-7CA2F6DCD226",
     "accessibilityLabel": "Greenland",
-    "name": "Полуостров Нуусуак",
+    "name": "Nuussuaq Peninsula",
     "pointsOfInterest": {
-      "0": "Путешествие по полуострову Нуусуак в Гренландии"
+      "0": "Traveling along the Nuussuaq Peninsula in Greenland"
     },
     "type": "landscape",
     "src": {
@@ -621,9 +621,9 @@
   {
     "id": "EE01F02D-1413-436C-AB05-410F224A5B7B",
     "accessibilityLabel": "Greenland",
-    "name": "Айсфьорд Илулиссат",
+    "name": "Ilulissat Icefjord 2",
     "pointsOfInterest": {
-      "0": "Ледниковый фьорд Илулиссат у берегов Гренландии"
+      "0": "The Ilulissat Icefjord off the coast of Greenland"
     },
     "type": "landscape",
     "timeOfDay": "night",
@@ -637,9 +637,9 @@
   {
     "id": "3D729CFC-9000-48D3-A052-C5BD5B7A6842",
     "accessibilityLabel": "Hawaii",
-    "name": "Побережье Кохала",
+    "name": "Kohala Coastline",
     "pointsOfInterest": {
-      "0": "Вдоль побережья Кохала на острове Гавайи"
+      "0": "Following the Kohala coastline on the island of Hawaii"
     },
     "type": "landscape",
     "timeOfDay": "night",
@@ -653,9 +653,9 @@
   {
     "id": "258A6797-CC13-4C3A-AB35-4F25CA3BF474",
     "accessibilityLabel": "Hawaii",
-    "name": "Пу'у О 'Уми",
+    "name": "Pu\u2018u O \u2018Umi",
     "pointsOfInterest": {
-      "0": "Над заповедником Pu'u O 'Umi Natural Area Reserve на острове Гавайи"
+      "0": "Above the Pu\u2018u O \u2018Umi Natural Area Reserve on the island of Hawaii"
     },
     "type": "landscape",
     "src": {
@@ -668,9 +668,9 @@
   {
     "id": "499995FA-E51A-4ACE-8DFD-BDF8AFF6C943",
     "accessibilityLabel": "Hawaii",
-    "name": "Долина Вайману",
+    "name": "Waimanu Valley",
     "pointsOfInterest": {
-      "0": "Долина Вайману в лесном заповеднике Кохала на острове Гавайи"
+      "0": "The Waimanu Valley in the Kohala Forest Reserve on the island of Hawaii"
     },
     "type": "landscape",
     "src": {
@@ -683,9 +683,9 @@
   {
     "id": "82BD33C9-B6D2-47E7-9C42-AA3B7758921A",
     "accessibilityLabel": "Hawaii",
-    "name": "Пу'у О 'Уми",
+    "name": "Pu\u2018u O \u2018Umi",
     "pointsOfInterest": {
-      "0": "Над заповедником Pu'u O 'Umi Natural Area Reserve на острове Гавайи"
+      "0": "Above the Pu\u2018u O \u2018Umi Natural Area Reserve on the island of Hawaii"
     },
     "type": "landscape",
     "timeOfDay": "night",
@@ -699,9 +699,9 @@
   {
     "id": "12E0343D-2CD9-48EA-AB57-4D680FB6D0C7",
     "accessibilityLabel": "Hawaii",
-    "name": "Лаупахоэ Нуи",
+    "name": "Laup\u0101hoehoe Nui",
     "pointsOfInterest": {
-      "0": "Полет над Лаупахоэ Нуи в лесном заповеднике Кохала на острове Гавайи"
+      "0": "Flying over Laup\u0101hoehoe Nui in the Kohala Forest Reserve on the island of Hawaii"
     },
     "type": "landscape",
     "src": {
@@ -714,9 +714,9 @@
   {
     "id": "E99FA658-A59A-4A2D-9F3B-58E7BDC71A9A",
     "accessibilityLabel": "Hong Kong",
-    "name": "Гавань Виктории",
+    "name": "Victoria Harbour",
     "pointsOfInterest": {
-      "0": "Над гаванью Виктория по направлению к центру Гонконга"
+      "0": "Over Victoria Harbour heading toward Central Hong Kong"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -730,11 +730,11 @@
   {
     "id": "C8559883-6F3E-4AF2-8960-903710CD47B7",
     "accessibilityLabel": "Hong Kong",
-    "name": "Пик Виктория",
+    "name": "Victoria Peak",
     "pointsOfInterest": {
-      "0": "Полет над пиком Виктория в Гонконге",
-      "150": "Полет над Гонконгом в направлении гавани Виктория",
-      "330": "Над гаванью Виктория, приближаясь к полуострову Коулун"
+      "0": "Flying over Victoria Peak in Hong Kong",
+      "150": "Flying over Hong Kong toward Victoria Harbour",
+      "330": "Over Victoria Harbour approaching the Kowloon Peninsulao"
     },
     "type": "cityscape",
     "src": {
@@ -747,11 +747,11 @@
   {
     "id": "024891DE-B7F6-4187-BFE0-E6D237702EF0",
     "accessibilityLabel": "Hong Kong",
-    "name": "Ван Чай",
+    "name": "Wan Chai",
     "pointsOfInterest": {
-      "0": "Над Ван Чаем, приближающимся к Центральному Гонконгу",
-      "150": "Над Центральным Гонконгом",
-      "270": "Над островом Гонконг"
+      "0": "Over Wan Chai approaching Central Hong Kong",
+      "150": "Over Central Hong Kongo",
+      "270": "Over Hong Kong Island"
     },
     "type": "cityscape",
     "src": {
@@ -764,9 +764,9 @@
   {
     "id": "FE8E1F9D-59BA-4207-B626-28E34D810D0A",
     "accessibilityLabel": "Hong Kong",
-    "name": "Гавань Виктории",
+    "name": "Victoria Harbour 1",
     "pointsOfInterest": {
-      "0": "Над гаванью Виктория с видом на остров Гонконг"
+      "0": "Over Victoria Harbour facing Hong Kong Island"
     },
     "type": "cityscape",
     "src": {
@@ -779,9 +779,9 @@
   {
     "id": "DD47D8E1-CB66-4C12-BFEA-2ADB0D8D1E2E",
     "accessibilityLabel": "Humpback Whale",
-    "name": "Горбатый кит",
+    "name": "Humpback Whale",
     "pointsOfInterest": {
-      "0": "Горбатый кит у берегов Французской Полинезии"
+      "0": "A Humpback Whale off of French Polynesia"
     },
     "type": "underwater",
     "src": {
@@ -794,9 +794,9 @@
   {
     "id": "DDE50C77-B7CB-4488-9EB1-D1B13BF21FFE",
     "accessibilityLabel": "Iceland",
-    "name": "Тунгнаа",
+    "name": "Tungna\u00e1",
     "pointsOfInterest": {
-      "0": "Путешествие по Тунгнаа в исландском высокогорье"
+      "0": "Traveling over Tungna\u00e1 in the Icelandic highlands"
     },
     "type": "landscape",
     "src": {
@@ -809,10 +809,10 @@
   {
     "id": "E54D5AFE-F362-4D48-A20D-F2C21D2B5330",
     "accessibilityLabel": "Iceland",
-    "name": "Река Йёкульгильсквисль",
+    "name": "J\u00f6kulgilskv\u00edsl River",
     "pointsOfInterest": {
-      "0": "Следуя по течению реки Йёкульгильсвиль в Ландманналаугаре, Исландия",
-      "308": "Путешествие по исландскому нагорью"
+      "0": "Following the J\u00f6kulgilskv\u00edsl river in Landmannalaugar, Iceland",
+      "308": "Traveling over the Icelandic highlands"
     },
     "type": "landscape",
     "src": {
@@ -825,9 +825,9 @@
   {
     "id": "8ACF5D77-B22C-416F-B12A-72FB35E2834F",
     "accessibilityLabel": "Iceland",
-    "name": "Ландманналаугар",
+    "name": "Landmannalaugar",
     "pointsOfInterest": {
-      "0": "Путешествие по Ландманналаугару в Исландии"
+      "0": "Traveling over Landmannalaugar in Iceland"
     },
     "type": "landscape",
     "src": {
@@ -840,9 +840,9 @@
   {
     "id": "F9518D54-04A7-4793-8666-CFC114D73CE5",
     "accessibilityLabel": "Iceland",
-    "name": "Jökulgil",
+    "name": "J\u00f6kulgil",
     "pointsOfInterest": {
-      "0": "Путешествие по Йёкульгилю в Ландманналаугаре, Исландия"
+      "0": "Traveling through J\u00f6kulgil in Landmannalaugar, Iceland"
     },
     "type": "landscape",
     "src": {
@@ -855,9 +855,9 @@
   {
     "id": "8590D0C5-E344-4FAC-A39A-FD7BC652AEDA",
     "accessibilityLabel": "Iceland",
-    "name": "Лангисйор",
+    "name": "Langisj\u00f3r",
     "pointsOfInterest": {
-      "0": "Полет над Лангисйором в Исландии"
+      "0": "Flying over Langisj\u00f3r in Iceland"
     },
     "type": "landscape",
     "src": {
@@ -870,12 +870,12 @@
   {
     "id": "2F17FCCE-6CCA-4AFA-A08A-C50BF9812DA5",
     "accessibilityLabel": "Iceland",
-    "name": "Ледник Мюрдальсйёкюдль",
+    "name": "M\u00fdrdalsj\u00f6kull Glacier",
     "pointsOfInterest": {
-      "0": "Движение к леднику Мюрдальсйёкюдль в Исландии",
-      "150": "Приближение к леднику Мюрдальсйёкюдль в Исландии",
-      "225": "Ледник Мюрдальсйёкюдль в Исландии",
-      "324": "Путешествие над ледником Мюрдальсйёкюдль в Исландии"
+      "0": "Moving toward M\u00fdrdalsj\u00f6kull glacier in Iceland",
+      "150": "Approaching M\u00fdrdalsj\u00f6kull glacier in Iceland",
+      "225": "M\u00fdrdalsj\u00f6kull glacier in Iceland",
+      "324": "Traveling over M\u00fdrdalsj\u00f6kull glacier in Iceland"
     },
     "type": "landscape",
     "src": {
@@ -888,11 +888,11 @@
   {
     "id": "F439B0A7-D18C-4B14-9681-6520E6A74FE9",
     "accessibilityLabel": "Iran and Afghanistan",
-    "name": "Иран и Афганистан",
+    "name": "Iran and Afghanistan",
     "pointsOfInterest": {
-      "0": "Отражение солнца на побережье Ирана",
-      "15": "Переход от дня к ночи над Ираном",
-      "60": "Переход от дня к ночи над Центральной Азией"
+      "0": "The reflection of the sun along the coast of Iran",
+      "15": "Moving from day to night over Iran",
+      "60": "Moving from day to night over central Asia"
     },
     "type": "space",
     "timeOfDay": "night",
@@ -906,17 +906,17 @@
   {
     "id": "7C643A39-C0B2-4BA0-8BC2-2EAA47CC580E",
     "accessibilityLabel": "Ireland to Asia",
-    "name": "Ирландия - Азия",
+    "name": "Ireland to Asia",
     "pointsOfInterest": {
-      "0": "Над Северной Атлантикой, приближаясь к Британским островам",
-      "15": "Ирландия и Великобритания",
-      "45": "Над Великобританией, направляясь к материковой Европе",
-      "65": "Над северо-западной Европой в направлении России",
-      "105": "Над центральной Европой в направлении России",
-      "150": "Над восточной Европой с Москвой вдали",
-      "165": "Над Восточной Европой в направлении Москвы",
-      "185": "Над западной частью России, проходящей мимо Москвы",
-      "195": "Над Россией, направляясь в сторону Центральной Азии"
+      "0": "Over the North Atlantic approaching the British Isles",
+      "15": "Ireland and Great Britain",
+      "45": "Over Great Britain traveling toward mainland Europe",
+      "65": "Over northwestern Europe heading toward Russia",
+      "105": "Over central Europe heading toward Russia",
+      "150": "Over eastern Europe with Moscow in the distance",
+      "165": "Over eastern Europe looking toward Moscow",
+      "185": "Over western Russia passing Moscow",
+      "195": "Over Russia traveling toward central Asia"
     },
     "type": "space",
     "timeOfDay": "night",
@@ -930,15 +930,15 @@
   {
     "id": "E5DB138A-F04E-4619-B896-DE5CB538C534",
     "accessibilityLabel": "Italy to Asia",
-    "name": "Италия - Азия",
+    "name": "Italy to Asia",
     "pointsOfInterest": {
-      "0": "Над Тунисом в направлении Италии",
-      "5": "Над Средиземным морем с видом на Сицилию и Итальянский полуостров",
-      "15": "Над южной Италией и Балканским полуостровом за ее пределами",
-      "25": "Над Балканским полуостровом, движется в сторону Центральной Азии",
-      "40": "Через Балканский полуостров, мимо Черного моря",
-      "55": "За Украину с Россией дальше",
-      "75": "Над юго-западной частью России, проходящей мимо Казахстана"
+      "0": "Over Tunisia heading toward Italy",
+      "5": "Over the Mediterranean Sea looking toward Sicily and the Italian Peninsula",
+      "15": "Over southern Italy with the Balkan Peninsula beyond",
+      "25": "Over the Balkan Peninsula moving toward central Asia",
+      "40": "Over the Balkan Peninsula passing by the Black Sea",
+      "55": "Over Ukraine with Russia beyond",
+      "75": "Over southwest Russia passing by Kazakhstan"
     },
     "type": "space",
     "timeOfDay": "night",
@@ -952,9 +952,9 @@
   {
     "id": "537A4DAB-83B0-4B66-BCD1-05E5DBB4A268",
     "accessibilityLabel": "Jacks",
-    "name": "Джеки",
+    "name": "Jacks",
     "pointsOfInterest": {
-      "0": "Школа большеротых джеков у берегов Борнео"
+      "0": "A school of Bigeye Jacks off the coast of Borneo"
     },
     "type": "underwater",
     "src": {
@@ -967,9 +967,9 @@
   {
     "id": "6143116D-03BB-485E-864E-A8CF58ACF6F1",
     "accessibilityLabel": "Kelp",
-    "name": "Южноафриканская ламинария",
+    "name": "South African Kelp",
     "pointsOfInterest": {
-      "0": "Дрейф через ламинарию вблизи полуострова Кейп в Южной Африке"
+      "0": "Drifting through a kelp forest near Cape Peninsula South Africa"
     },
     "type": "underwater",
     "src": {
@@ -982,17 +982,17 @@
   {
     "id": "009BA758-7060-4479-8EE8-FB9B40C8FB97",
     "accessibilityLabel": "Korea and Japan Night",
-    "name": "Ночь в Корее и Японии",
+    "name": "Korea and Japan Night",
     "pointsOfInterest": {
-      "0": "Движется на юго-восток над Сибирью и Монголией",
-      "22": "Направление к Внутренней Монголии",
-      "32": "Через Монголию в сторону Китая",
-      "60": "Над северным Китаем, движется в сторону Корейского полуострова",
-      "110": "Над Китаем в направлении Корейского полуострова",
-      "150": "Корейский полуостров с Японией вдали",
-      "180": "Над Южной Кореей в направлении Японии",
-      "195": "Над Японией в направлении Тихого океана",
-      "260": "Над Тихим океаном к юго-востоку от Японии"
+      "0": "Moving southeast over Siberia and Mongolia",
+      "22": "Heading toward Inner Mongolia",
+      "32": "Over Mongolia traveling toward China",
+      "60": "Over northern China moving toward the Korean Peninsula",
+      "110": "Over China heading toward the Korean Peninsula",
+      "150": "The Korean Peninsula with Japan in the distance",
+      "180": "Over South Korea traveling toward Japan",
+      "195": "Over Japan looking toward the Pacific Ocean",
+      "260": "Over the Pacific Ocean southeast of Japan"
     },
     "type": "space",
     "timeOfDay": "night",
@@ -1006,9 +1006,9 @@
   {
     "id": "AFA22C08-A486-4CE8-9A13-E355B6C38559",
     "accessibilityLabel": "Liwa",
-    "name": "Оазис Лива",
+    "name": "Liwa Oasis 2",
     "pointsOfInterest": {
-      "0": "Полет над оазисом Лива в Объединенных Арабских Эмиратах"
+      "0": "Flying over Liwa Oasis in the United Arab Emirates"
     },
     "type": "landscape",
     "src": {
@@ -1021,9 +1021,9 @@
   {
     "id": "001C94AE-2BA4-4E77-A202-F7DE60E8B1C8",
     "accessibilityLabel": "Liwa",
-    "name": "Оазис Лива",
+    "name": "Liwa Oasis 1",
     "pointsOfInterest": {
-      "0": "Полет над оазисом Лива в Объединенных Арабских Эмиратах"
+      "0": "Flying over Liwa Oasis in the United Arab Emirates"
     },
     "type": "landscape",
     "src": {
@@ -1036,16 +1036,16 @@
   {
     "id": "A5AAFF5D-8887-42BB-8AFD-867EF557ED85",
     "accessibilityLabel": "London",
-    "name": "Букингемский дворец",
+    "name": "Buckingham Palace",
     "pointsOfInterest": {
-      "0": "Проезжая по территории Букингемского дворца в Лондоне",
-      "24": "Над Букингемским дворцом в Лондоне",
-      "49": "Над Сент-Джеймсским парком в направлении реки Темзы, Лондон",
-      "104": "Пересечение реки Темзы и проезд над \"Лондонским глазом\".",
-      "149": "Проезжая над Южным Лондоном",
-      "279": "Проезжая мимо Осколка в южной части Лондона",
-      "299": "Пересечение реки Темзы в Лондоне",
-      "324": "Переход через Темзу по Тауэрскому мосту в Лондоне"
+      "0": "Passing over the grounds of Buckingham Palace London",
+      "24": "Over Buckingham Palace in London",
+      "49": "Over St James's Park heading toward the River Thames, London",
+      "104": "Crossing the River Thames and passing over the London Eye",
+      "149": "Passing over South London",
+      "279": "Passing by The Shard in South London",
+      "299": "Crossing the River Thames in London",
+      "324": "Crossing the River Thames at Tower Bridge in London"
     },
     "type": "cityscape",
     "src": {
@@ -1058,14 +1058,14 @@
   {
     "id": "F604AF56-EA77-4960-AEF7-82533CC1A8B3",
     "accessibilityLabel": "London",
-    "name": "Река Темза на закате",
+    "name": "River Thames near Sunset",
     "pointsOfInterest": {
-      "0": "Подход к реке Темзе в Лондоне",
-      "20": "Пересечение реки Темзы в Лондоне",
-      "60": "Проезжая мимо Осколка в южной части Лондона",
-      "92": "К югу от реки Темзы по направлению к Лондонскому глазу",
-      "200": "Пересечение реки Темзы в направлении лондонского Вестминстера",
-      "270": "Над Вестминстером, Лондон"
+      "0": "Approaching the River Thames in London",
+      "20": "Crossing the River Thames in London",
+      "60": "Passing The Shard in South London",
+      "92": "South of the River Thames heading toward the London Eye",
+      "200": "Crossing the River Thames toward Westminster London",
+      "270": "Over Westminster, London"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -1079,12 +1079,12 @@
   {
     "id": "58754319-8709-4AB0-8674-B34F04E7FFE2",
     "accessibilityLabel": "London",
-    "name": "Река Темза",
+    "name": "River Thames",
     "pointsOfInterest": {
-      "0": "Приближение к Тауэрскому мосту на реке Темзе, Лондон",
-      "78": "Следуя по реке Темзе в Лондоне",
-      "178": "К югу от реки Темзы в Лондоне",
-      "258": "Пересечение реки Темзы в Лондоне"
+      "0": "Approaching Tower Bridge on the River Thames, London",
+      "78": "Following the River Thames in London",
+      "178": "South of the River Thames in London",
+      "258": "Crossing the River Thames in London"
     },
     "type": "cityscape",
     "src": {
@@ -1097,14 +1097,14 @@
   {
     "id": "7F4C26C2-67C2-4C3A-8F07-8A7BF6148C97",
     "accessibilityLabel": "London",
-    "name": "Река Темза в сумерках",
+    "name": "River Thames at Dusk",
     "pointsOfInterest": {
-      "0": "Приближение к Тауэрскому мосту на реке Темзе, Лондон",
-      "20": "Следуя по реке Темзе в Лондоне",
-      "130": "Следуя по Темзе в сторону Лондонского глаза",
-      "210": "Приближение к \"Лондонскому глазу\" на реке Темзе",
-      "310": "Следуя по реке Темзе мимо Лондонского глаза",
-      "325": "Проезжая мимо здания парламента на Темзе в Лондоне"
+      "0": "Approaching Tower Bridge on the River Thames, London",
+      "20": "Following the River Thames in London",
+      "130": "Following the River Thames toward the London Eye",
+      "210": "Approaching the London Eye on the River Thames",
+      "310": "Following the River Thames past the London Eye",
+      "325": "Passing the Houses of Parliament on the River Thames in London"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -1118,11 +1118,11 @@
   {
     "id": "92E48DE9-13A1-4172-B560-29B4668A87EE",
     "accessibilityLabel": "Los Angeles",
-    "name": "Пляж Санта-Моники",
+    "name": "Santa Monica Beach",
     "pointsOfInterest": {
-      "0": "Над пляжем Санта-Моника близ Лос-Анджелеса",
-      "365": "Проезжает над пирсом Санта-Моника недалеко от Лос-Анджелеса",
-      "430": "Над пляжем Санта-Моника близ Лос-Анджелеса"
+      "0": "Over Santa Monica State Beach near Los Angeles",
+      "365": "Passing over Santa Monica Pier near Los Angeles",
+      "430": "Over Santa Monica State Beach near Los Angeles"
     },
     "type": "cityscape",
     "src": {
@@ -1135,9 +1135,9 @@
   {
     "id": "35693AEA-F8C4-4A80-B77D-C94B20A68956",
     "accessibilityLabel": "Los Angeles",
-    "name": "Харбор Фривей",
+    "name": "Harbor Freeway",
     "pointsOfInterest": {
-      "0": "По шоссе 110 на север через Лос-Анджелес"
+      "0": "Following Interstate 110 north through Los Angeles"
     },
     "type": "cityscape",
     "src": {
@@ -1150,9 +1150,9 @@
   {
     "id": "F5804DD6-5963-40DA-9FA0-39C0C6E6DEF9",
     "accessibilityLabel": "Los Angeles",
-    "name": "Центр города",
+    "name": "Downtown",
     "pointsOfInterest": {
-      "0": "Центр Лос-Анджелеса"
+      "0": "Downtown Los Angeles"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -1166,10 +1166,10 @@
   {
     "id": "EC67726A-8212-4C5E-83CF-8412932740D2",
     "accessibilityLabel": "Los Angeles",
-    "name": "Голливудские холмы",
+    "name": "Hollywood Hills",
     "pointsOfInterest": {
-      "0": "Знак Голливуда в Лос-Анджелесе",
-      "250": "Над Голливудскими холмами, приближаясь к Бербанку, Калифорния"
+      "0": "The Hollywood Sign in Los Angeles",
+      "250": "Over the Hollywood Hills approaching Burbank California"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -1183,9 +1183,9 @@
   {
     "id": "CE279831-1CA7-4A83-A97B-FF1E20234396",
     "accessibilityLabel": "Los Angeles",
-    "name": "Международный аэропорт Лос-Анджелеса",
+    "name": "Los Angeles Int\u2019l Airport",
     "pointsOfInterest": {
-      "0": "Направление на запад над международным аэропортом Лос-Анджелеса"
+      "0": "Heading west over Los Angeles International Airport"
     },
     "type": "cityscape",
     "src": {
@@ -1198,9 +1198,9 @@
   {
     "id": "89B1643B-06DD-4DEC-B1B0-774493B0F7B7",
     "accessibilityLabel": "Los Angeles",
-    "name": "Обсерватория Гриффита",
+    "name": "Griffith Observatory",
     "pointsOfInterest": {
-      "0": "Обсерватория Гриффита и Голливудские холмы в Лос-Анджелесе"
+      "0": "Griffith Observatory and the Hollywood Hills in Los Angeles"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -1214,11 +1214,11 @@
   {
     "id": "44166C39-8566-4ECA-BD16-43159429B52F",
     "accessibilityLabel": "New York",
-    "name": "Седьмая авеню",
+    "name": "Seventh Avenue",
     "pointsOfInterest": {
-      "0": "Направление по 7-й авеню к Таймс-сквер в Нью-Йорке",
-      "40": "Над Таймс-сквер в Нью-Йорке",
-      "120": "Направление по 7-й авеню в центре Манхэттена, Нью-Йорк"
+      "0": "Heading down 7th Avenue toward Times Square New York",
+      "40": "Over Times Square in New York",
+      "120": "Heading down 7th Avenue in Midtown Manhattan, New York"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -1232,10 +1232,10 @@
   {
     "id": "3BA0CFC7-E460-4B59-A817-B97F9EBB9B89",
     "accessibilityLabel": "New York",
-    "name": "Центральный парк",
+    "name": "Central Park",
     "pointsOfInterest": {
-      "0": "Над Центральным парком по направлению к Мидтауну Манхэттена в Нью-Йорке",
-      "246": "Над Мидтауном Манхэттена в Нью-Йорке"
+      "0": "Over Central Park traveling toward Midtown Manhattan in New York",
+      "246": "Over Midtown Manhattan in New York"
     },
     "type": "cityscape",
     "src": {
@@ -1248,12 +1248,12 @@
   {
     "id": "640DFB00-FBB9-45DA-9444-9F663859F4BC",
     "accessibilityLabel": "New York",
-    "name": "Нижний Манхэттен",
+    "name": "Lower Manhattan",
     "pointsOfInterest": {
-      "0": "Приближение к Нижнему Манхэттену из гавани Нью-Йорка",
-      "110": "Вдоль Нижнего Манхэттена приближается Всемирный торговый центр.",
-      "180": "Проезжая мимо Всемирного торгового центра в сторону Манхэттена",
-      "210": "Над Нижним Манхэттеном в Нью-Йорке, двигаясь к Мидтауну"
+      "0": "Approaching Lower Manhattan from New York Harbor",
+      "110": "Alongside Lower Manhattan approaching One World Trade Center",
+      "180": "Passing One World Trade Center toward Midtown Manhattan",
+      "210": "Over Lower Manhattan in New York moving toward Midtown"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -1267,12 +1267,12 @@
   {
     "id": "840FE8E4-D952-4680-B1A7-AC5BACA2C1F8",
     "accessibilityLabel": "New York",
-    "name": "Верхний Ист-Сайд",
+    "name": "Upper East Side",
     "pointsOfInterest": {
-      "0": "Над Верхним Ист-Сайдом и Центральным парком в Нью-Йорке",
-      "50": "Над Мидтауном Манхэттена в направлении Эмпайр-стейт-билдинг",
-      "160": "Приближение к Эмпайр-стейт-билдинг в Нью-Йорке",
-      "205": "Проезжая мимо Эмпайр-стейт-билдинг, движется к Нижнему Манхэттену"
+      "0": "Over the Upper East Side and Central Park in New York",
+      "50": "Over Midtown Manhattan heading downtown toward the Empire State Building",
+      "160": "Approaching the Empire State Building in New York",
+      "205": "Passing the Empire State Building moving toward Lower Manhattan"
     },
     "type": "cityscape",
     "src": {
@@ -1285,16 +1285,16 @@
   {
     "id": "B1B5DDC5-73C8-4920-8133-BACCE38A08DE",
     "accessibilityLabel": "New York Night",
-    "name": "Мехико - Нью-Йорк",
+    "name": "Mexico City to New York",
     "pointsOfInterest": {
-      "0": "Над Тихим океаном в направлении Мексики",
-      "105": "Проходит над Мехико в направлении Мексиканского залива",
-      "122": "Пролетая над Мексиканским заливом в направлении Соединенных Штатов Америки",
-      "180": "Проезжая мимо Хьюстона и приближаясь к Новому Орлеану в Соединенных Штатах Америки",
-      "190": "Направление над Новым Орлеаном и побережьем Мексиканского залива США",
-      "215": "Перемещение над юго-восточной частью США",
-      "280": "Над восточной частью Соединенных Штатов, двигаясь в направлении Нью-Йорка",
-      "320": "Над восточной частью Соединенных Штатов, приближаясь к Нью-Йорку"
+      "0": "Over the Pacific Ocean heading toward Mexico",
+      "105": "Passing over Mexico City toward the Gulf of Mexico",
+      "122": "Flying over the Gulf of Mexico toward the United States",
+      "180": "Passing by Houston and approaching New Orleans in the United States",
+      "190": "Heading over New Orleans and the Gulf Coast of the United States",
+      "215": "Moving over the southeastern United States",
+      "280": "Over the eastern United States traveling toward New York",
+      "320": "Over the eastern United States approaching New York City"
     },
     "type": "space",
     "timeOfDay": "night",
@@ -1308,12 +1308,12 @@
   {
     "id": "78911B7E-3C69-47AD-B635-9C2486F6301D",
     "accessibilityLabel": "New Zealand",
-    "name": "Новая Зеландия",
+    "name": "New Zealand",
     "pointsOfInterest": {
-      "0": "Переход от ночи к дню над южной частью Тихого океана",
-      "70": "Переход от ночи к дню над Новой Зеландией",
-      "110": "Приближающийся восход солнца над Новой Зеландией",
-      "170": "Покидаем Новую Зеландию, направляясь на северо-восток над Тихим океаном"
+      "0": "Crossing from night to day over the South Pacific Ocean",
+      "70": "Crossing from night to day over New Zealand",
+      "110": "Approaching sunrise over New Zealand",
+      "170": "Leaving New Zealand heading northeast over the Pacific Ocean"
     },
     "type": "space",
     "timeOfDay": "day",
@@ -1327,17 +1327,17 @@
   {
     "id": "3C4678E4-4D3D-4A40-8817-77752AEA62EB",
     "accessibilityLabel": "Nile Delta",
-    "name": "Дельта Нила",
+    "name": "Nile Delta",
     "pointsOfInterest": {
-      "0": "Путешествие над Западной Европой с Британскими островами вдали",
-      "20": "Направление на юго-восток над Альпами и долиной реки По",
-      "50": "Перемещение по Итальянскому полуострову и Адриатическому морю",
-      "100": "Греция, омываемая Ионическим и Эгейским морями",
-      "160": "Путешествие на юго-восток над Средиземным морем",
-      "185": "Средиземное море и дельта реки Нил",
-      "205": "Река Нил, протекающая через Сахару в Египте",
-      "220": "Восточная пустыня, омываемая рекой Нил и Суэцким заливом.",
-      "240": "Направление на юго-восток над Красным морем"
+      "0": "Traveling over Western Europe with the British Isles in the distance",
+      "20": "Heading southeast over the Alps and the Po River Valley",
+      "50": "Moving down the Italian Peninsula and the Adriatic Sea",
+      "100": "Greece flanked by the Ionian and Aegean Seas",
+      "160": "Traveling southeast over the Mediterranean Sea",
+      "185": "The Mediterranean Sea and the Nile River Delta",
+      "205": "The Nile River flowing through the Sahara in Egypt",
+      "220": "The Eastern Desert flanked by the Nile River and the Gulf of Suez",
+      "240": "Heading southeast over the Red Sea"
     },
     "type": "space",
     "src": {
@@ -1350,20 +1350,20 @@
   {
     "id": "737E9E24-49BE-4104-9B72-F352DE1AD2BF",
     "accessibilityLabel": "North America Aurora",
-    "name": "Северная Америка Аврора",
+    "name": "North America Aurora",
     "pointsOfInterest": {
-      "0": "Над Тихим океаном, двигаясь к Бахе, Калифорния",
-      "45": "Над Баха Калифорнией, глядя на север в сторону США",
-      "55": "Над Мексикой, направляясь к юго-западу США",
-      "75": "Над юго-западом Соединенных Штатов",
-      "110": "Над Скалистыми горами, приближаясь к Денверу",
-      "125": "Путешествие по Великим равнинам США",
-      "185": "Приближение к Великим озерам с Онтарио, Канада, за пределами",
-      "200": "Над Великими озерами, приближаясь к канадской провинции Онтарио",
-      "210": "Аврора Бореалис над западной частью провинции Онтарио, Канада",
-      "235": "Аврора Бореалис над северной частью провинции Онтарио Канадыо островами Теркс и Кайкос в Атлантическом океане",
-      "250": "Аврора Бореалис над северным Квебеком, Канада",
-      "300": "Направление к Северной Атлантике с Авророй Бореалис над Лабрадором, Канада"
+      "0": "Over the Pacific Ocean moving toward Baja, California",
+      "45": "Over Baja California looking north toward the United States",
+      "55": "Over Mexico heading toward the southwest United States",
+      "75": "Over the southwest United States",
+      "110": "Over the Rocky Mountains approaching Denver",
+      "125": "Traveling over the Great Plains of the United States",
+      "185": "Approaching the Great Lakes with Ontario, Canada beyond",
+      "200": "Over the Great Lakes approaching Ontario Canada",
+      "210": "The Aurora Borealis over western Ontario, Canada",
+      "235": "The Aurora Borealis over northern Ontario Canadao Turks and Caicos Islands in the Atlantic Ocean",
+      "250": "The Aurora Borealis over northern Quebec Canada",
+      "300": "Heading toward the North Atlantic with the Aurora Borealis over Labrador, Canada"
     },
     "type": "space",
     "timeOfDay": "night",
@@ -1377,9 +1377,9 @@
   {
     "id": "F07CC61B-30FC-4614-BDAD-3240B61F6793",
     "accessibilityLabel": "Palau Coral",
-    "name": "Коралл Палау",
+    "name": "Palau Coral",
     "pointsOfInterest": {
-      "0": "Коралловый риф в окрестностях Палауо"
+      "0": "Coral reef near Palauo"
     },
     "type": "underwater",
     "src": {
@@ -1392,11 +1392,11 @@
   {
     "id": "BA4ECA11-592F-4727-9221-D2A32A16EB28",
     "accessibilityLabel": "Palau Jellies",
-    "name": "Медузы Палау",
+    "name": "Palau Jellies 1",
     "pointsOfInterest": {
-      "0": "Золотая медуза в водах Палау",
-      "282": "Золотая медуза с лунной медузой среди них",
-      "348": "Золотая медуза в водах Палау"
+      "0": "Golden Jellyfish in the waters of Palau",
+      "282": "Golden Jellyfish with a Moon Jellyfish in their midst",
+      "348": "Golden Jellyfish in the waters of Palau"
     },
     "type": "underwater",
     "src": {
@@ -1409,9 +1409,9 @@
   {
     "id": "E580E5A5-0888-4BE8-A4CA-F74A18A643C3",
     "accessibilityLabel": "Palau Jellies",
-    "name": "Медузы Палау",
+    "name": "Palau Jellies 2",
     "pointsOfInterest": {
-      "0": "Золотая медуза в водах Палау"
+      "0": "Golden Jellyfish in the waters of Palau"
     },
     "type": "underwater",
     "src": {
@@ -1424,9 +1424,9 @@
   {
     "id": "EC3DC957-D4C2-4732-AACE-7D0C0F390EC8",
     "accessibilityLabel": "Palau Jellies",
-    "name": "МедузыПалау",
+    "name": "Palau Jellies 3",
     "pointsOfInterest": {
-      "0": "Золотая медуза в водах Палауо"
+      "0": "Golden Jellyfish in the waters of Palauo"
     },
     "type": "underwater",
     "src": {
@@ -1439,9 +1439,9 @@
   {
     "id": "5C987900-AD53-469C-8210-CABBCCDDFCAE",
     "accessibilityLabel": "Patagonia",
-    "name": "Куэрнос дель Пайне",
+    "name": "Cuernos del Paine",
     "pointsOfInterest": {
-      "0": "Передвижение по Куэрнос-дель-Пайне в Национальном парке Торрес-дель-Пайне, Чили"
+      "0": "Moving along Cuernos del Paine in Torres del Paine National Park, Chile"
     },
     "type": "landscape",
     "src": {
@@ -1454,9 +1454,9 @@
   {
     "id": "B004358B-5A27-42E5-B49E-93FC100B2371",
     "accessibilityLabel": "Patagonia",
-    "name": "Лаго Норденшельд",
+    "name": "Lago Nordenskj\u00f6ld 1",
     "pointsOfInterest": {
-      "0": "Путешествие по Лаго Норденшельд в Национальном парке Торрес-дель-Паине, Чили"
+      "0": "Traveling along Lago Nordenskj\u00f6ld in Torres del Paine National Park, Chile"
     },
     "type": "landscape",
     "src": {
@@ -1469,9 +1469,9 @@
   {
     "id": "25A6CFB2-3570-4448-B114-244A4E454B7A",
     "accessibilityLabel": "Patagonia",
-    "name": "Лаго Норденшельд",
+    "name": "Lago Nordenskj\u00f6ld 2",
     "pointsOfInterest": {
-      "0": "Над Лаго Норденшельд в Национальном парке Торрес-дель-Пайн, Чили"
+      "0": "Over Lago Nordenskj\u00f6ld in Torres del Paine National Park, Chile"
     },
     "type": "landscape",
     "src": {
@@ -1484,9 +1484,9 @@
   {
     "id": "E5D58CC2-3C52-4206-9DA2-427DC88B5896",
     "accessibilityLabel": "Patagonia",
-    "name": "Национальный парк Торрес-дель-Паине",
+    "name": "Torres del Paine National Park",
     "pointsOfInterest": {
-      "0": "Путешествие по Национальному парку Торрес-дель-Пайн в Чили"
+      "0": "Traveling over Torres del Paine National Park in Chile"
     },
     "type": "landscape",
     "src": {
@@ -1499,9 +1499,9 @@
   {
     "id": "82175C1F-153C-4EC8-AE37-2860EA828004",
     "accessibilityLabel": "Red Sea Coral",
-    "name": "Коралл Красного моря",
+    "name": "Red Sea Coral",
     "pointsOfInterest": {
-      "0": "Коралловый риф в Красном море недалеко от Египта"
+      "0": "Coral reef in the Red Sea near Egypt"
     },
     "type": "underwater",
     "src": {
@@ -1514,18 +1514,18 @@
   {
     "id": "E556BBC5-D0A0-4DB1-AC77-BC76E4A526F4",
     "accessibilityLabel": "Sahara and Italy",
-    "name": "Сахара и Италия",
+    "name": "Sahara and Italy",
     "pointsOfInterest": {
-      "0": "Над западной частью Африки, перемещаясь в сторону Сахары",
-      "30": "Пересечение Сахары в Северной Африке",
-      "110": "Проезжая над горами Ахаггар в Сахаре, Северная Африка",
-      "155": "Через Гранд Эрг Ориенталь в Северной Африке движется к Средиземному морю",
-      "195": "Побережье Туниса и Средиземное море",
-      "210": "Над побережьем Туниса, направляясь в сторону Италии",
-      "230": "Приближение к Италии в Средиземном море",
-      "245": "Над Италией в направлении Балканского полуострова",
-      "285": "Над Балканским полуостровом в направлении Карпатских гор",
-      "310": "Карпатские горы и Черное море"
+      "0": "Over western Africa moving toward the Saharao",
+      "30": "Crossing the Sahara in North Africa",
+      "110": "Passing over the Ahaggar Mountains in the Sahara, North Africa",
+      "155": "Over the Grand Erg Oriental in North Africa moving toward the Mediterranean Sea",
+      "195": "The coast of Tunisia and the Mediterranean Sea",
+      "210": "Over the coast of Tunisia traveling toward Italy",
+      "230": "Approaching Italy in the Mediterranean Sea",
+      "245": "Over Italy traveling toward the Balkan Peninsula",
+      "285": "Over the Balkan Peninsula heading toward the Carpathian Mountains",
+      "310": "The Carpathian Mountains and the Black Sea"
     },
     "type": "space",
     "timeOfDay": "day",
@@ -1539,13 +1539,13 @@
   {
     "id": "72B4390D-DF1D-4D51-B179-229BBAEFFF2C",
     "accessibilityLabel": "San Francisco",
-    "name": "Золотые Ворота из СФ",
+    "name": "Golden Gate from SF",
     "pointsOfInterest": {
-      "0": "Подъезд к мосту \"Золотые ворота\" из Сан-Франциско",
-      "60": "Вдоль моста \"Золотые ворота\" по направлению к горам Марин.",
-      "140": "Переход через мост Золотые Ворота",
-      "230": "Проезжая мимо Северной башни моста Золотые Ворота",
-      "260": "Через залив Сан-Франциско, проезжая по мосту Золотые Ворота"
+      "0": "Approaching the Golden Gate Bridge from San Francisco",
+      "60": "Alongside the Golden Gate Bridge heading toward the Marin Headlands",
+      "140": "Crossing over the Golden Gate Bridge",
+      "230": "Passing by the North Tower of the Golden Gate Bridge",
+      "260": "Over San Francisco Bay traveling alongside the Golden Gate Bridge"
     },
     "type": "cityscape",
     "src": {
@@ -1558,11 +1558,11 @@
   {
     "id": "3E94AE98-EAF2-4B09-96E3-452F46BC114E",
     "accessibilityLabel": "San Francisco",
-    "name": "Мост Бэй",
+    "name": "Bay Bridge",
     "pointsOfInterest": {
-      "0": "Приближение к мосту через залив и центру Сан-Франциско",
-      "80": "Пересечение моста через залив по направлению к центру Сан-Франциско",
-      "116": "Над заливом Сан-Франциско по направлению к центру города"
+      "0": "Approaching the Bay Bridge and downtown San Francisco",
+      "80": "Crossing over the Bay Bridge heading toward downtown San Francisco",
+      "116": "Over San Francisco Bay heading toward downtown"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -1576,11 +1576,11 @@
   {
     "id": "DE851E6D-C2BE-4D9F-AB54-0F9CE994DC51",
     "accessibilityLabel": "San Francisco",
-    "name": "Залив и Золотые ворота",
+    "name": "Bay and Golden Gate",
     "pointsOfInterest": {
-      "0": "Залив Сан-Франциско и мост Золотые Ворота",
-      "140": "Направляясь через северную башню моста \"Золотые ворота\" в сторону Сан-Франциско",
-      "191": "Над заливом Сан-Франциско"
+      "0": "San Francisco Bay and the Golden Gate Bridge",
+      "140": "Heading over the north tower of the Golden Gate Bridge toward San Francisco",
+      "191": "Over San Francisco Bay"
     },
     "type": "cityscape",
     "src": {
@@ -1593,12 +1593,12 @@
   {
     "id": "4AD99907-9E76-408D-A7FC-8429FF014201",
     "accessibilityLabel": "San Francisco",
-    "name": "Залив и Эмбаркадеро",
+    "name": "Bay and Embarcadero",
     "pointsOfInterest": {
-      "0": "Над заливом Сан-Франциско, двигаясь к Эмбаркадеру.",
-      "90": "Вид с Эмбаркадеро на Маркет-стрит в Сан-Франциско",
-      "150": "Следуйте по Маркет-стрит через центр Сан-Франциско",
-      "360": "Следуйте по Маркет-стрит через Сан-Франциско"
+      "0": "Over the San Francisco Bay moving toward the Embarcader",
+      "90": "Over the Embarcadero looking down Market Street in San Francisco",
+      "150": "Following Market Street through downtown San Francisco",
+      "360": "Following Market Street through San Francisco"
     },
     "type": "cityscape",
     "src": {
@@ -1611,10 +1611,10 @@
   {
     "id": "EE533FBD-90AE-419A-AD13-D7A60E2015D6",
     "accessibilityLabel": "San Francisco",
-    "name": "Горы Марин в тумане",
+    "name": "Marin Headlands in Fog",
     "pointsOfInterest": {
-      "0": "С высоты мыса Марин в направлении моста Золотые Ворота",
-      "150": "Пересечение моста \"Золотые ворота\" в направлении Президио в Сан-Франциско"
+      "0": "Over the Marin Headlands looking toward the Golden Gate Bridge",
+      "150": "Crossing the Golden Gate Bridge toward the Presidio of San Francisco"
     },
     "type": "cityscape",
     "src": {
@@ -1627,10 +1627,10 @@
   {
     "id": "85CE77BF-3413-4A7B-9B0F-732E96229A73",
     "accessibilityLabel": "San Francisco",
-    "name": "Эмбаркадеро, Маркет-стрит",
+    "name": "Embarcadero, Market Street",
     "pointsOfInterest": {
-      "0": "Над заливом Сан-Франциско, двигаясь к Эмбаркадеру",
-      "208": "Следуйте по Маркет-стрит через Сан-Франциско"
+      "0": "Over San Francisco Bay moving toward the Embarcader",
+      "208": "Following Market Street through San Francisco"
     },
     "type": "cityscape",
     "src": {
@@ -1643,12 +1643,12 @@
   {
     "id": "29BDF297-EB43-403A-8719-A78DA11A2948",
     "accessibilityLabel": "San Francisco",
-    "name": "Рыбацкая пристань",
+    "name": "Fisherman\u2019s Wharf",
     "pointsOfInterest": {
-      "0": "Над Рыбацкой пристанью по направлению к центру Сан-Франциско",
-      "80": "Приближение к башне Койт с центром Сан-Франциско и мостом Бэй-Бридж на заднем плане",
-      "150": "Проезжая мимо башни Койт в сторону центра Сан-Франциско и моста Бэй-Бридж",
-      "196": "Центр Сан-Франциско"
+      "0": "Over Fisherman's Wharf heading toward downtown San Francisco",
+      "80": "Approaching Coit Tower with downtown San Francisco and the Bay Bridge in the background",
+      "150": "Passing Coit Tower toward downtown San Francisco and the Bay Bridge",
+      "196": "Downtown San Francisco"
     },
     "type": "cityscape",
     "timeOfDay": "night",
@@ -1662,11 +1662,11 @@
   {
     "id": "0C747C29-4BF8-43F6-A5CC-2E012E555341",
     "accessibilityLabel": "Scotland",
-    "name": "Остров Скай",
+    "name": "Isle of Skye",
     "pointsOfInterest": {
-      "0": "Путешествие вдоль побережья острова Скай, Шотландия",
-      "338": "Маяк Нейст-Пойнт, остров Скай, Шотландия",
-      "372": "Над гаванью Виктория по направлению к центру Гонконга"
+      "0": "Traveling along the coast of the Isle of Skye, Scotland",
+      "338": "Neist Point Lighthouse, Isle of Skye, Scotland",
+      "372": "Over Victoria Harbour heading toward Central Hong Kong"
     },
     "type": "landscape",
     "src": {
@@ -1679,12 +1679,12 @@
   {
     "id": "E161929C-0819-4BC2-8359-550C081C7D54",
     "accessibilityLabel": "Scotland",
-    "name": "Замок Тиорам",
+    "name": "Castle Tioram",
     "pointsOfInterest": {
-      "0": "Лох Мойдарт на западном побережье Шотландии",
-      "139": "Подъезд к замку Тиорам на западном побережье Шотландии",
-      "181": "Замок Тиорамон, западное побережье Шотландии",
-      "214": "Путешествие над западным побережьем Шотландии"
+      "0": "Loch Moidart on the west coast of Scotland",
+      "139": "Approaching Castle Tioram on the west coast of Scotland",
+      "181": "Castle Tioramon, the west coast of Scotland",
+      "214": "Traveling over the west coast of Scotland"
     },
     "type": "landscape",
     "src": {
@@ -1697,10 +1697,10 @@
   {
     "id": "3954A7C4-51EC-4ABC-ABA3-6757AC91C7CF",
     "accessibilityLabel": "Scotland",
-    "name": "Лох Мойдарт",
+    "name": "Loch Moidart",
     "pointsOfInterest": {
-      "0": "Над Лох-Мойдартом на западном побережье Шотландии",
-      "252": "Приближение к Гебридскому морю, Шотландия"
+      "0": "Over Loch Moidart on the west coast of Scotland",
+      "252": "Approaching the Sea of Hebrides, Scotland"
     },
     "type": "landscape",
     "src": {
@@ -1713,9 +1713,9 @@
   {
     "id": "581A4F1A-2B6D-468C-A1BE-6F473F06D10B",
     "accessibilityLabel": "Sea Stars",
-    "name": "Морские звезды",
+    "name": "Sea Stars",
     "pointsOfInterest": {
-      "0": "Рогатые морские звезды на дне океана вблизи Борнео"
+      "0": "Horned Sea Stars on the ocean floor near Borneo"
     },
     "type": "underwater",
     "src": {
@@ -1728,9 +1728,9 @@
   {
     "id": "83C65C90-270C-4490-9C69-F51FE03D7F06",
     "accessibilityLabel": "Seals",
-    "name": "Уплотнения",
+    "name": "Seals",
     "pointsOfInterest": {
-      "0": "Капские тюлени у побережья Капского полуострова, Южная Африка"
+      "0": "Cape Fur Seals off the coast of Cape Peninsula, South Africa"
     },
     "type": "underwater",
     "src": {
@@ -1743,22 +1743,22 @@
   {
     "id": "87060EC2-D006-4102-98CC-3005C68BB343",
     "accessibilityLabel": "South Africa to North Asia",
-    "name": "От Южной Африки до Северной Азии",
+    "name": "South Africa to North Asia",
     "pointsOfInterest": {
-      "0": "Путешествие на северо-восток над Эфиопским нагорьем",
-      "45": "Путешествие через Красное море на Аравийский полуостров",
-      "100": "Направление на северо-восток над Аравийским полуостровом",
-      "130": "Над Аравийским полуостровом, двигаясь в сторону Ирана",
-      "165": "Над Аравийским полуостровом, приближаясь к Ирану",
-      "190": "Над Афганистаном и Пакистаном, продвигаясь к Каракорумскому хребту",
-      "210": "Над горами Загрос в Иране",
-      "240": "Над пустыней Дашт-и-Лут в Иране",
-      "265": "Двигаемся в сторону Туркменистана и пустыни Гарагум",
-      "305": "Река Амударья и Памиро-Алайские горы в Центральной Азии",
-      "322": "Памиро-Алайские горы и Ферганская долина в Центральной Азии",
-      "360": "Направляясь в юго-восточный Казахстан из Кыргызстана",
-      "400": "Путешествие на север через Казахстан",
-      "450": "Через Алтайские горы в Монголию"
+      "0": "Traveling northeast over the Ethiopian Highlands",
+      "45": "Traveling over the Red Sea into the Arabian Peninsula",
+      "100": "Heading northeast over the Arabian Peninsula",
+      "130": "Over the Arabian Peninsula moving toward Iran",
+      "165": "Over the Arabian Peninsula approaching Iran",
+      "190": "Over Afghanistan and Pakistan moving toward the Karakoram Range",
+      "210": "Over the Zagros Mountains in Iran",
+      "240": "Over the Dasht-e Lut desert in Iran",
+      "265": "Moving toward Turkmenistan and the Garagum desert",
+      "305": "The Amu Darya River and the Pamir-Alay Mountains in central Asia",
+      "322": "The Pamir-Alay Mountains and the Fergana Valley in central Asia",
+      "360": "Heading into southeastern Kazakhstan from Kyrgyzstano",
+      "400": "Traveling north over Kazakhstan",
+      "450": "Over the Altai Mountains moving into Mongolia"
     },
     "type": "space",
     "src": {
@@ -1771,18 +1771,18 @@
   {
     "id": "7719B48A-2005-4011-9280-2F64EEC6FD91",
     "accessibilityLabel": "Southern California to Baja",
-    "name": "От Северной Калифорнии до Бахи",
+    "name": "Northern California to Baja",
     "pointsOfInterest": {
-      "0": "Над Тихим океаном в направлении Соединенных Штатов",
-      "20": "Путешествие на юг вдоль побережья Калифорнии",
-      "50": "Над южной Калифорнией, движется в сторону Мексики",
-      "65": "Приближаемся к пустыне Мохаве в южной Калифорнии и Мексике за ее пределами.",
-      "95": "Калифорнийский залив, омываемый пустыней Соноран и полуостровом Баха Калифорния.",
-      "130": "Горы Сьерра-Мадре-Оксиденталь на западном побережье Мексики",
-      "185": "Над горами Сьерра-Мадре-Оксиденталь, движется к западному побережью Мексики",
-      "225": "Вид на юг, на Тихий океан, над Сьерра-Мадре-дель-Сур в Мексике",
-      "280": "Тихий океан у побережья Мексики",
-      "290": "Тихий океан у побережья Мексики и Гватемалы"
+      "0": "Over the Pacific Ocean heading toward the United States",
+      "20": "Traveling south down the coast of California",
+      "50": "Over southern California moving towards Mexico",
+      "65": "Approaching the Mojave Desert in southern California with Mexico beyond",
+      "95": "The Gulf of California flanked by the Sonoran Desert and the Baja California Peninsula",
+      "130": "The Sierra Madre Occidental mountains on the west coast of Mexico",
+      "185": "Over the Sierra Madre Occidental mountains moving toward the west coast of Mexico",
+      "225": "Looking south to the Pacific Ocean over the Sierra Madre del Sur in Mexico",
+      "280": "The Pacific Ocean off the coast of Mexico",
+      "290": "The Pacific Ocean off the coast of Mexico and Guatemalao"
     },
     "type": "space",
     "timeOfDay": "day",
@@ -1796,9 +1796,9 @@
   {
     "id": "149E7795-DBDA-4F5D-B39A-14712F841118",
     "accessibilityLabel": "Tahiti Waves",
-    "name": "Волны Таити",
+    "name": "Tahiti Waves 1",
     "pointsOfInterest": {
-      "0": "Волны разбиваются о берега Таити"
+      "0": "Waves breaking on the shores of Tahiti"
     },
     "type": "underwater",
     "src": {
@@ -1811,9 +1811,9 @@
   {
     "id": "8C31B06F-91A4-4F7C-93ED-56146D7F48B9",
     "accessibilityLabel": "Tahiti Waves",
-    "name": "Волны Таити",
+    "name": "Tahiti Waves 2",
     "pointsOfInterest": {
-      "0": "Волны разбиваются о берега Таити"
+      "0": "Waves breaking on the shores of Tahiti"
     },
     "type": "underwater",
     "src": {
@@ -1826,17 +1826,17 @@
   {
     "id": "63C042F0-90EF-4A95-B7CC-CC9A64BF8421",
     "accessibilityLabel": "West Africa to the Alps",
-    "name": "От Западной Африки до Альп",
+    "name": "West Africa to the Alps",
     "pointsOfInterest": {
-      "0": "Канарские острова Атлантический океан и побережье Африки",
-      "45": "Двигаясь на северо-восток вдоль побережья Марокко",
-      "75": "Проезжая над Атласскими горами в Марокко",
-      "105": "Над Марокко, приближаясь к Средиземному морю",
-      "125": "Средиземное море и южная Испания",
-      "145": "Путешествие на северо-восток по испанскому побережью Коста-Бланка",
-      "165": "Путешествие на северо-восток над Балеарскими островами Испании",
-      "185": "Над западной частью Средиземного моря и Альпами за его пределами",
-      "220": "Движение на северо-восток над Альпами"
+      "0": "The Canary Islands Atlantic Ocean and coast of Africa",
+      "45": "Moving north east along the coast of Morocco",
+      "75": "Passing over the Atlas Mountains in Morocco",
+      "105": "Over Morocco approaching the Mediterranean Sea",
+      "125": "The Mediterranean Sea and southern Spain",
+      "145": "Traveling northeast over Spain's Costa Blanca",
+      "165": "Traveling northeast over Spain's Balearic Islands",
+      "185": "Over the western Mediterranean Sea with the Alps beyond",
+      "220": "Moving northeast over the Alps"
     },
     "type": "space",
     "timeOfDay": "day",
@@ -1850,11 +1850,11 @@
   {
     "id": "E5799A24-1949-4E66-A17B-B5EB05F28C5D",
     "accessibilityLabel": "Yosemite",
-    "name": "Халф-Доум и Невадский водопад",
+    "name": "Half Dome and Nevada Fall",
     "pointsOfInterest": {
       "0": "",
-      "124": "Проезжая мимо полукупола и приближаясь к водопаду Невада в Йосемитском национальном парке",
-      "146": "Полукупол и водопад Невада в Йосемитском национальном парке, США"
+      "124": "Passing by Half Dome and approaching Nevada Fall in Yosemite National Park",
+      "146": "Half Dome and Nevada Fall in Yosemite National Park, United States"
     },
     "type": "landscape",
     "src": {
@@ -1867,13 +1867,13 @@
   {
     "id": "E487C6EF-B3FB-427B-A2BE-8CBA60F902F0",
     "accessibilityLabel": "Yosemite",
-    "name": "Йосемити",
+    "name": "Yosemite 1",
     "pointsOfInterest": {
-      "0": "Над Йосемитским национальным парком в США",
-      "40": "Путешествие к Полукуполу в Йосемитском национальном парке, США",
-      "60": "Полукупол в Йосемитском национальном парке, Соединенные Штаты Америки",
-      "155": "Над национальным парком Йосемити с водопадом Невада вдали",
-      "255": "Водопады Невада и Иллилуэтт в Национальном парке Йосемити, Соединенные Штаты Америки",
+      "0": "Over Yosemite National Park in the United States",
+      "40": "Traveling toward Half Dome in Yosemite National Park, United States",
+      "60": "Half Dome in Yosemite National Park, United States",
+      "155": "Over Yosemite National Park with Nevada Fall in the distance",
+      "255": "Nevada and Illilouette Falls in Yosemite National Park, United States",
       "285": ""
     },
     "type": "landscape",
@@ -1887,10 +1887,10 @@
   {
     "id": "E540DEE6-4C40-42C8-9CCC-D4CB0FAD7D7B",
     "accessibilityLabel": "Yosemite",
-    "name": "Йосемити",
+    "name": "Yosemite 2",
     "pointsOfInterest": {
       "0": "",
-      "70": "Подход к Полукуполу в Йосемитском национальном парке, США",
+      "70": "Approaching Half Dome in Yosemite National Park, United States",
       "87": "",
       "210": ""
     },
@@ -1905,13 +1905,13 @@
   {
     "id": "81CA5ACD-E682-4D8B-A948-0F147EB6ED4F",
     "accessibilityLabel": "Yosemite",
-    "name": "Пик Мерсед",
+    "name": "Merced Peak",
     "pointsOfInterest": {
-      "0": "Над Йосемитским национальным парком, Соединенные Штаты Америки",
-      "93": "Путешествие к пику Мерсед в Йосемитском национальном парке, США",
-      "130": "Пик Мерсед в Йосемитском национальном парке, Соединенные Штаты Америки",
-      "221": "Проезжая мимо пика Мерсед в Йосемитском национальном парке, США",
-      "244": "Путешествие над Йосемитским национальным парком, США"
+      "0": "Over Yosemite National Park, United States",
+      "93": "Traveling toward Merced Peak in Yosemite National Park, United States",
+      "130": "Merced Peak in Yosemite National Park, United States",
+      "221": "Passing by Merced Peak in Yosemite National Park, United States",
+      "244": "Traveling over Yosemite National Park, United States"
     },
     "type": "landscape",
     "src": {
@@ -1924,15 +1924,15 @@
   {
     "id": "4109D42A-D717-46A7-A9A2-FE53A82B25C0",
     "accessibilityLabel": "Yosemite",
-    "name": "Йосемити",
+    "name": "Yosemite 3",
     "pointsOfInterest": {
-      "0": "Путешествие к водопаду Брайдвейл и Эль-Капитану в Йосемитском национальном парке",
-      "44": "Путешествие на восток к Эль-Капитану в Йосемитском национальном парке, США",
-      "87": "Прохождение мимо Эль-Капитана, Йосемитский национальный парк, США",
-      "120": "Путешествие на восток к Полукуполу в Йосемитском национальном парке, США",
+      "0": "Traveling toward Bridalveil Fall and El Capitan in Yosemite National Park",
+      "44": "Traveling east toward El Capitan in Yosemite National Park, United States",
+      "87": "Passing El Capitan, Yosemite National Park, United States",
+      "120": "Traveling east toward Half Dome in Yosemite National Park, United States",
       "390": "",
-      "470": "Путешествие за Полукупол в Йосемитской долине, США",
-      "585": "Путешествие на восток над долиной Йосемити, Соединенные Штаты Америки"
+      "470": "Traveling past Half Dome in Yosemite Valley, United States",
+      "585": "Traveling east over Yosemite Valley, United States"
     },
     "type": "landscape",
     "src": {
@@ -1945,9 +1945,9 @@
   {
     "id": "DAD82DCE-F3AE-4AEC-8A79-1694D412FC0A",
     "accessibilityLabel": "Yosemite",
-    "name": "Луга Туолумна",
+    "name": "Tuolumne Meadows",
     "pointsOfInterest": {
-      "0": "Проезд через луга Туолумн в Йосемитском национальном парке, США"
+      "0": "Passing over Tuolumne Meadows in Yosemite National Park, United States"
     },
     "type": "landscape",
     "src": {
@@ -1960,13 +1960,13 @@
   {
     "id": "8D04D70F-738B-441D-8D43-AF46B2BF8062",
     "accessibilityLabel": "Yosemite",
-    "name": "Маттес Крест",
+    "name": "Matthes Crest",
     "pointsOfInterest": {
-      "0": "Путешествие по направлению к Маттес Крэст в Йосемитском национальном парке, США",
+      "0": "Traveling toward Matthes Crest in Yosemite National Park, United States",
       "75": "",
-      "124": "Полет через Маттес Крэст в Йосемитском национальном парке, США",
-      "215": "Полет над Маттес Крэст в Йосемитском национальном парке, США",
-      "396": "Движение к лугам Туолумн в Йосемитском национальном парке, США"
+      "124": "Flying through Matthes Crest in Yosemite National Park, United States",
+      "215": "Flying over Matthes Crest in Yosemite National Park, United States",
+      "396": "Moving toward Tuolumne Meadows in Yosemite National Park, United States"
     },
     "type": "landscape",
     "src": {
@@ -1976,4 +1976,3 @@
       "H2654khdr": "https://sylvan.apple.com/Aerials/2x/Videos/Y011_C008_HDR_4K_HEVC.mov"
     }
   }
-]
