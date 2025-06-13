@@ -45,7 +45,7 @@
                         var logoPath = response.logos[0].file_path;
 
                         if (logoPath !== "") {
-                            var logoHtml = '<img style="margin-top: 20px; margin-bottom: 45px; max-height: 45px;" src="' + Lampa.TMDB.image("/t/p/w500" + logoPath.replace(".svg", ".png")) + '" />';
+                            var logoHtml = '<img style="margin-top: 15px; margin-bottom: 45px; max-height: 45px;" src="' + Lampa.TMDB.image("/t/p/w500" + logoPath.replace(".svg", ".png")) + '" />';
 
                             // Safely check if activity and render() exist
                             if (a.object && a.object.activity && typeof a.object.activity.render === 'function') {
