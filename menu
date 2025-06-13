@@ -80,9 +80,6 @@
                     width: 80% !important;
                 }
 
-                img {
-                     object-fit: scale-down !important;
-                }
                 .explorer__left {
                     width: 20% !important;
                     flex-shrink: 0 !important;
