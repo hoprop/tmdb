@@ -1,0 +1,161 @@
+(function() {
+    'use strict';
+
+    console.log('Script starting...');
+    if (typeof Lampa === 'undefined') {
+        console.error('Lampa is not defined!');
+        return;
+    }
+    if (typeof $ === 'undefined') {
+        console.error('jQuery ($) is not defined!');
+        return;
+    }
+
+    try {
+        Lampa.Platform.tv();
+        console.log('Lampa.Platform.tv() called successfully');
+    } catch (err) {
+        console.error('Error calling Lampa.Platform.tv():', err);
+    }
+
+    try {
+        Lampa.SettingsApi.addParam({
+            component: 'interface',
+            param: {
+                name: 'season_and_seria',
+                type: 'trigger',
+                default: true
+            },
+            field: {
+                name: 'Отображение состояния сериала (сезон/серия)'
+            },
+            onRender: function(field) {
+                console.log('Settings onRender triggered');
+            }
+        });
+        console.log('Settings parameter added');
+    } catch (err) {
+        console.error('Error adding settings parameter:', err);
+    }
+
+    function attachListener() {
+        try {
+            var settingEnabled = Lampa.Storage.get('season_and_seria') !== false;
+            console.log('season_and_seria setting value:', settingEnabled);
+
+            if (settingEnabled) {
+                Lampa.Listener.follow('full', function(e) {
+                    console.log('Full event triggered:', e.type);
+                    try {
+                        if (!Lampa.Activity || !Lampa.Activity.active) {
+                            console.error('Lampa.Activity.active is not available');
+                            return;
+                        }
+
+                        var activeActivity = Lampa.Activity.active();
+                        console.log('Active activity full structure:', activeActivity);
+
+                        if (e.type !== 'render' && e.type !== 'complite') {
+                            console.log('Not a render/complite event, skipping:', e.type);
+                            return;
+                        }
+
+                        // Use card for data, activity for rendering
+                        var data = activeActivity.card;
+                        console.log('Card data:', data);
+
+                        if (!data || data.source !== 'tmdb' || !data.seasons || !data.last_episode_to_air || !data.last_episode_to_air.season_number) {
+                            console.log('Required TMDB data not available:', data);
+                            return;
+                        }
+
+                        var seasonNum = data.last_episode_to_air.season_number;
+                        var lastEpisode = data.last_episode_to_air.episode_number;
+                        var nextEpisode = data.next_episode_to_air;
+                        var episodeNum = (nextEpisode && new Date(nextEpisode.air_date) <= Date.now()) 
+                            ? nextEpisode.episode_number 
+                            : lastEpisode;
+                        var episodeCount = data.seasons.find(function(s) {
+                            return s.season_number === seasonNum;
+                        }).episode_count;
+                        var label = nextEpisode 
+                            ? 'Сезон ' + seasonNum + ' - cерия ' + episodeNum + ' из ' + episodeCount 
+                            : seasonNum + ' сезон завершен';
+
+                        console.log('Generated label:', label);
+
+                        // Use activity.render() instead of card.render()
+                        var $activityRender = activeActivity.activity.render();
+                        if (!$('.card--new_seria', $activityRender).length) {
+                            console.log('No existing .card--new_seria, appending new element');
+                            if (window.innerWidth > 585) {
+                                var $poster = $('.full-start__poster, .full-start-new__poster', $activityRender);
+                                if ($poster.length) {
+                                    $poster.append(
+                                        '<div class="card--new_seria" style="right: 1px!important;position: absolute;background: rgb(0 0 0 / 76%);color: #fff;bottom:.6em!important;padding: 0.4em 0.4em;font-size: 1.2em;font-weight: 600;-webkit-border-radius: 0.3em;-moz-border-radius: 0.3em;border-radius: 0.3em;">' +
+                                        Lampa.Lang.translate(label) +
+                                        '</div>'
+                                    );
+                                    console.log('Appended to poster');
+                                } else {
+                                    console.log('Poster element not found');
+                                }
+                            } else {
+                                var $tags = $('.full-start__tags', $activityRender);
+                                if ($tags.length) {
+                                    $tags.append(
+                                        '<div class="full-start__tag card--new_seria"><img src="./img/icons/menu/movie.svg" /> <div>' +
+                                        Lampa.Lang.translate(label) +
+                                        '</div></div>'
+                                    );
+                                    console.log('Appended to tags');
+                                } else {
+                                    var $details = $('.full-start-new__details', $activityRender);
+                                    if ($details.length) {
+                                        $details.append(
+                                            '<span class="full-start-new__split">●</span><div class="card--new_seria"><div> ' +
+                                            Lampa.Lang.translate(label) +
+                                            '</div></div>'
+                                        );
+                                        console.log('Appended to details');
+                                    } else {
+                                        console.log('Details element not found');
+                                    }
+                                }
+                            }
+                        } else {
+                            console.log('.card--new_seria already exists, skipping');
+                        }
+                    } catch (err) {
+                        console.error('Error in full listener:', err);
+                    }
+                });
+                console.log('Full listener attached');
+            }
+        } catch (err) {
+            console.error('Error setting up listener:', err);
+        }
+    }
+
+    function initialize() {
+        console.log('App initialized');
+        attachListener();
+    }
+
+    try {
+        if (window.appready) {
+            console.log('App already ready, initializing');
+            initialize();
+        } else {
+            Lampa.Listener.follow('app', function(e) {
+                if (e.type === 'ready') {
+                    console.log('App ready event received');
+                    initialize();
+                }
+            });
+            console.log('App listener attached');
+        }
+    } catch (err) {
+        console.error('Error in app ready setup:', err);
+    }
+})();
