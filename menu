@@ -74,6 +74,11 @@
                 .head__logo-icon {
                     width: 2.7em !important;
                 }
+
+                @media screen and (max-width: 991px) {
+               .full-descr__text {
+                    width: 80% !important;
+                }
                 .explorer__left {
                     width: 16% !important;
                     flex-shrink: 0 !important;
