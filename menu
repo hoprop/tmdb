@@ -75,14 +75,14 @@
                     width: 2.7em !important;
                 }
                 .explorer__left {
-                    width: 17% !important;
+                    width: 15% !important;
                     flex-shrink: 0 !important;
                 }
                 .explorer__files {
                     flex-grow: 1 !important;
                     flex-shrink: 0 !important;
                     width: auto !important;
-                    max-width: 70% !important;
+                    max-width: 65% !important;
                 }
                 .explorer-card__head {
                     align-items: flex-start;
