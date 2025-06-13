@@ -80,9 +80,8 @@
                     width: 80% !important;
                 }
 
-                .full-start__background {
-                    object-fit: scale-down !important;
-
+                img {
+                     object-fit: scale-down !important;
                 }
                 .explorer__left {
                     width: 20% !important;
