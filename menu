@@ -20,7 +20,7 @@
             style.innerHTML = `
                 .wrap__left {
                     width: 15em !important;
-                    padding-top: 4em !important;
+                    padding-top: 3em !important;
                     flex-shrink: 0 !important;
                     z-index: 2 !important;
                     position: relative !important;
@@ -35,7 +35,7 @@
                 }
                 .wrap__content {
                     flex-grow: 1 !important;
-                    padding-top: 4em !important;
+                    padding-top: 3em !important;
                     transform: none !important;
                 }
                 .wrap__content > * {
