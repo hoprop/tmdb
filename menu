@@ -79,6 +79,11 @@
                .full-descr__text {
                     width: 80% !important;
                 }
+
+                .full-start__background {
+                    object-fit: scale-down !important;
+
+                }
                 .explorer__left {
                     width: 20% !important;
                     flex-shrink: 0 !important;
