@@ -61,8 +61,8 @@
         const style = document.createElement("style");
         style.textContent = `
             .domain-icon {
-                width: 25px;
-                height: 25px;
+                width: 23px;
+                height: 23px;
 
             }
 
