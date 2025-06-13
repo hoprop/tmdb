@@ -55,7 +55,7 @@
                     visibility: visible !important;
                 }
                 .activity--active {
-                    width: 900px !important;
+                    width: 800px !important;
                 }
                 .full-start__status,
                 .full-start-new__rate-line,
@@ -80,14 +80,14 @@
                     width: 80% !important;
                 }
                 .explorer__left {
-                    width: 16% !important;
+                    width: 20% !important;
                     flex-shrink: 0 !important;
                 }
                 .explorer__files {
                     flex-grow: 1 !important;
                     flex-shrink: 0 !important;
                     width: auto !important;
-                    max-width: 69% !important;
+                    max-width: 78% !important;
                 }
                 .explorer-card__head {
                     align-items: flex-start;
