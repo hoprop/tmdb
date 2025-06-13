@@ -1,0 +1,142 @@
+(function () {
+    'use strict';
+
+    if (window.StaticMenuMod && window.StaticMenuMod.inited) return;
+
+    function initWhenReady() {
+        if (typeof Lampa === 'undefined') {
+            setTimeout(initWhenReady, 100);
+            return;
+        }
+
+        window.StaticMenuMod = window.StaticMenuMod || {};
+        StaticMenuMod.inited = true;
+
+        const styleId = 'static_menu_style';
+
+        if (!document.getElementById(styleId)) {
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.innerHTML = `
+                .wrap__left {
+                    width: 15em !important;
+                    padding-top: 4em !important;
+                    flex-shrink: 0 !important;
+                    z-index: 2 !important;
+                    position: relative !important;
+                    margin-left: 0 !important;
+                    transform: none !important;
+                }
+                .wrap__left .scroll--mask .scroll__content {
+                    padding: 1.9em 0 !important;
+                }
+                .wrap__left--hidden {
+                    visibility: visible !important;
+                }
+                .wrap__content {
+                    flex-grow: 1 !important;
+                    padding-top: 4em !important;
+                    transform: none !important;
+                }
+                .wrap__content > * {
+                    flex-grow: 1 !important;
+                }
+                body.menu--open:not(.light--version) .wrap__left {
+                    transform: none !important;
+                    background: transparent !important;
+                }
+                body.menu--open:not(.light--version) .wrap__content {
+                    transform: none !important;
+                }
+                body.menu--open:not(.light--version) .background {
+                    opacity: 1 !important;
+                }
+                body.light--version .wrap__left {
+                    visibility: visible !important;
+                }
+                .activity--active {
+                    width: 1600px !important;
+                }
+                .full-start__status,
+                .full-start-new__rate-line,
+                .full-start-new__details {
+                    font-weight: 600;
+                }
+                .full-start__background.loaded {
+                    opacity: 1;
+                }
+                body {
+                    background: #242d32 !important;
+                }
+                .explorer-card__title {
+                    font-size: 2em !important;
+                }
+                .head__logo-icon {
+                    width: 4.7em !important;
+                }
+                .explorer__left {
+                    width: 20% !important;
+                    flex-shrink: 0 !important;
+                }
+                .explorer__files {
+                    flex-grow: 1 !important;
+                    flex-shrink: 0 !important;
+                    width: auto !important;
+                    max-width: 78% !important;
+                }
+                .explorer-card__head {
+                    align-items: flex-start;
+                    flex-direction: column;
+                }
+                .explorer.layer--width {
+                    width: auto !important;
+                    max-width: 100% !important;
+                }
+            `;
+            document.head.appendChild(style);
+            console.log('[StaticMenuMod] Loaded on all platforms (no check).');
+        }
+
+        function translateStatus() {
+            const statusEl = document.querySelector('.full-start__status');
+            if (!statusEl) return;
+
+            const original = statusEl.textContent.trim();
+            const map = {
+                'Онгоинг': 'Незавершённый',
+                'Завершен': 'Финито',
+                'Анонс': 'Анонсирован',
+                'Выходит': 'Скоро',
+                'Отменено': "Отменён",
+                'Выпущенный': "В прокате"
+            };
+
+            for (let key in map) {
+                if (original.includes(key)) {
+                    statusEl.textContent = map[key];
+                    console.log(`[StaticMenuMod] Status updated: ${original} → ${map[key]}`);
+                    break;
+                }
+            }
+        }
+
+        if (typeof Lampa !== 'undefined') {
+            Lampa.Listener.follow('full', function (e) {
+                if (e.type === 'render' || e.type === 'complite') {
+                    setTimeout(translateStatus, 100);
+                }
+            });
+        }
+
+        const observer = new MutationObserver(() => {
+            translateStatus();
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    initWhenReady();
+})();
