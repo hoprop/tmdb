@@ -1,16 +1,21 @@
 (function () {
-    var toggleKey = 'showbuttonwn';
-    var settingsGroup = 'buttonfix';
+    var toggleKey = 'lme_showbuttonwn';
+    var settingsGroup = 'lme_buttonfix';
 
     function renderButtons() {
         Lampa.Listener.follow('full', function (e) {
             if (e.type !== 'complite') return;
 
             setTimeout(function () {
-                var fullContainer = e.object && e.object.activity && e.object.activity.render && e.object.activity.render();
+                var activity = e.object && e.object.activity;
+                if (!activity || typeof activity.render !== 'function') return;
+
+                var fullContainer = activity.render();
                 if (!fullContainer || !fullContainer.length) return;
 
                 var targetContainer = fullContainer.find('.full-start-new__buttons');
+                if (!targetContainer.length) return;
+
                 fullContainer.find('.button--play').remove();
 
                 var allButtons = fullContainer.find('.buttons--container .full-start__button')
@@ -23,8 +28,8 @@
                     other: []
                 };
 
-                allButtons.each(function () {
-                    var $btn = $(this);
+                allButtons.each(function (i, el) {
+                    var $btn = $(el);
                     var className = $btn.attr('class') || '';
 
                     if (className.indexOf('online') !== -1) {
@@ -38,18 +43,20 @@
                     }
                 });
 
-                var buttonSortOrder = Lampa.Storage.get('lme_buttonsort') || ['torrent', 'online', 'trailer', 'other'];
+                var buttonSortOrder = Lampa.Storage.get('lme_buttonsort');
+                if (!buttonSortOrder || !Array.isArray(buttonSortOrder)) {
+                    buttonSortOrder = ['torrent', 'online', 'trailer', 'other'];
+                }
 
                 targetContainer.empty();
                 for (var i = 0; i < buttonSortOrder.length; i++) {
-                    var category = buttonSortOrder[i];
-                    var buttons = categories[category] || [];
+                    var cat = buttonSortOrder[i];
+                    var buttons = categories[cat] || [];
                     for (var j = 0; j < buttons.length; j++) {
                         targetContainer.append(buttons[j]);
                     }
                 }
 
-                // Apply toggle
                 if (Lampa.Storage.get(toggleKey) === true) {
                     targetContainer.find('span').remove();
                 }
@@ -69,15 +76,15 @@
         Lampa.Settings.listener.follow('open', function (e) {
             if (e.name !== 'more') return;
 
-            var toggleValue = Lampa.Storage.get(toggleKey) === true;
+            var currentValue = Lampa.Storage.get(toggleKey) === true;
 
             Lampa.Settings.add({
                 component: settingsGroup,
                 name: 'Кнопки: скрыть текст',
                 type: 'toggle',
-                value: toggleValue,
-                onchange: function (value) {
-                    Lampa.Storage.set(toggleKey, value);
+                value: currentValue,
+                onchange: function (val) {
+                    Lampa.Storage.set(toggleKey, val);
                 }
             });
         });
