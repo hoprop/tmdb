@@ -42,7 +42,7 @@
         document.head.appendChild(el);
     })();
 
-    // Установка бейджа качества в карточку (аналог setBadge)
+    // Установка бейджа качества в карточку
     function setJacredBadge($el, value){
         var $holder = $el.find('.card__quality');
         var text = (typeof value === 'undefined') ? '…' : (value === null ? '' : String(value));
@@ -158,7 +158,7 @@
         function makeTmdbCacheKey(tmdbId, type, imdbId) {
             var base = tmdbId || '';
 
-            // fallback на imdb, если прям вообще нет tmdb
+            // fallback на imdb, если совсем нет tmdb
             if (!base && imdbId) {
                 base = String(imdbId).replace(/^tt/, '');
             }
@@ -171,7 +171,7 @@
             return 'tmdb_' + base;
         }
 
-        // ранжирование качеств — чтобы не понижать 4K -> SD и т.п.
+        // Ранг качества — чтобы не понижать 4K → SD
         function rankQuality(q) {
             if (!q) return -1;
             q = String(q).toUpperCase();
@@ -209,23 +209,6 @@
             return age < ttl ? item : null;
         }
 
-        function refreshCardsForKey(key) {
-            if (!key) return;
-
-            var cards = document.querySelectorAll('.card[data-jacred-q-key="' + key + '"]');
-            if (!cards.length) return;
-
-            cards.forEach(function (card) {
-                try {
-                    if (!cardDataStorage.has(card)) return;
-                    var data = cardDataStorage.get(card);
-                    if (data) {
-                        addQualityToMiniCard(card, data);
-                    }
-                } catch (e) {}
-            });
-        }
-
         function saveQualityCache(key, data) {
             if (!key) return;
 
@@ -247,10 +230,9 @@
                 var oldRank = rankQuality(oldQ);
                 var newRank = rankQuality(newQ);
 
-                // если новое качество хуже старого — не понижаем
+                // если новое качество хуже старого — не понижаем, только таймстамп
                 if (newRank < oldRank) {
                     shouldWrite = false;
-                    // но можем обновить timestamp старой записи
                     existing.timestamp = Date.now();
                 }
             }
@@ -264,9 +246,6 @@
             }
 
             Lampa.Storage.set(CACHE_STORAGE_KEY, cache);
-
-            // обновляем все карточки, которые помечены этим ключом
-            refreshCardsForKey(key);
         }
 
         // ---------- HTTP: прямой запрос + прокси ----------
@@ -679,7 +658,7 @@
                     if (mHref) tmdbId = mHref[1];
                 }
 
-                // 4) Последний fallback — старый getCardIdFromLocal (по названию/хешу)
+                // 4) Последний fallback — старый getCardIdFromLocal
                 if (!tmdbId) {
                     tmdbId = getCardIdFromLocal(cardElement);
                 }
@@ -721,8 +700,8 @@
                 }
 
                 var cardData = {
-                    id: tmdbId,          // для совместимости, но по сути это TMDB id
-                    tmdb_id: tmdbId,     // явное поле TMDB
+                    id: tmdbId,          // по сути TMDB id
+                    tmdb_id: tmdbId,
                     title: title,
                     original_title: originalTitle,
                     type: isTv ? 'tv' : 'movie',
@@ -767,7 +746,7 @@
             }
         }
 
-        // >>> НОВАЯ addQualityToMiniCard С ИСПОЛЬЗОВАНИЕМ setJacredBadge <<<
+        // >>> addQualityToMiniCard с учётом кэша (не понижает качество) <<<
 
         function addQualityToMiniCard(cardElement, cardData) {
             if (!cardData || !cardData.title) return;
@@ -789,11 +768,9 @@
                 getBestReleaseFromJacred(cardData, cardData.id, function (res) {
                     if (!$slot || !$slot.length) return;
 
-                    if (res && res.quality && res.quality !== 'undefined' && res.quality !== '' && res.quality !== 'null') {
-                        var text = res.quality || '';
-                        if (!text) return;
-
-                        setJacredBadge($slot, text);
+                    var q = res && res.quality;
+                    if (q && q !== 'undefined' && q !== '' && q !== 'null') {
+                        setJacredBadge($slot, q);
 
                         var $holder = $slot.find('.card__quality').first();
                         if ($holder.length) {
@@ -805,7 +782,7 @@
                 return;
             }
 
-            // помечаем карточку ключом, чтобы можно было её обновить при улучшении качества
+            // помечаем карточку ключом
             cardElement.setAttribute('data-jacred-q-key', qCacheKey);
 
             var cache = getQualityCache(qCacheKey);
@@ -827,34 +804,61 @@
                 }
             }
 
+            // если в кэше уже что-то есть — сразу рисуем
             if (cache && cache.quality) {
                 applyQuality(cache.quality, cache.isCamrip);
             } else {
                 // плейсхолдер "…" пока ждём ответ
                 setJacredBadge($slot, undefined);
+            }
 
-                getBestReleaseFromJacred(cardData, cardData.id, function (res) {
-                    if (!$slot || !$slot.length) return;
+            // В любом случае запускаем запрос (чтобы можно было апгрейдить качество)
+            getBestReleaseFromJacred(cardData, cardData.id, function (res) {
+                if (!$slot || !$slot.length) return;
 
-                    if (res && res.quality && res.quality !== 'undefined' && res.quality !== '' && res.quality !== 'null') {
-                        applyQuality(res.quality, res.isCamrip);
+                var cacheNow   = getQualityCache(qCacheKey);
+                var cacheQ     = cacheNow && cacheNow.quality;
+                var cacheRank  = rankQuality(cacheQ);
 
+                var resQ = (res && res.quality && res.quality !== 'undefined' &&
+                           res.quality !== '' && res.quality !== 'null') ? res.quality : null;
+                var resRank = rankQuality(resQ);
+
+                var chosenQ = null;
+                var chosenIsCamrip = false;
+
+                // Берём лучший из: (текущий кэш, ответ JacRed)
+                if (resQ && resRank >= cacheRank) {
+                    // Ответ JacRed не хуже кэша — используем его
+                    chosenQ = resQ;
+                    chosenIsCamrip = !!res.isCamrip;
+                } else if (cacheQ) {
+                    // Ответ хуже кэша или пустой — остаёмся на том, что уже было
+                    chosenQ = cacheQ;
+                    chosenIsCamrip = cacheNow && cacheNow.isCamrip;
+                }
+
+                if (chosenQ) {
+                    applyQuality(chosenQ, chosenIsCamrip);
+
+                    // Если мы взяли новое (лучшее) качество — обновляем кэш
+                    if (resQ && resRank > cacheRank) {
                         saveQualityCache(qCacheKey, {
-                            quality: res.quality,
-                            isCamrip: res.isCamrip
-                        });
-                    } else {
-                        // если ничего нет — просто убираем наш «…»
-                        var $holder = $slot.find('.card__quality');
-                        $holder.each(function () {
-                            var $h = $(this);
-                            if ($h.find('.jacq-qtext').length) $h.remove();
+                            quality: chosenQ,
+                            isCamrip: chosenIsCamrip
                         });
                     }
-                });
-            }
+                } else {
+                    // Ничего не нашли — убираем наш «…»
+                    var $holder = $slot.find('.card__quality');
+                    $holder.each(function () {
+                        var $h = $(this);
+                        if ($h.find('.jacq-qtext').length) $h.remove();
+                    });
+                }
+            });
         }
-        // <<< КОНЕЦ НОВОЙ addQualityToMiniCard >>>
+        // <<< КОНЕЦ addQualityToMiniCard >>>
 
         function processAllCards() {
             var cards = document.querySelectorAll('.card:not([data-jacred-quality-processed])');
@@ -914,7 +918,7 @@
     // -----------------------------
     function addSettingsItem() {
         try {
-            // 1) Новый API SettingsApi (современные версии Lampa)
+            // 1) Новый API SettingsApi
             if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addComponent === 'function') {
 
                 Lampa.SettingsApi.addComponent({
@@ -923,7 +927,7 @@
                     icon: '<svg height="200" width="200" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>'
                 });
 
-                // Триггер включения/выключения плагина
+                // Триггер включения/выключения
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -959,14 +963,13 @@
                         if (url && Lampa.Noty) {
                             Lampa.Noty.show('JacRed URL: ' + url);
                         }
-                        // На всякий случай чистим кэш и переинициализируем
                         Lampa.Storage.set(CACHE_STORAGE_KEY, {});
                         window.jacredQualityInitialized = false;
                         applyJacredQuality();
                     }
                 });
 
-                // Кнопка сброса кэша качества
+                // Кнопка сброса кэша
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -990,7 +993,7 @@
                 return;
             }
 
-            // 2) Старый API настроек (на всякий случай)
+            // 2) Старый API настроек
             if (Lampa.Settings && typeof Lampa.Settings.add === 'function') {
                 Lampa.Settings.add({
                     group: 'jacred_quality',
@@ -1011,7 +1014,6 @@
                 return;
             }
 
-            // 3) Ни одного API нет — молча выходим
         } catch (e) {
             console.error('JacRedQuality: settings error:', e);
         }
