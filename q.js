@@ -1,4 +1,4 @@
-(function () { 
+(function () {  
     'use strict';
 
     // -----------------------------
@@ -340,7 +340,7 @@
         }
 
         // ---------- Фильтрация торрентов по году и типу ----------
-
+        // тут фиксим serial / anime / cartoon и т.п.
         function filterTorrentsForCard(torrents, normalizedCard) {
             if (!Array.isArray(torrents)) return [];
 
@@ -352,12 +352,24 @@
                 if (!isNaN(y)) cardYear = y;
             }
 
-            // 1) Фильтр по типу (movie vs tvshow)
+            function isTvLike(t) {
+                if (!Array.isArray(t.types)) return false;
+                // считаем всё это "сериалами"
+                var tvKinds = ['tvshow', 'serial', 'anime', 'cartoon', 'mult', 'tv'];
+                for (var i = 0; i < tvKinds.length; i++) {
+                    if (t.types.indexOf(tvKinds[i]) !== -1) return true;
+                }
+                return false;
+            }
+
+            // 1) Фильтр по типу (movie vs tv-like)
             var filtered = torrents.filter(function (t) {
-                if (cardType === 'movie' && Array.isArray(t.types) && t.types.indexOf('tvshow') !== -1) {
+                if (cardType === 'movie' && isTvLike(t)) {
+                    // для фильмов выкидываем всё, что выглядит как сериал/аниме-сериал/мульт-сериал
                     return false;
                 }
-                if (cardType === 'tv' && Array.isArray(t.types) && t.types.indexOf('tvshow') === -1) {
+                if (cardType === 'tv' && !isTvLike(t)) {
+                    // для сериалов берём только tv-like
                     return false;
                 }
                 return true;
