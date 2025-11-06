@@ -42,14 +42,8 @@
           + '.jacred-full-quality{'
           + '  border:1px solid #fff;'
           + '  border-radius:0.2em;'
-          + '  padding:0.3em;'
-          + '  display:inline-block;'
+          + '  padding:0.35em;'       
           + '  margin-left:0.5em;'
-          + '}'
-          // CAMRIP красный фон (внутри)
-          + '.jacred-full-quality_cam{'
-          + '  background:#c62828!important;'
-          + '  color:#fff!important;'
           + '}'
           + '@keyframes jacqPop{0%{opacity:0;transform:translateY(-4px) scale(.98);}100%{opacity:1;transform:translateY(0) scale(1);}}'
           + '@media (prefers-reduced-motion: reduce){.card__quality.jacq-anim{animation:none!important;}}';
