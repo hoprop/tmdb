@@ -148,7 +148,7 @@
                 this.abort = function () {
                     this.signal.aborted = true;
                     if (typeof this.signal._onabort === 'function') {
-                        this._onabort();
+                        this.signal._onabort();
                     }
                 };
             };
@@ -315,12 +315,12 @@
             return null;
         }
 
-        // ---------- 2) НОВЫЙ analyzeTorrentQuality, как в server.js ----------
+        // ---------- 2) НОВЫЙ analyzeTorrentQuality С ЧИСЛОВЫМ FALLBACK ----------
 
         function analyzeTorrentQuality(torrent) {
             if (!torrent) return null;
 
-            // Собираем всё, что может содержать инфу о качестве
+            // 2.1. Собираем всё, что может содержать инфу о качестве
             var parts = [];
 
             if (torrent.title)       parts.push(String(torrent.title));
@@ -330,21 +330,37 @@
             if (torrent.description) parts.push(String(torrent.description));
 
             var combined = parts.join(' ');
-            // Как на сервере — выкидываем HDRip при поиске CAM/TS
+            // как на сервере — выкидываем HDRip при поиске CAM/TS
             var camText  = combined.replace(/HDRIP/gi, '');
 
+            // 2.2. Основной путь: jacNormalizeQualityFromText
             var q = jacNormalizeQualityFromText(camText);
+            if (!q) q = jacNormalizeQualityFromText(combined);
+
+            // 2.3. Fallback: если jacNormalizeQualityFromText не сработал —
+            //      пробуем старую числовую логику (как было раньше в плагине)
             if (!q) {
-                // fallback — попробуем по "сырым" данным
-                q = jacNormalizeQualityFromText(combined);
+                var rawQuality = torrent.quality != null ? String(torrent.quality) : '';
+                var numericQuality = parseInt(rawQuality.replace(/[^0-9]/g, ''), 10);
+
+                if (!isNaN(numericQuality)) {
+                    if (numericQuality >= 2160)      q = '4K';
+                    else if (numericQuality >= 1440) q = '1080p'; // "2K" не выделяем отдельно
+                    else if (numericQuality >= 1080) q = '1080p';
+                    else if (numericQuality >= 720)  q = '720p';
+                    else if (numericQuality >= 480)  q = 'SD';
+                }
             }
+
+            // 2.4. Если всё равно ничего — сдаёмся
             if (!q) return null;
 
             var isCamrip = (q === 'CAMRip' || q === 'TS');
+            var score    = JAC_RANK[q] != null ? JAC_RANK[q] : 0;
 
             return {
                 label: q,
-                score: JAC_RANK[q] != null ? JAC_RANK[q] : 0,
+                score: score,
                 isCamrip: isCamrip
             };
         }
