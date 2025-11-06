@@ -176,8 +176,35 @@
             return age < ttl ? item : null;
         }
 
+        // *** тут добавили ранги и защиту от даунгрейда по качеству
         function saveQualityCache(key, data) {
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
+
+            // ранги качеств — чем больше, тем лучше
+            var ranks = {
+                'CAMRIP': 0,
+                'TS': 1,
+                'SD': 2,
+                'HD': 3,
+                '720P': 3,
+                '900P': 3,
+                '1080P': 4,
+                '2K': 4,
+                '4K': 5
+            };
+
+            var newQ = data && data.quality ? String(data.quality).toUpperCase() : '';
+
+            if (cache[key] && cache[key].quality) {
+                var oldQ = String(cache[key].quality).toUpperCase();
+                var oldR = (oldQ in ranks) ? ranks[oldQ] : -1;
+                var newR = (newQ in ranks) ? ranks[newQ] : -1;
+
+                // если новое качество не лучше старого — кэш не трогаем
+                if (newR <= oldR) {
+                    return;
+                }
+            }
 
             Object.keys(cache).forEach(function (cacheKey) {
                 if (Date.now() - cache[cacheKey].timestamp >= Q_CACHE_TIME) {
@@ -519,7 +546,11 @@
                 release_date: card.release_date || card.first_air_date || ''
             };
 
-            var qCacheKey = normalizedCard.type + '_' + (normalizedCard.id || normalizedCard.imdb_id);
+            // *** КЛЮЧ КЭША: TMDB ID, если есть
+            var tmdbKey = normalizedCard.id || normalizedCard.imdb_id;
+            var qCacheKey = tmdbKey ? ('tmdb_' + tmdbKey) 
+                                    : (normalizedCard.type + '_' + (normalizedCard.id || normalizedCard.imdb_id));
+
             var cache = getQualityCache(qCacheKey);
 
             if (cache) {
@@ -559,17 +590,29 @@
                     return cardDataStorage.get(cardElement);
                 }
 
-                var tmdbId = null;
-                var cardId = cardElement.getAttribute('data-id') ||
-                    cardElement.getAttribute('id');
+                var ds = cardElement.dataset || {};
+
+                // *** TMDB ID: тащим из всего, что может быть
+                var tmdbId =
+                    cardElement.getAttribute('data-tmdb-id') ||
+                    cardElement.getAttribute('data-card-id') ||
+                    cardElement.getAttribute('data-movie-id') ||
+                    cardElement.getAttribute('data-tv-id') ||
+                    cardElement.getAttribute('data-id') ||
+                    cardElement.getAttribute('id') ||
+                    ds.tmdbId || ds.movieId || ds.tvId || null;
+
+                var cardId = tmdbId;
 
                 if (!cardId) {
                     var parent = cardElement.parentElement;
                     while (parent && !cardId) {
-                        cardId = parent.getAttribute('data-id') ||
+                        cardId = parent.getAttribute('data-tmdb-id') ||
+                            parent.getAttribute('data-card-id') ||
                             parent.getAttribute('data-movie-id') ||
-                            parent.getAttribute('data-tmdb-id') ||
-                            parent.getAttribute('data-tv-id');
+                            parent.getAttribute('data-tv-id') ||
+                            parent.getAttribute('data-id') ||
+                            parent.getAttribute('id');
                         parent = parent.parentElement;
                     }
                 }
@@ -578,8 +621,6 @@
                     cardId = getCardIdFromLocal(cardElement);
                 }
                 if (!cardId) return null;
-
-                var ds = cardElement.dataset || {};
 
                 // ---------- ЛОКАЛЬНЫЙ TITLE ----------
                 var titleElement = cardElement.querySelector('.card__title, .card-title, .title, .card__name, .name');
@@ -590,23 +631,19 @@
                         ds.title || ds.name || '';
                 }
 
-                // ---------- ORIGINAL_TITLE: максимально агрессивно ----------
+                // ---------- ORIGINAL_TITLE ----------
                 var originalTitleElement = cardElement.querySelector('.card__original-title, .original-title, .card__original-name, .original-name');
                 var originalTitle = originalTitleElement ? originalTitleElement.textContent.trim() : '';
 
                 if (!originalTitle) {
                     originalTitle =
-                        // dataset-варианты
                         ds.originalTitle || ds.original_title || ds.originalname || ds.originalName ||
-                        ds.engTitle || ds.eng_title || ds.enTitle || ds.en_title ||
-                        // data-* атрибуты
                         cardElement.getAttribute('data-original-title') ||
                         cardElement.getAttribute('data-original_title') ||
                         cardElement.getAttribute('data-original-name') ||
                         cardElement.getAttribute('data-originalname') ||
                         cardElement.getAttribute('data-eng-title') ||
                         cardElement.getAttribute('data-en-title') ||
-                        // иногда могут писать вообще без data-
                         cardElement.getAttribute('original_title') ||
                         cardElement.getAttribute('original-name') ||
                         cardElement.getAttribute('originalname') ||
@@ -621,7 +658,7 @@
                     cardElement.getAttribute('data-type') === 'tv' ||
                     ds.type === 'tv';
 
-                // ---------- ГОД / ДАТА ВЫХОДА: максимально агрессивно ----------
+                // ---------- ГОД / ДАТА ----------
                 var year = cardElement.getAttribute('data-year') ||
                     cardElement.getAttribute('data-release-year') ||
                     cardElement.getAttribute('data-first-air-date') ||
@@ -631,7 +668,6 @@
                     cardElement.getAttribute('release_date') ||
                     ds.year || ds.releaseYear || ds.firstAirDate || ds.releaseDate || ds.release_date || '';
 
-                // если всё ещё пусто — пробуем выдрать из текста года
                 if (!year) {
                     var yearElement = cardElement.querySelector('.card__year, .year, .card__date, .date');
                     if (yearElement) {
@@ -641,10 +677,8 @@
                     }
                 }
 
-                // В normalizedCard.release_date мы кладём именно строку, откуда потом возьмём первые 4 символа (год)
                 var release_date = '';
                 if (year) {
-                    // если уже явно формат yyyy-mm-dd — оставляем как есть
                     if (/^\d{4}-\d{2}-\d{2}$/.test(year)) release_date = year;
                     else if (/^\d{4}$/.test(year)) release_date = String(year);
                     else {
@@ -655,7 +689,7 @@
 
                 var cardData = {
                     id: cardId,
-                    tmdb_id: tmdbId,
+                    tmdb_id: tmdbId || cardId, // *** важно: tmdb_id для кэша
                     title: title,
                     original_title: originalTitle,
                     type: isTv ? 'tv' : 'movie',
@@ -700,18 +734,19 @@
             }
         }
 
-        // >>> НОВАЯ addQualityToMiniCard С ИСПОЛЬЗОВАНИЕМ setJacredBadge <<<
+        // >>> addQualityToMiniCard С TMDB-кэшем <<<
         function addQualityToMiniCard(cardElement, cardData) {
-            // теперь достаточно, чтобы был либо title, либо original_title
             if (!cardData || (!cardData.title && !cardData.original_title)) return;
             if (!isJacredEnabled()) return;
 
-            // Находим "слот" карточки, как в примере
             var $root = $(cardElement instanceof HTMLElement ? cardElement : cardElement);
             var $slot = $root.find('.card__view, .card__image, .card__img, .card__poster, .card__content, .card').first();
             if (!$slot.length) $slot = $root;
 
-            var qCacheKey = cardData.type + '_' + cardData.id;
+            // *** КЛЮЧ КЭША ДЛЯ КАРТОЧКИ: TMDB ID
+            var tmdbKey = cardData.tmdb_id || cardData.id;
+            var qCacheKey = tmdbKey ? ('tmdb_' + tmdbKey) : (cardData.type + '_' + cardData.id);
+
             var cache = getQualityCache(qCacheKey);
 
             function applyQuality(quality, isCamrip) {
@@ -734,7 +769,6 @@
             if (cache && cache.quality) {
                 applyQuality(cache.quality, cache.isCamrip);
             } else {
-                // плейсхолдер "…" пока ждём ответ
                 setJacredBadge($slot, undefined);
 
                 getBestReleaseFromJacred(cardData, cardData.id, function (res) {
@@ -748,7 +782,6 @@
                             isCamrip: res.isCamrip
                         });
                     } else {
-                        // если ничего нет — просто убираем наш «…»
                         var $holder = $slot.find('.card__quality');
                         $holder.each(function () {
                             var $h = $(this);
@@ -758,7 +791,7 @@
                 });
             }
         }
-        // <<< КОНЕЦ НОВОЙ addQualityToMiniCard >>>
+        // <<< КОНЕЦ addQualityToMiniCard >>>
 
         function processAllCards() {
             var cards = document.querySelectorAll('.card:not([data-jacred-quality-processed])');
@@ -818,7 +851,6 @@
     // -----------------------------
     function addSettingsItem() {
         try {
-            // 1) Новый API SettingsApi (современные версии Lampa)
             if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addComponent === 'function') {
 
                 Lampa.SettingsApi.addComponent({
@@ -827,7 +859,6 @@
                     icon: '<svg height="200" width="200" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>'
                 });
 
-                // Триггер включения/выключения плагина
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -845,7 +876,6 @@
                     }
                 });
 
-                // Поле для изменения jacred_url
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -869,7 +899,6 @@
                     }
                 });
 
-                // Кнопка сброса кэша качества
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -893,7 +922,6 @@
                 return;
             }
 
-            // 2) Старый API настроек (на всякий случай)
             if (Lampa.Settings && typeof Lampa.Settings.add === 'function') {
                 Lampa.Settings.add({
                     group: 'jacred_quality',
