@@ -38,12 +38,17 @@
           + '  background:#c62828!important;'
           + '  color:#fff!important;'
           + '}'
-         // Бейдж качества внутри карточки
+          // Бейдж качества в фулл-описании
           + '.jacred-full-quality{'
           + '  border:1px solid #fff;'
           + '  border-radius:0.2em;'
-          + '  padding:0.44em;'       
+          + '  padding:0.44em;'
           + '  margin-left:0.5em;'
+          + '}'
+          // Красный фон для CAMRIP в фулле
+          + '.jacred-full-quality_cam{'
+          + '  background:#c62828!important;'
+          + '  color:#fff!important;'
           + '}'
           + '@keyframes jacqPop{0%{opacity:0;transform:translateY(-4px) scale(.98);}100%{opacity:1;transform:translateY(0) scale(1);}}'
           + '@media (prefers-reduced-motion: reduce){.card__quality.jacq-anim{animation:none!important;}}';
@@ -691,22 +696,6 @@
             });
         }
 
-        // Обновить все видимые (.card__view), если жмём кнопку в настройках
-        function refreshVisibleMiniQuality() {
-            $('.card__view').each(function () {
-                var $view = $(this);
-                var cardEl = $view.closest('.card')[0] || $view[0];
-                if (!cardEl) return;
-
-                var data = cardEl.card_data;
-                if (!data) return;
-
-                // сбрасываем флаг, чтобы перерасчитать
-                $view.removeData('jacred_mini_done');
-                fetchMiniQualityForCardData(data, $view);
-            });
-        }
-
         // MutationObserver: цепляемся ко всем новым card__view
         function startMiniCardsObserver() {
             scanExistingMiniCardViews();
@@ -737,8 +726,21 @@
 
                 mo.observe(root, { childList: true, subtree: true });
 
-                // положим функцию рефреша, чтобы дергать её из настроек (кнопка)
-                window.jacredMiniQualityRefresh = refreshVisibleMiniQuality;
+                // функцию refreshVisibleMiniQuality можно оставить глобально,
+                // если вдруг захочешь дергать её из консоли
+                window.jacredMiniQualityRefresh = function () {
+                    $('.card__view').each(function () {
+                        var $view = $(this);
+                        var cardEl = $view.closest('.card')[0] || $view[0];
+                        if (!cardEl) return;
+
+                        var data = cardEl.card_data;
+                        if (!data) return;
+
+                        $view.removeData('jacred_mini_done');
+                        fetchMiniQualityForCardData(data, $view);
+                    });
+                };
             } catch (e) {
                 console.error('JacRedQuality: MutationObserver mini-cards error', e);
             }
