@@ -33,6 +33,24 @@
 
         var css = ''
           + '.card__quality.jacq-anim{animation:jacqPop .18s ease-out both;}'
+          // CAMRIP красный фон (мини-карточки)
+          + '.card__quality.jacq-cam{'
+          + '  background:#c62828!important;'
+          + '  color:#fff!important;'
+          + '}'
+         // Бейдж качества внутри карточки
+          + '.jacred-full-quality{'
+          + '  border:1px solid #fff;'
+          + '  border-radius:0.2em;'
+          + '  padding:0.3em;'
+          + '  display:inline-block;'
+          + '  margin-left:0.5em;'
+          + '}'
+          // CAMRIP красный фон (внутри)
+          + '.jacred-full-quality_cam{'
+          + '  background:#c62828!important;'
+          + '  color:#fff!important;'
+          + '}'
           + '@keyframes jacqPop{0%{opacity:0;transform:translateY(-4px) scale(.98);}100%{opacity:1;transform:translateY(0) scale(1);}}'
           + '@media (prefers-reduced-motion: reduce){.card__quality.jacq-anim{animation:none!important;}}';
 
@@ -327,7 +345,7 @@
             return meta;
         }
 
-        // ---------- Фильтрация торрентов по году и типу (НОВЫЙ КОД) ----------
+        // ---------- Фильтрация торрентов по году и типу ----------
 
         function filterTorrentsForCard(torrents, normalizedCard) {
             if (!Array.isArray(torrents)) return [];
@@ -351,13 +369,11 @@
                 return true;
             });
 
-            // 2) Фильтр по году, чтобы не тянуть старые 4K к новому фильму
+            // 2) Фильтр по году
             if (cardYear) {
                 var byYear = filtered.filter(function (t) {
                     var ty = parseInt(t.relased || t.year, 10);
                     if (!ty || isNaN(ty)) return false;
-
-                    // допускаем +-1 год
                     return Math.abs(ty - cardYear) <= 1;
                 });
 
@@ -399,7 +415,7 @@
                             return;
                         }
 
-                        // НОВОЕ: фильтруем по году и типу под конкретную карточку
+                        // фильтруем по году и типу под конкретную карточку
                         torrents = filterTorrentsForCard(torrents, normalizedCard);
                         if (!torrents.length) {
                             apiCallback(null);
