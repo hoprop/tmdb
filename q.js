@@ -274,57 +274,98 @@
                 });
         }
 
-        // ---------- Анализ качества одного торрента ----------
+        // ---------- Анализ качества одного торрента (ОБНОВЛЁННАЯ ЛОГИКА) ----------
 
         function analyzeTorrentQuality(torrent) {
             if (!torrent) return null;
 
-            var rawQuality = torrent.quality != null ? torrent.quality : '';
+            var rawQuality = torrent.quality != null ? String(torrent.quality) : '';
             var title = torrent.title || '';
             var extra = torrent.release || torrent.source || '';
             var combined = (title + ' ' + rawQuality + ' ' + extra).toUpperCase();
+
+            // чтобы CAM не ловился из HDRip
             var camText = combined.replace(/HDRIP/gi, '');
 
-            var isCamrip = /\b(CAMRIP|CAM|TS|TELESYNC|TELECINE|TC|SCREENER|SCR|HDTS)\b/.test(camText);
+            // 1) CAM / TS / прочее кинотеатральное → всегда CAMRIP (как и было)
+            var isCamrip = /\b(CAMRIP|HDCAM|CAM|TS|HDTS|TELESYNC|TELECINE|TC|SCREENER|SCR|HD\s*TS)\b/.test(camText);
             if (isCamrip) {
                 return { label: 'CAMRIP', score: 50, isCamrip: true };
             }
 
-            var meta = { label: null, score: -1, isCamrip: false };
+            // 2) Обычное качество
+            var label = null;
+            var score = -1;
 
-            function assign(label, score) {
-                if (score > meta.score) {
-                    meta.label = label;
-                    meta.score = score;
+            function set(lab, sc) {
+                if (sc > score) {
+                    label = lab;
+                    score = sc;
                 }
             }
 
-            var numericQuality = parseInt(String(rawQuality).replace(/[^0-9]/g, ''), 10);
+            // Попытка вытащить из цифр (720, 1080 и т.п.)
+            var numericQuality = parseInt(rawQuality.replace(/[^0-9]/g, ''), 10);
             if (!isNaN(numericQuality)) {
-                if (numericQuality >= 2160) assign('4K', 800);
-                else if (numericQuality >= 1440) assign('2K', 360);
-                else if (numericQuality >= 1080) assign('1080P', 340);
-                else if (numericQuality >= 720) assign('HD', 220);
-                else if (numericQuality >= 480) assign('SD', 120);
+                if (numericQuality >= 2160) set('4K', 800);
+                else if (numericQuality >= 1440) set('2K', 360);
+                else if (numericQuality >= 1080) set('1080P', 340);
+                else if (numericQuality >= 720) set('HD', 230);
+                else if (numericQuality >= 480) set('SD', 130);
             }
 
-            if (/\b(2160P|4K|UHD|ULTRA\s*HD)\b/.test(combined)) assign('4K', 800);
-            if (/\b(1440P|2K)\b/.test(combined)) assign('2K', 360);
-            if (/\b(1080P|FHD|FULL\s*HD|BLU[-\s]?RAY|BDRIP|BDREMUX|REMUX|BRRIP)\b/.test(combined)) assign('1080P', 340);
-            if (/\b(900P)\b/.test(combined)) assign('HD', 230);
-            if (/\b(720P|HDTV|HDRIP|WEB[-\s]?DL|WEB[-\s]?RIP|WEBDL|WEBRIP)\b/.test(combined)) assign('HD', 220);
-            if (/\b(540P)\b/.test(combined)) assign('SD', 140);
-            if (/\b(480P|SD|DVDRIP|DVD|TVRIP|VHS)\b/.test(combined)) assign('SD', 120);
+            // 4K / UHD / 2160p
+            if (/\b(2160P|4K|UHD|ULTRA\s*HD)\b/.test(combined)) {
+                set('4K', 800);
+            }
 
-            if (typeof rawQuality === 'string') {
+            // 2K / 1440p
+            if (/\b(1440P|2K)\b/.test(combined)) {
+                set('2K', 360);
+            }
+
+            // 1080p + Blu-ray / Remux
+            if (/\b(1080P|FHD|FULL\s*HD)\b/.test(combined)) {
+                set('1080P', 340);
+            }
+            if (/\b(BDREMUX|REMUX)\b/.test(combined)) {
+                set('1080P', 360); // ремаксы чуть повыше
+            }
+            if (/\b(BDRIP|BRRIP|BLU[-\s]?RAY)\b/.test(combined)) {
+                set('1080P', 345);
+            }
+
+            // 720p / WEB-DL / HDTV / HDRip → HD
+            if (/\b(900P|720P|HDTV|HDRIP|WEB[-\s]?DL|WEB[-\s]?RIP|WEBDL|WEBRIP)\b/.test(combined)) {
+                set('HD', 230);
+            }
+
+            // 540p
+            if (/\b540P\b/.test(combined)) {
+                set('SD', 140);
+            }
+
+            // 480p / SD / DVDRip / DVD / TVRip
+            if (/\b(480P|SD|DVDRIP|DVD|TVRIP|VHS)\b/.test(combined)) {
+                set('SD', 130);
+            }
+
+            // Доп. попытка по самому полю quality, если ещё ничего
+            if (!label && typeof rawQuality === 'string') {
                 var qUpper = rawQuality.toUpperCase();
-                if (!meta.label && /\b(BDRIP|BLURAY|BDREMUX|REMUX)\b/.test(qUpper)) assign('1080P', 320);
-                if (!meta.label && /\b(WEBDL|WEB[-\s]?DL|WEB[-\s]?RIP|HDRIP|HDTV)\b/.test(qUpper)) assign('HD', 210);
-                if (!meta.label && /\b(DVDRIP|DVD|TVRIP)\b/.test(qUpper)) assign('SD', 110);
+                if (/\b(BDREMUX|REMUX)\b/.test(qUpper)) set('1080P', 360);
+                else if (/\b(BDRIP|BLURAY|BRRIP)\b/.test(qUpper)) set('1080P', 345);
+                else if (/\b(WEBDL|WEB[-\s]?DL|WEB[-\s]?RIP|HDRIP|HDTV)\b/.test(qUpper)) set('HD', 230);
+                else if (/\b(DVDRIP|DVD|TVRIP)\b/.test(qUpper)) set('SD', 130);
             }
 
-            if (!meta.label) return null;
-            return meta;
+            if (!label) return null;
+
+            return {
+                label: label,
+                score: score,
+                isCamrip: false
+            };
         }
 
         // ---------- Поиск лучшего релиза JacRed ----------
@@ -545,10 +586,10 @@
         });
 
         // ==================================================
-        // 2) КАЧЕСТВО НА МИНИ-КАРТОЧКАХ (НОВАЯ ЛОГИКА, КАК В ПЛАГИНЕ ВЫШЕ)
+        // 2) КАЧЕСТВО НА МИНИ-КАРТОЧКАХ (через card_data Lampa)
         // ==================================================
 
-        // Нормализация card_data Lampa → формат, понятный JacRed
+        // Нормализация card_data Lampa → формат, понятный JacRed части
         function normalizeFromCardData(data) {
             if (!data) return null;
             return {
