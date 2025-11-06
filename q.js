@@ -8,7 +8,6 @@
     var CACHE_STORAGE_KEY  = 'jacred_plugin_quality_cache';   // кэш качества
     var DEFAULT_ENABLE     = 'on';
 
-    // Универсальный чекер "включен ли плагин"
     function isJacredEnabled() {
         try {
             var v = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
@@ -26,13 +25,16 @@
     }
 
     // -----------------------------
-    // МИНИМАЛЬНЫЙ СТИЛЬ ДЛЯ БЕЙДЖЕЙ + setJacredBadge
+    // СТИЛИ ДЛЯ БЕЙДЖЕЙ + setJacredBadge
     // -----------------------------
     (function addJacredQualityStyle(){
         if (document.getElementById('jacred-quality-style')) return;
 
         var css = ''
           + '.card__quality.jacq-anim{animation:jacqPop .18s ease-out both;}'
+          + '.card__quality.jacq-cam{background-color:#c62828!important;color:#fff!important;}'
+          + '.jacred-full-quality{margin-left:.6em;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.06);font-size:.9em;}'
+          + '.jacred-full-quality_cam{background-color:#c62828!important;color:#fff!important;}'
           + '@keyframes jacqPop{0%{opacity:0;transform:translateY(-4px) scale(.98);}100%{opacity:1;transform:translateY(0) scale(1);}}'
           + '@media (prefers-reduced-motion: reduce){.card__quality.jacq-anim{animation:none!important;}}';
 
@@ -42,33 +44,27 @@
         document.head.appendChild(el);
     })();
 
-    // Установка бейджа качества в карточку (аналог setBadge из примера)
     function setJacredBadge($el, value){
         var $holder = $el.find('.card__quality');
         var text = (typeof value === 'undefined') ? '…' : (value === null ? '' : String(value));
 
-        // пустую строку не рисуем
         if (text === '') return;
 
         if ($holder.length){
-            // 1) Наш внутренний текстовый блок
             var $inner = $holder.find('.jacq-qtext');
             if ($inner.length){
                 if ($inner.text() !== text) $inner.text(text);
                 return;
             }
-            // 2) Если есть родной ребёнок — пишем туда
             var $child = $holder.children().first();
             if ($child.length){
                 if ($child.text() !== text) $child.text(text);
                 return;
             }
-            // 3) В крайнем случае — прямо в holder
             if ($holder.text() !== text) $holder.text(text);
             return;
         }
 
-        // Блока качества нет — создаём свой компактный
         $holder = $('<div>', {
             "class": "card__quality jacq-anim"
         }).append(
@@ -80,7 +76,6 @@
 
         $el.append($holder);
 
-        // один раз анимация появления
         $holder.one('animationend', function () {
             $(this).removeClass('jacq-anim');
         });
@@ -98,10 +93,8 @@
         }
     }
 
-    // Основная точка входа
     function applyJacredQuality() {
         if (!isJacredEnabled()) {
-            // если отключено – просто чистим кэш
             Lampa.Storage.set(CACHE_STORAGE_KEY, {});
             return;
         }
@@ -122,9 +115,7 @@
     // СИСТЕМА КАЧЕСТВА
     // -----------------------------
     function initJacredQualitySystem(jacredUrl) {
-        // общий TTL – 72 часа
         var Q_CACHE_TIME    = 72 * 60 * 60 * 1000;
-        // для TS / CAM / CAMRip – 24 часа (раз в сутки)
         var Q_TS_CACHE_TIME = 24 * 60 * 60 * 1000;
 
         var JACRED_PROTOCOL = 'https://';
@@ -134,7 +125,6 @@
         ];
         var PROXY_TIMEOUT = 5000;
 
-        // Полифилл AbortController (если нет)
         if (typeof AbortController === 'undefined') {
             window.AbortController = function () {
                 this.signal = {
@@ -154,21 +144,15 @@
             };
         }
 
-        // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ КЭША ----------
-
         function getQualityCache(key) {
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
             var item  = cache[key];
             if (!item) return null;
 
             var age = Date.now() - item.timestamp;
-
-            // по умолчанию TTL = 72 часа
             var ttl = Q_CACHE_TIME;
 
             var q = String(item.quality || '').toUpperCase();
-
-            // для TS / CAM / CAMRIP — обновление раз в сутки
             if (/\bTS\b/.test(q) || /\bCAM\b/.test(q) || /\bCAMRIP\b/.test(q)) {
                 ttl = Q_TS_CACHE_TIME;
             }
@@ -193,8 +177,6 @@
 
             Lampa.Storage.set(CACHE_STORAGE_KEY, cache);
         }
-
-        // ---------- HTTP: прямой запрос + прокси ----------
 
         function fetchWithProxy(url, cardId, callback) {
             var currentProxyIndex = 0;
@@ -327,6 +309,33 @@
             return meta;
         }
 
+        // ---------- Тип карточки ----------
+
+        function getCardType(card) {
+            var type = card.media_type || card.type;
+            if (type === 'movie' || type === 'tv') return type;
+            return card.name || card.original_name ? 'tv' : 'movie';
+        }
+
+        // ---------- Нормализация карточки (общая для full + mini) ----------
+
+        function normalizeCard(card) {
+            if (!card) return null;
+
+            var id = card.id || card.tmdb_id || card.card_id;
+            var type = card.type || getCardType(card);
+            var release_date = card.release_date || card.first_air_date || card.year || card.releaseYear || '';
+
+            return {
+                id: id,
+                imdb_id: card.imdb_id || card.imdbid,
+                title: card.title || card.name || '',
+                original_title: card.original_title || card.original_name || '',
+                type: type || 'movie',
+                release_date: release_date
+            };
+        }
+
         // ---------- Поиск лучшего релиза JacRed ----------
 
         function getBestReleaseFromJacred(normalizedCard, cardId, callback) {
@@ -456,7 +465,7 @@
             }
         }
 
-        // ---------- Универсальный запрос качества (единая логика) ----------
+        // ---------- Универсальный запрос качества ----------
 
         function requestJacredQuality(normalizedCard, cardId, callback) {
             if (!normalizedCard) {
@@ -497,14 +506,6 @@
                     callback(null);
                 }
             });
-        }
-
-        // ---------- Тип карточки ----------
-
-        function getCardType(card) {
-            var type = card.media_type || card.type;
-            if (type === 'movie' || type === 'tv') return type;
-            return card.name || card.original_name ? 'tv' : 'movie';
         }
 
         // ==================================================
@@ -551,14 +552,11 @@
         function fetchFullQuality(card, render) {
             if (!render || !card) return;
 
-            var normalizedCard = {
-                id: card.id,
-                imdb_id: card.imdb_id || card.imdbid,
-                title: card.title || card.name || '',
-                original_title: card.original_title || card.original_name || '',
-                type: getCardType(card),
-                release_date: card.release_date || card.first_air_date || ''
-            };
+            var normalizedCard = normalizeCard(card);
+            if (!normalizedCard || !normalizedCard.id) {
+                clearFullQuality(render);
+                return;
+            }
 
             showFullPlaceholder(render);
 
@@ -580,7 +578,7 @@
         });
 
         // ==================================================
-        // 2) КАЧЕСТВО НА МИНИ-КАРТОЧКАХ (та же логика поиска)
+        // 2) КАЧЕСТВО НА МИНИ-КАРТОЧКАХ
         // ==================================================
 
         var cardDataStorage = new WeakMap();
@@ -692,10 +690,12 @@
             }
         }
 
-        // Теперь мини-карточки полностью используют ту же логику requestJacredQuality
         function addQualityToMiniCard(cardElement, cardData) {
             if (!cardData || !cardData.title) return;
             if (!isJacredEnabled()) return;
+
+            var normalizedCard = normalizeCard(cardData);
+            if (!normalizedCard || !normalizedCard.id) return;
 
             var $root = $(cardElement instanceof HTMLElement ? cardElement : cardElement);
             var $slot = $root.find('.card__view, .card__image, .card__img, .card__poster, .card__content, .card').first();
@@ -718,16 +718,14 @@
                 }
             }
 
-            // плейсхолдер "…" пока ждём ответ
             setJacredBadge($slot, undefined);
 
-            requestJacredQuality(cardData, cardData.id, function (res) {
+            requestJacredQuality(normalizedCard, normalizedCard.id, function (res) {
                 if (!$slot || !$slot.length) return;
 
                 if (res && res.quality && res.quality !== 'undefined' && res.quality !== '' && res.quality !== 'null') {
                     applyQuality(res.quality, res.isCamrip);
                 } else {
-                    // если ничего нет — убираем наш «…»
                     var $holder = $slot.find('.card__quality');
                     $holder.each(function () {
                         var $h = $(this);
@@ -795,7 +793,6 @@
     // -----------------------------
     function addSettingsItem() {
         try {
-            // 1) Новый API SettingsApi (современные версии Lampa)
             if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addComponent === 'function') {
 
                 Lampa.SettingsApi.addComponent({
@@ -804,7 +801,6 @@
                     icon: '<svg height="200" width="200" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>'
                 });
 
-                // Триггер включения/выключения плагина
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -822,7 +818,6 @@
                     }
                 });
 
-                // Поле для изменения jacred_url
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -846,7 +841,6 @@
                     }
                 });
 
-                // Кнопка сброса кэша качества
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -870,7 +864,6 @@
                 return;
             }
 
-            // 2) Старый API настроек (на всякий случай)
             if (Lampa.Settings && typeof Lampa.Settings.add === 'function') {
                 Lampa.Settings.add({
                     group: 'jacred_quality',
