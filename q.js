@@ -272,7 +272,7 @@
 
             var isCamrip = /\b(CAMRIP|CAM|TS|TELESYNC|TELECINE|TC|SCREENER|SCR|HDTS)\b/.test(camText);
             if (isCamrip) {
-                return { label: 'CAM', score: 50, isCamrip: true };
+                return { label: 'CAMRIP', score: 50, isCamrip: true };
             }
 
             var meta = { label: null, score: -1, isCamrip: false };
