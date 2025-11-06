@@ -42,7 +42,6 @@
         document.head.appendChild(el);
     })();
 
-    // Установка бейджа качества в карточку (аналог setBadge из примера)
     function setJacredBadge($el, value){
         var $holder = $el.find('.card__quality');
         var text = (typeof value === 'undefined') ? '…' : (value === null ? '' : String(value));
@@ -145,9 +144,34 @@
             };
         }
 
-        // ---------- КЭШ ----------
+        // ---------- ХЕЛПЕРЫ ДЛЯ ГОДА И КЛЮЧА КЭША ----------
+
+        function extractYear(str) {
+            if (!str) return '';
+            var m = String(str).match(/(\d{4})/);
+            return m ? m[1] : '';
+        }
+
+        // ЕДИНЫЙ ключ кэша: type + '_' + (original_title|title) + '_' + year
+        function makeCacheKey(info) {
+            if (!info) return null;
+
+            var type = info.type || info.media_type || 'movie';
+            var title = (info.original_title || info.original_name || info.title || info.name || '').toLowerCase().trim();
+            var year  = extractYear(info.release_date || info.first_air_date || info.year);
+
+            if (!title && info.id) {
+                return type + '_' + String(info.id);
+            }
+
+            return type + '_' + title + '_' + year;
+        }
+
+        // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ КЭША ----------
 
         function getQualityCache(key) {
+            if (!key) return null;
+
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
             var item  = cache[key];
             if (!item) return null;
@@ -165,6 +189,8 @@
         }
 
         function saveQualityCache(key, data) {
+            if (!key) return;
+
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
 
             Object.keys(cache).forEach(function (cacheKey) {
@@ -315,7 +341,7 @@
             return meta;
         }
 
-        // ---------- Поиск лучшего релиза JacRed (УЛУЧШЕННЫЙ) ----------
+        // ---------- Поиск лучшего релиза JacRed (с обходом всех стратегий) ----------
 
         function getBestReleaseFromJacred(normalizedCard, cardId, callback) {
             if (!jacredUrl) {
@@ -516,7 +542,7 @@
                 release_date: card.release_date || card.first_air_date || ''
             };
 
-            var qCacheKey = normalizedCard.type + '_' + (normalizedCard.id || normalizedCard.imdb_id);
+            var qCacheKey = makeCacheKey(normalizedCard);
             var cache = getQualityCache(qCacheKey);
 
             if (cache) {
@@ -657,7 +683,7 @@
             }
         }
 
-        // >>> addQualityToMiniCard с setJacredBadge <<<
+        // >>> addQualityToMiniCard с setJacredBadge и новым ключом кэша <<<
         function addQualityToMiniCard(cardElement, cardData) {
             if (!cardData || !cardData.title) return;
             if (!isJacredEnabled()) return;
@@ -666,7 +692,7 @@
             var $slot = $root.find('.card__view, .card__image, .card__img, .card__poster, .card__content, .card').first();
             if (!$slot.length) $slot = $root;
 
-            var qCacheKey = cardData.type + '_' + cardData.id;
+            var qCacheKey = makeCacheKey(cardData);
             var cache = getQualityCache(qCacheKey);
 
             function applyQuality(quality, isCamrip) {
@@ -771,7 +797,6 @@
     // -----------------------------
     function addSettingsItem() {
         try {
-            // Новый API SettingsApi
             if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addComponent === 'function') {
 
                 Lampa.SettingsApi.addComponent({
@@ -780,7 +805,6 @@
                     icon: '<svg height="200" width="200" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>'
                 });
 
-                // Вкл/выкл плагин
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -798,7 +822,6 @@
                     }
                 });
 
-                // jacred_url
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -822,7 +845,6 @@
                     }
                 });
 
-                // Сброс кэша
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -846,12 +868,11 @@
                 return;
             }
 
-            // Старый API
             if (Lampa.Settings && typeof Lampa.Settings.add === 'function') {
                 Lampa.Settings.add({
                     group: 'jacred_quality',
-                    title: 'Отметкм качества',
-                    subtitle: 'Плагин показа качества по JacRed',
+                    title: 'JacRed качество',
+                    subtitle: 'Плагин показа качества по JacRed (отдельно от Lampa)',
                     icon: 'magic',
                     onRender: function (item) {
                         item.toggleClass('on', isJacredEnabled());
