@@ -279,9 +279,27 @@
         function analyzeTorrentQuality(torrent) {
             if (!torrent) return null;
 
-            var rawQuality = torrent.quality != null ? torrent.quality : '';
-            var title = torrent.title || '';
-            var extra = torrent.release || torrent.source || '';
+            // пытаемся вытащить качество из разных мест:
+            // torrent.quality или torrent.info.quality
+            var rawQuality = torrent.quality != null
+                ? torrent.quality
+                : (torrent.info && torrent.info.quality != null
+                    ? torrent.info.quality
+                    : '');
+
+            // заголовок – Title / title / info.name / info.originalname
+            var title = torrent.title ||
+                        torrent.Title ||
+                        (torrent.info && (torrent.info.name || torrent.info.originalname)) ||
+                        '';
+
+            // доп. инфа – release/source/CategoryDesc/videotype/sizeName
+            var extra = torrent.release ||
+                        torrent.source ||
+                        torrent.CategoryDesc ||
+                        (torrent.info && (torrent.info.videotype || torrent.info.sizeName)) ||
+                        '';
+
             var combined = (title + ' ' + rawQuality + ' ' + extra).toUpperCase();
             var camText = combined.replace(/HDRIP/gi, '');
 
@@ -299,6 +317,7 @@
                 }
             }
 
+            // числовое качество (2160/1080/720/480 и т.п.)
             var numericQuality = parseInt(String(rawQuality).replace(/[^0-9]/g, ''), 10);
             if (!isNaN(numericQuality)) {
                 if (numericQuality >= 2160) assign('4K', 800);
@@ -308,6 +327,7 @@
                 else if (numericQuality >= 480) assign('SD', 120);
             }
 
+            // текстовые маркеры в Title/CategoryDesc/sizeName
             if (/\b(2160P|4K|UHD|ULTRA\s*HD)\b/.test(combined)) assign('4K', 800);
             if (/\b(1440P|2K)\b/.test(combined)) assign('2K', 360);
             if (/\b(1080P|FHD|FULL\s*HD|BLU[-\s]?RAY|BDRIP|BDREMUX|REMUX|BRRIP)\b/.test(combined)) assign('1080P', 340);
@@ -316,6 +336,7 @@
             if (/\b(540P)\b/.test(combined)) assign('SD', 140);
             if (/\b(480P|SD|DVDRIP|DVD|TVRIP|VHS)\b/.test(combined)) assign('SD', 120);
 
+            // fallback по строковому rawQuality
             if (typeof rawQuality === 'string') {
                 var qUpper = rawQuality.toUpperCase();
                 if (!meta.label && /\b(BDRIP|BLURAY|BDREMUX|REMUX)\b/.test(qUpper)) assign('1080P', 320);
@@ -342,10 +363,20 @@
             }
 
             function searchJacredApi(searchTitle, searchYear, exactMatch, strategyName, apiCallback) {
-                var apiUrl = JACRED_PROTOCOL + jacredUrl + '/api/v1.0/torrents?search=' +
-                    encodeURIComponent(searchTitle) +
-                    (searchYear ? '&year=' + searchYear : '') +
-                    (exactMatch ? '&exact=true' : '');
+                // apikey можно хранить в Storage, но можно и пустой
+                var apiKey = (Lampa.Storage.get('jacred_apikey', '') || '').trim();
+
+                // is_serial: 1 для сериалов, 0 для фильмов
+                var isSerial = normalizedCard.type === 'tv' ? '1' : '0';
+
+                var apiUrl = JACRED_PROTOCOL + jacredUrl +
+                    '/api/v2.0/indexers/status:healthy/results?' +
+                    'apikey=' + encodeURIComponent(apiKey) +
+                    '&Query=' + encodeURIComponent(searchTitle) +
+                    '&title=' + encodeURIComponent(normalizedCard.title || '') +
+                    '&title_original=' + encodeURIComponent(normalizedCard.original_title || '') +
+                    '&year=' + encodeURIComponent(searchYear || '') +
+                    '&is_serial=' + isSerial;
 
                 fetchWithProxy(apiUrl, cardId, function (error, responseText) {
                     if (error || !responseText) {
@@ -353,7 +384,13 @@
                         return;
                     }
                     try {
-                        var torrents = JSON.parse(responseText);
+                        var json = JSON.parse(responseText);
+
+                        // { Results: [ ... ], jacred: true }
+                        var torrents = Array.isArray(json)
+                            ? json
+                            : (json.Results || json.results || []);
+
                         if (!Array.isArray(torrents) || torrents.length === 0) {
                             apiCallback(null);
                             return;
@@ -364,6 +401,7 @@
 
                         for (var i = 0; i < torrents.length; i++) {
                             var torrent = torrents[i];
+
                             var qualityMeta = analyzeTorrentQuality(torrent);
                             if (!qualityMeta || !qualityMeta.label) continue;
 
@@ -382,14 +420,14 @@
                         if (chosen) {
                             apiCallback({
                                 quality: chosen.meta.label,
-                                title: chosen.torrent.title,
+                                title: chosen.torrent.Title || chosen.torrent.title || '',
                                 isCamrip: chosen.meta.isCamrip
                             });
                         } else {
                             apiCallback(null);
                         }
                     } catch (e) {
-                        console.error('Ошибка при получении качества из JacRed:', e);
+                        console.error('Ошибка при получении качества из JacRed v2:', e);
                         apiCallback(null);
                     }
                 });
