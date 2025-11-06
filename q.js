@@ -107,7 +107,11 @@
     // СИСТЕМА КАЧЕСТВА
     // -----------------------------
     function initJacredQualitySystem(jacredUrl) {
-        var Q_CACHE_TIME = 72 * 60 * 60 * 1000;
+        // общий TTL – 72 часа
+        var Q_CACHE_TIME    = 72 * 60 * 60 * 1000;
+        // для TS / CAM / CAMRip – 24 часа (раз в сутки)
+        var Q_TS_CACHE_TIME = 24 * 60 * 60 * 1000;
+
         var JACRED_PROTOCOL = 'https://';
         var PROXY_LIST = [
             'http://api.allorigins.win/raw?url=',
@@ -139,8 +143,22 @@
 
         function getQualityCache(key) {
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
-            var item = cache[key];
-            return item && (Date.now() - item.timestamp < Q_CACHE_TIME) ? item : null;
+            var item  = cache[key];
+            if (!item) return null;
+
+            var age = Date.now() - item.timestamp;
+
+            // по умолчанию TTL = 72 часа
+            var ttl = Q_CACHE_TIME;
+
+            var q = String(item.quality || '').toUpperCase();
+
+            // для TS / CAM / CAMRip — обновление раз в сутки
+            if (/\bTS\b/.test(q) || /\bCAM\b/.test(q) || /\bCAMRIP\b/.test(q)) {
+                ttl = Q_TS_CACHE_TIME;
+            }
+
+            return age < ttl ? item : null;
         }
 
         function saveQualityCache(key, data) {
