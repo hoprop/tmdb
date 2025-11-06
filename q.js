@@ -25,57 +25,64 @@
     }
 
     // -----------------------------
-    // СТИЛЬ + setBadge КАК В ANTQ
+    // СТИЛЬ ДЛЯ БЕЙДЖЕЙ + setJacredBadge
     // -----------------------------
-    (function addStyle(){
-        if (document.getElementById('antq-quality-style')) return;
+    (function addJacredQualityStyle(){
+        if (document.getElementById('jacred-quality-style')) return;
+
         var css = ''
-          + '.card__quality.lme-anim{animation:antqPop .18s ease-out both;}'
-          + '@keyframes antqPop{0%{opacity:0;transform:translateY(-4px) scale(.98);}100%{opacity:1;transform:translateY(0) scale(1);}}'
-          + '@media (prefers-reduced-motion: reduce){.card__quality.lme-anim{animation:none!important;}}'
-          + '.jacq-cam{color:#f55!important;}';
-        var el = document.createElement('style'); 
-        el.id='antq-quality-style'; 
-        el.textContent=css; 
+          + '.card__quality.jacq-anim{animation:jacqPop .18s ease-out both;}'
+          + '@keyframes jacqPop{0%{opacity:0;transform:translateY(-4px) scale(.98);}100%{opacity:1;transform:translateY(0) scale(1);}}'
+          + '@media (prefers-reduced-motion: reduce){.card__quality.jacq-anim{animation:none!important;}}'
+          + '.jacred-full-quality{margin-left:.5em;font-size:.9em;opacity:.9;}'
+          + '.jacred-full-quality_cam{color:#f55;}'
+          + '.jacq-cam{color:#f55;}';
+
+        var el = document.createElement('style');
+        el.id = 'jacred-quality-style';
+        el.textContent = css;
         document.head.appendChild(el);
     })();
 
-    // та же логика, что в ANTQ
-    function setBadge($el, value){
+    // установка бейджа качества (универсальная)
+    function setJacredBadge($el, value){
         var $holder = $el.find('.card__quality');
-        var text = (typeof value === 'undefined') ? '…' : (value===null ? '' : String(value));
+        var text = (typeof value === 'undefined') ? '…' : (value === null ? '' : String(value));
+
         if (text === '') return;
 
         if ($holder.length){
-            // 1) Наш внутренний текстовый блок
-            var $lme = $holder.find('.lme-qtext');
-            if ($lme.length){
-                if ($lme.text() !== text) $lme.text(text);
+            var $inner = $holder.find('.jacq-qtext');
+            if ($inner.length){
+                if ($inner.text() !== text) $inner.text(text);
                 return;
             }
-            // 2) Родной блок Lampa
             var $child = $holder.children().first();
             if ($child.length){
                 if ($child.text() !== text) $child.text(text);
                 return;
             }
-            // 3) На крайний случай
             if ($holder.text() !== text) $holder.text(text);
             return;
         }
 
-        // Блока нет — создаём наш компактный
-        $holder = $('<div>',{
-          "class":"card__quality lme-anim",
-          css:{ zIndex:999, fontSize:"75%" }
-        }).append($('<div>',{"class":"lme-qtext",text:text}));
+        $holder = $('<div>', {
+            "class": "card__quality jacq-anim"
+        }).append(
+            $('<div>', {
+                "class": "jacq-qtext",
+                text: text
+            })
+        );
 
         $el.append($holder);
-        $holder.one('animationend',function(){ $(this).removeClass('lme-anim'); });
+        $holder.one('animationend', function () {
+            $(this).removeClass('jacq-anim');
+        });
     }
 
     // -----------------------------
-    // НАЧАЛО ИНИЦИАЛИЗАЦИИ
+    // СТАРТ ПЛАГИНА
     // -----------------------------
     function startPlugin() {
         try {
@@ -251,7 +258,7 @@
                 });
         }
 
-        // ---------- Анализ качества торрента ----------
+        // ---------- Анализ качества одного торрента ----------
         function analyzeTorrentQuality(torrent) {
             if (!torrent) return null;
 
@@ -312,7 +319,9 @@
 
             var year = '';
             var dateStr = normalizedCard.release_date || '';
-            if (dateStr.length >= 4) year = dateStr.substring(0, 4);
+            if (dateStr.length >= 4) {
+                year = dateStr.substring(0, 4);
+            }
 
             function searchJacredApi(searchTitle, searchYear, exactMatch, strategyName, apiCallback) {
                 var apiUrl = JACRED_PROTOCOL + jacredUrl + '/api/v1.0/torrents?search=' +
@@ -422,8 +431,11 @@
                 });
             }
 
-            if (searchStrategies.length > 0) executeNextStrategy(0);
-            else callback(null);
+            if (searchStrategies.length > 0) {
+                executeNextStrategy(0);
+            } else {
+                callback(null);
+            }
         }
 
         function getCardType(card) {
@@ -432,15 +444,13 @@
             return card.name || card.original_name ? 'tv' : 'movie';
         }
 
-        // ==================================================
-        // FULL-ОПИСАНИЕ: БЕЙДЖ КАК В ANTQ
-        // ==================================================
-        function fetchFullQuality(card, render) {
-            if (!render || !card) return;
+        // ===== ОБЩАЯ НОРМАЛИЗАЦИЯ (full + lists) =====
+        function normalizeCard(card){
+            if (!card) return null;
 
             var tmdbId = card.tmdb_id || card.id;
 
-            var normalizedCard = {
+            return {
                 id: tmdbId,
                 tmdb_id: tmdbId,
                 title: card.title || card.name || '',
@@ -448,40 +458,70 @@
                 type: getCardType(card),
                 release_date: card.release_date || card.first_air_date || ''
             };
+        }
 
-            var keyId = normalizedCard.tmdb_id || normalizedCard.id;
-            if (!keyId) return;
+        // ==================================================
+        // 1) КАЧЕСТВО В ФУЛЛ-ОПИСАНИИ (ИСХОДНАЯ ЛОГИКА)
+        // ==================================================
+        function clearFullQuality(render) {
+            if (!render) return;
+            $('.jacred-full-quality', render).remove();
+        }
 
-            var qCacheKey = normalizedCard.type + '_tmdb_' + keyId;
+        function showFullPlaceholder(render) {
+            if (!render) return;
+            var rateLine = $('.full-start-new__rate-line', render);
+            if (!rateLine.length) return;
 
-            var $render = $(render);
-            var $rateLine = $render.find('.full-start-new__rate-line, .full-start__rate-line').first();
-            if (!$rateLine.length) return;
+            if (!$('.jacred-full-quality', render).length) {
+                var placeholder = document.createElement('div');
+                placeholder.className = 'jacred-full-quality';
+                placeholder.textContent = '...';
+                rateLine.append(placeholder);
+            }
+        }
 
+        function updateFullQuality(quality, isCamrip, render) {
+            if (!render) return;
+
+            var element = $('.jacred-full-quality', render);
+            var rateLine = $('.full-start-new__rate-line', render);
+            if (!rateLine.length) return;
+
+            if (element.length) {
+                element.text(quality);
+                if (isCamrip) element.addClass('jacred-full-quality_cam');
+                else element.removeClass('jacred-full-quality_cam');
+            } else {
+                var div = document.createElement('div');
+                div.className = 'jacred-full-quality' + (isCamrip ? ' jacred-full-quality_cam' : '');
+                div.textContent = quality;
+                rateLine.append(div);
+            }
+        }
+
+        function fetchFullQuality(card, render) {
+            if (!render || !card) return;
+
+            var normalizedCard = normalizeCard(card);
+            if (!normalizedCard || !normalizedCard.id) return;
+
+            var qCacheKey = normalizedCard.type + '_' + (normalizedCard.id || normalizedCard.imdb_id);
             var cache = getQualityCache(qCacheKey);
 
-            function applyQuality(quality, isCamrip) {
-                if (!quality) return;
-                setBadge($rateLine, quality);
-                var $holder = $rateLine.find('.card__quality').first();
-                if (isCamrip && $holder.length) $holder.addClass('jacq-cam');
-            }
-
             if (cache) {
-                applyQuality(cache.quality, cache.isCamrip);
+                updateFullQuality(cache.quality, cache.isCamrip, render);
             } else {
-                // можно показать плейсхолдер, если хочется:
-                // setBadge($rateLine, undefined);
-
-                getBestReleaseFromJacred(normalizedCard, keyId, function (res) {
+                showFullPlaceholder(render);
+                getBestReleaseFromJacred(normalizedCard, normalizedCard.id, function (res) {
                     var quality = res && res.quality;
                     var isCamrip = res && res.isCamrip;
 
                     if (quality && quality !== 'NO') {
                         saveQualityCache(qCacheKey, { quality: quality, isCamrip: isCamrip });
-                        applyQuality(quality, isCamrip);
+                        updateFullQuality(quality, isCamrip, render);
                     } else {
-                        // если не нашли — просто ничего не рисуем
+                        clearFullQuality(render);
                     }
                 });
             }
@@ -496,225 +536,122 @@
         });
 
         // ==================================================
-        // МИНИ-КАРТОЧКИ (ВСЕ .card В DOM) С TMDB + setBadge
+        // 2) КАЧЕСТВО В СПИСКАХ (ЛОГИКА КАК У FULL)
         // ==================================================
-        var cardDataStorage = new WeakMap();
 
-        function getCardDataFromElement(cardElement) {
-            try {
-                if (cardDataStorage.has(cardElement)) {
-                    return cardDataStorage.get(cardElement);
-                }
+        // слот карточки из корня (как в antq)
+        function pickCardSlot($cardRoot, onReady){
+            if(!$cardRoot || !$cardRoot.length) return;
 
-                var tmdbId = cardElement.getAttribute('data-tmdb-id');
-                if (!tmdbId) {
-                    tmdbId = cardElement.getAttribute('data-id') ||
-                             cardElement.getAttribute('data-movie-id') ||
-                             cardElement.getAttribute('data-tv-id');
-                }
-
-                if (!tmdbId) {
-                    var parent = cardElement.parentElement;
-                    while (parent && !tmdbId) {
-                        tmdbId = parent.getAttribute('data-tmdb-id') ||
-                                 parent.getAttribute('data-id') ||
-                                 parent.getAttribute('data-movie-id') ||
-                                 parent.getAttribute('data-tv-id');
-                        parent = parent.parentElement;
-                    }
-                }
-
-                if (!tmdbId) {
-                    tmdbId = getCardIdFromLocal(cardElement);
-                }
-                if (!tmdbId) return null;
-
-                var titleElement = cardElement.querySelector('.card__title, .card-title, .title, .card__name, .name');
-                var title = titleElement ? titleElement.textContent.trim() : '';
-                if (!title) {
-                    title = cardElement.getAttribute('data-title') ||
-                            cardElement.getAttribute('data-name') || '';
-                }
-
-                var originalTitleElement = cardElement.querySelector('.card__original-title, .original-title, .card__original-name, .original-name');
-                var originalTitle = originalTitleElement ? originalTitleElement.textContent.trim() : '';
-                if (!originalTitle) {
-                    originalTitle = cardElement.getAttribute('data-original-title') ||
-                                    cardElement.getAttribute('data-original-name') || '';
-                }
-
-                var isTv = cardElement.classList.contains('card--tv') ||
-                    cardElement.classList.contains('tv') ||
-                    cardElement.querySelector('[data-type="tv"]') ||
-                    cardElement.getAttribute('data-type') === 'tv';
-
-                var year = cardElement.getAttribute('data-year') ||
-                    cardElement.getAttribute('data-release-year') ||
-                    cardElement.getAttribute('data-first-air-date') ||
-                    cardElement.getAttribute('data-release-date') || '';
-
-                if (!year) {
-                    var yearElement = cardElement.querySelector('.card__year, .year, .card__date, .date');
-                    if (yearElement) {
-                        var yearText = yearElement.textContent.trim();
-                        var yearMatch = yearText.match(/(\d{4})/);
-                        if (yearMatch) year = yearMatch[1];
-                    }
-                }
-
-                var cardData = {
-                    id: tmdbId,
-                    tmdb_id: tmdbId,
-                    title: title,
-                    original_title: originalTitle,
-                    type: isTv ? 'tv' : 'movie',
-                    release_date: year
-                };
-
-                cardDataStorage.set(cardElement, cardData);
-                return cardData;
-            } catch (e) {
-                console.error('JacRedQuality: ошибка парсинга карточки:', e);
-                return null;
+            function pick(){ 
+                return $cardRoot.find('.card__view, .card__image, .card__img, .card__poster, .card, .card__content').first(); 
             }
+
+            var $slot = pick(); 
+            if($slot && $slot.length){ 
+                onReady($slot); 
+                return; 
+            }
+
+            var attempts=0, maxAttempts=20;
+            var timer=setInterval(function(){
+                attempts++; 
+                var $try = pick();
+                if($try && $try.length){ 
+                    clearInterval(timer); 
+                    onReady($try); 
+                }
+                else if(attempts>=maxAttempts){ 
+                    clearInterval(timer); 
+                }
+            },100);
+
+            try{
+                var mo = new MutationObserver(function(){ 
+                    var $t = pick(); 
+                    if($t && $t.length){ 
+                        mo.disconnect(); 
+                        clearInterval(timer); 
+                        onReady($t); 
+                    } 
+                });
+                mo.observe($cardRoot.get(0),{childList:true,subtree:true});
+            }catch(_){}
         }
 
-        function getCardIdFromLocal(cardElement) {
-            try {
-                var href = cardElement.getAttribute('href') || '';
-                var idMatch = href.match(/\/(\d+)/);
-                if (idMatch) return idMatch[1];
-
-                var onclick = cardElement.getAttribute('onclick') || '';
-                var onclickMatch = onclick.match(/id[:\s]*(\d+)/);
-                if (onclickMatch) return onclickMatch[1];
-
-                var titleElement = cardElement.querySelector('.card__title, .card-title, .title, .card__name, .name');
-                if (titleElement) {
-                    var title = titleElement.textContent.trim();
-                    if (title) {
-                        var hash = 0;
-                        for (var i = 0; i < title.length; i++) {
-                            var char = title.charCodeAt(i);
-                            hash = ((hash << 5) - hash) + char;
-                            hash = hash & hash;
-                        }
-                        return Math.abs(hash).toString().substr(0, 8);
-                    }
-                }
-
-                return null;
-            } catch (e) {
-                return null;
-            }
-        }
-
-        function addQualityToMiniCard(cardElement, cardData) {
-            if (!cardData || !cardData.tmdb_id || !cardData.title) return;
+        function applyListQuality(obj, $slot){
+            if (!obj || !$slot || !$slot.length) return;
             if (!isJacredEnabled()) return;
 
-            var $root = $(cardElement instanceof HTMLElement ? cardElement : cardElement);
-            var $slot = $root.find('.card__view, .card__image, .card__img, .card__poster, .card__content, .card').first();
-            if (!$slot.length) $slot = $root;
+            var normalizedCard = normalizeCard(obj);
+            if (!normalizedCard || !normalizedCard.id) return;
 
-            var qCacheKey = cardData.type + '_tmdb_' + cardData.tmdb_id;
+            var qCacheKey = normalizedCard.type + '_' + (normalizedCard.id || normalizedCard.imdb_id);
             var cache = getQualityCache(qCacheKey);
 
             function applyQuality(quality, isCamrip) {
                 if (!$slot || !$slot.length) return;
-                if (!quality) return;
+                var text = quality || '';
+                if (!text) return;
 
-                setBadge($slot, quality);
+                setJacredBadge($slot, text);
 
                 var $holder = $slot.find('.card__quality').first();
                 if (!$holder.length) return;
 
-                if (isCamrip) {
-                    $holder.addClass('jacq-cam');
-                } else {
-                    $holder.removeClass('jacq-cam');
-                }
+                if (isCamrip) $holder.addClass('jacq-cam');
+                else $holder.removeClass('jacq-cam');
             }
 
             if (cache && cache.quality) {
                 applyQuality(cache.quality, cache.isCamrip);
             } else {
-                setBadge($slot, undefined); // плейсхолдер "…"
+                setJacredBadge($slot, undefined); // тот же плейсхолдер "…"
 
-                getBestReleaseFromJacred(cardData, cardData.tmdb_id, function (res) {
+                getBestReleaseFromJacred(normalizedCard, normalizedCard.id, function (res) {
                     if (!$slot || !$slot.length) return;
 
                     if (res && res.quality && res.quality !== 'undefined' && res.quality !== '' && res.quality !== 'null') {
                         applyQuality(res.quality, res.isCamrip);
-
                         saveQualityCache(qCacheKey, {
                             quality: res.quality,
                             isCamrip: res.isCamrip
                         });
                     } else {
-                        // если ничего нет — убираем наш «…»
                         var $holder = $slot.find('.card__quality');
                         $holder.each(function () {
                             var $h = $(this);
-                            var $txt = $h.find('.lme-qtext');
-                            if ($txt.length && $txt.text() === '…') $h.remove();
+                            if ($h.find('.jacq-qtext').length) $h.remove();
                         });
                     }
                 });
             }
         }
 
-        function processAllCards() {
-            var cards = document.querySelectorAll('.card:not([data-jacred-quality-processed])');
-            var batchSize = 5;
-            var currentIndex = 0;
+        // слушаем Lampa списки, как antq, и юзаем ту же логику, что full
+        Lampa.Listener.follow('line', function(e){
+            if (['create','append','visible'].indexOf(e.type) === -1) return;
 
-            function processBatch() {
-                var endIndex = Math.min(currentIndex + batchSize, cards.length);
-                for (var i = currentIndex; i < endIndex; i++) {
-                    var card = cards[i];
-                    var data = getCardDataFromElement(card);
-                    if (data) {
-                        addQualityToMiniCard(card, data);
-                        card.setAttribute('data-jacred-quality-processed', 'true');
-                    }
-                }
-                currentIndex = endIndex;
-                if (currentIndex < cards.length) {
-                    setTimeout(processBatch, 10);
-                }
-            }
+            var items = e.items || [];
+            if (!items.length) return;
 
-            if (cards.length > 0) {
-                processBatch();
-            }
-        }
+            setTimeout(function(){
+                for (var i=0;i<items.length;i++){
+                    var mc = items[i]; 
+                    if(!mc || !mc.data) continue;
 
-        var observer = new MutationObserver(function (mutations) {
-            var hasNewCards = false;
-            for (var i = 0; i < mutations.length; i++) {
-                var mutation = mutations[i];
-                if (mutation.type === 'childList') {
-                    var addedNodes = mutation.addedNodes;
-                    for (var j = 0; j < addedNodes.length; j++) {
-                        var node = addedNodes[j];
-                        if (node.nodeType === 1) {
-                            if (node.classList && node.classList.contains('card')) {
-                                hasNewCards = true;
-                            } else if (node.querySelector && node.querySelector('.card')) {
-                                hasNewCards = true;
-                            }
-                        }
-                    }
+                    var rootEl = mc.card || mc.html || mc.node || mc;
+                    var $root = rootEl instanceof $ ? rootEl : $(rootEl);
+                    if(!$root || !$root.length) continue;
+
+                    (function(data,$rootRef){
+                        pickCardSlot($rootRef,function($slot){
+                            applyListQuality(data, $slot);
+                        });
+                    })(mc.data,$root);
                 }
-            }
-            if (hasNewCards) {
-                setTimeout(processAllCards, 100);
-            }
+            },0);
         });
-
-        observer.observe(document.body, { childList: true, subtree: true });
-        setTimeout(processAllCards, 100);
     }
 
     // -----------------------------
@@ -739,7 +676,7 @@
                     },
                     field: {
                         name: 'Включить JacRed качество',
-                        description: 'Показывать бейдж качества из JacRed (full + карточки)'
+                        description: 'Показывать бейдж качества из JacRed (описание + списки)'
                     },
                     onChange: function () {
                         window.jacredQualityInitialized = false;
