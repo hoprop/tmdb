@@ -194,6 +194,17 @@
             Lampa.Storage.set(CACHE_STORAGE_KEY, cache);
         }
 
+        // Глобальное хранилище качеств из фула
+        function rememberFullQuality(key, quality, isCamrip) {
+            if (!quality) return;
+            window.jacredFullQualities = window.jacredFullQualities || {};
+            window.jacredFullQualities[key] = {
+                quality: quality,
+                isCamrip: !!isCamrip,
+                ts: Date.now()
+            };
+        }
+
         // ---------- HTTP: прямой запрос + прокси ----------
 
         function fetchWithProxy(url, cardId, callback) {
@@ -276,7 +287,6 @@
 
         // ---------- 1) ЛОГИКА КАЧЕСТВА ИЗ server.js ----------
 
-        // ранги качеств
         var JAC_RANK = { "4K":5, "1080p":4, "720p":3, "SD":2, "TS":1, "CAMRip":0 };
 
         function jacChooseBetterQuality(a, b){
@@ -287,20 +297,16 @@
             return rb > ra ? b : a;
         }
 
-        // normalizeQualityFromText из server.js (адаптировано)
         function jacNormalizeQualityFromText(s){
             var str = (s || "").toString().toLowerCase();
 
-            // CAM / CAMRip
             if (/\bcam[-\s]?rip\b|\bcam\b/.test(str)) return "CAMRip";
 
-            // "звук TS" / TS / TeleSynch / Telecine / TC
             var hasZvukTS   = /звук\s*(с)?\s*ts/i.test(str);
             var isTeleSynch = /\btelesynch\b|\btele\s*synch\b|\bts\b(?![a-z])/i.test(str);
             var isTelecine  = /\btelecine\b|\btc\b(?![a-z])/i.test(str);
             if (hasZvukTS || isTeleSynch || isTelecine) return "TS";
 
-            // 4K + HDR → 4K
             var is4k  = /\b(2160p|4k|uhd)\b/.test(str);
             var hasHDR= /\bhdr10\+?\b|\bhdr\b|\bdolby\s*vision\b|\bdv\b/.test(str);
             if (is4k && hasHDR) return "4K";
@@ -320,7 +326,6 @@
         function analyzeTorrentQuality(torrent) {
             if (!torrent) return null;
 
-            // 2.1. Собираем всё, что может содержать инфу о качестве
             var parts = [];
 
             if (torrent.title)       parts.push(String(torrent.title));
@@ -330,29 +335,24 @@
             if (torrent.description) parts.push(String(torrent.description));
 
             var combined = parts.join(' ');
-            // как на сервере — выкидываем HDRip при поиске CAM/TS
             var camText  = combined.replace(/HDRIP/gi, '');
 
-            // 2.2. Основной путь: jacNormalizeQualityFromText
             var q = jacNormalizeQualityFromText(camText);
             if (!q) q = jacNormalizeQualityFromText(combined);
 
-            // 2.3. Fallback: если jacNormalizeQualityFromText не сработал —
-            //      пробуем старую числовую логику (как было раньше в плагине)
             if (!q) {
                 var rawQuality = torrent.quality != null ? String(torrent.quality) : '';
                 var numericQuality = parseInt(rawQuality.replace(/[^0-9]/g, ''), 10);
 
                 if (!isNaN(numericQuality)) {
                     if (numericQuality >= 2160)      q = '4K';
-                    else if (numericQuality >= 1440) q = '1080p'; // "2K" не выделяем отдельно
+                    else if (numericQuality >= 1440) q = '1080p';
                     else if (numericQuality >= 1080) q = '1080p';
                     else if (numericQuality >= 720)  q = '720p';
                     else if (numericQuality >= 480)  q = 'SD';
                 }
             }
 
-            // 2.4. Если всё равно ничего — сдаёмся
             if (!q) return null;
 
             var isCamrip = (q === 'CAMRip' || q === 'TS');
@@ -558,6 +558,7 @@
             var cache = getQualityCache(qCacheKey);
 
             if (cache) {
+                rememberFullQuality(qCacheKey, cache.quality, cache.isCamrip);
                 updateFullQuality(cache.quality, cache.isCamrip, render);
             } else {
                 showFullPlaceholder(render);
@@ -567,6 +568,7 @@
 
                     if (quality && quality !== 'NO') {
                         saveQualityCache(qCacheKey, { quality: quality, isCamrip: isCamrip });
+                        rememberFullQuality(qCacheKey, quality, isCamrip);
                         updateFullQuality(quality, isCamrip, render);
                     } else {
                         clearFullQuality(render);
@@ -700,12 +702,26 @@
             if (!cardData || !cardData.title) return;
             if (!isJacredEnabled()) return;
 
-            // Находим "слот" карточки, как в примере
             var $root = $(cardElement instanceof HTMLElement ? cardElement : cardElement);
             var $slot = $root.find('.card__view, .card__image, .card__img, .card__poster, .card__content, .card').first();
             if (!$slot.length) $slot = $root;
 
             var qCacheKey = cardData.type + '_' + cardData.id;
+
+            // 1) ПРОБУЕМ ВЗЯТЬ КАЧЕСТВО ИЗ ФУЛА (если уже открывали)
+            var fullMap = window.jacredFullQualities || {};
+            var fromFull = fullMap[qCacheKey];
+            if (fromFull && fromFull.quality) {
+                setJacredBadge($slot, fromFull.quality);
+                var $holderFull = $slot.find('.card__quality').first();
+                if ($holderFull.length) {
+                    if (fromFull.isCamrip) $holderFull.addClass('jacq-cam');
+                    else $holderFull.removeClass('jacq-cam');
+                }
+                return;
+            }
+
+            // 2) Если из фула нет — обычный кэш / запрос
             var cache = getQualityCache(qCacheKey);
 
             function applyQuality(quality, isCamrip) {
@@ -715,8 +731,6 @@
 
                 setJacredBadge($slot, text);
 
-                // CAM можно дополнительно пометить классом, если хочешь стилизовать
-                // например .jacq-cam { color: #f55; }
                 var $holder = $slot.find('.card__quality').first();
                 if (!$holder.length) return;
 
@@ -730,7 +744,6 @@
             if (cache && cache.quality) {
                 applyQuality(cache.quality, cache.isCamrip);
             } else {
-                // плейсхолдер "…" пока ждём ответ
                 setJacredBadge($slot, undefined);
 
                 getBestReleaseFromJacred(cardData, cardData.id, function (res) {
@@ -744,7 +757,6 @@
                             isCamrip: res.isCamrip
                         });
                     } else {
-                        // если ничего нет — просто убираем наш «…»
                         var $holder = $slot.find('.card__quality');
                         $holder.each(function () {
                             var $h = $(this);
@@ -859,7 +871,6 @@
                         if (url && Lampa.Noty) {
                             Lampa.Noty.show('JacRed URL: ' + url);
                         }
-                        // На всякий случай чистим кэш и переинициализируем
                         Lampa.Storage.set(CACHE_STORAGE_KEY, {});
                         window.jacredQualityInitialized = false;
                         applyJacredQuality();
@@ -879,7 +890,6 @@
                         description: 'Очистить локальный кэш JacRed качества'
                     },
                     onChange: function () {
-                        // Сбрасываем значение триггера обратно
                         Lampa.Storage.set('jacred_quality_clear_cache', false);
                         Lampa.Storage.set(CACHE_STORAGE_KEY, {});
                         if (Lampa.Noty) {
@@ -912,7 +922,6 @@
                 return;
             }
 
-            // 3) Ни одного API нет — молча выходим
         } catch (e) {
             console.error('JacRedQuality: settings error:', e);
         }
