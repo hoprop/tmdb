@@ -1,4 +1,4 @@
-(function () {  
+(function () { 
     'use strict';
 
     // -----------------------------
@@ -119,7 +119,9 @@
     // СИСТЕМА КАЧЕСТВА
     // -----------------------------
     function initJacredQualitySystem(jacredUrl) {
+        // общий TTL – 72 часа
         var Q_CACHE_TIME    = 72 * 60 * 60 * 1000;
+        // для TS / CAM / CAMRip – 24 часа (раз в сутки)
         var Q_TS_CACHE_TIME = 24 * 60 * 60 * 1000;
 
         var JACRED_PROTOCOL = 'https://';
@@ -129,16 +131,15 @@
         ];
         var PROXY_TIMEOUT = 5000;
 
-        // карты по id
-        var jacredMetaById   = {}; // type_id -> meta (из фулла)
-        var jacredSearchById = {}; // type_id -> { searchTitle, year }
-
+        // Полифилл AbortController (если нет)
         if (typeof AbortController === 'undefined') {
             window.AbortController = function () {
                 this.signal = {
                     aborted: false,
                     addEventListener: function (event, callback) {
-                        if (event === 'abort') this._onabort = callback;
+                        if (event === 'abort') {
+                            this._onabort = callback;
+                        }
                     }
                 };
                 this.abort = function () {
@@ -150,7 +151,20 @@
             };
         }
 
-        // ---------- КЭШ ----------
+        // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ КЭША ----------
+
+        function qualityRank(q) {
+            q = String(q || '').toUpperCase();
+            if (q === '4K' || q === '2160P' || q === 'UHD') return 5;
+            if (q === '2K' || q === '1440P') return 4;
+            if (q === '1080P' || q === 'FHD' || q === 'FULL HD' || q === 'FULLHD') return 3;
+            if (q === 'HD' || q === '720P') return 2;
+            if (q === 'SD' || q === '480P' || q === '540P') return 1;
+            if (q === 'CAMRIP' || q === 'CAM' || q === 'TS') return 0;
+            if (!q || q === 'NO') return -1;
+            return -1;
+        }
+
         function getQualityCache(key) {
             if (!key) return null;
 
@@ -159,9 +173,13 @@
             if (!item) return null;
 
             var age = Date.now() - item.timestamp;
+
+            // по умолчанию TTL = 72 часа
             var ttl = Q_CACHE_TIME;
 
             var q = String(item.quality || '').toUpperCase();
+
+            // для TS / CAM / CAMRIP — обновление раз в сутки
             if (/\bTS\b/.test(q) || /\bCAM\b/.test(q) || /\bCAMRIP\b/.test(q)) {
                 ttl = Q_TS_CACHE_TIME;
             }
@@ -169,27 +187,44 @@
             return age < ttl ? item : null;
         }
 
-        function saveQualityCache(key, data) {
+        // source = 'full' | 'card'
+        function saveQualityCache(key, data, source) {
             if (!key) return;
 
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
+            var nowQ  = data.quality || null;
 
+            // Чистка старых записей
             Object.keys(cache).forEach(function (cacheKey) {
                 if (Date.now() - cache[cacheKey].timestamp >= Q_CACHE_TIME) {
                     delete cache[cacheKey];
                 }
             });
 
+            var old = cache[key];
+            if (old) {
+                var oldRank = qualityRank(old.quality);
+                var newRank = qualityRank(nowQ);
+
+                // ФУЛЛ ВСЕГДА МОЖЕТ ПЕРЕЗАПИСАТЬ
+                if (source === 'card') {
+                    // Карточке запрещаем занижать качество
+                    if (newRank < oldRank) {
+                        return; // просто не затираем
+                    }
+                }
+            }
+
             cache[key] = {
-                quality:  data.quality || null,
-                isCamrip: data.isCamrip || false,
+                quality:   nowQ,
+                isCamrip:  data.isCamrip || false,
                 timestamp: Date.now()
             };
 
             Lampa.Storage.set(CACHE_STORAGE_KEY, cache);
         }
 
-        // ---------- HTTP с прокси ----------
+        // ---------- HTTP: прямой запрос + прокси ----------
         function fetchWithProxy(url, cardId, callback) {
             var currentProxyIndex = 0;
             var callbackCalled = false;
@@ -320,112 +355,132 @@
             return meta;
         }
 
-        // ---------- Общий билдер параметров поиска ----------
-        function buildSearchParams(normalizedCard, source) {
-            var type = normalizedCard.type || 'movie';
-            var id   = normalizedCard.id || normalizedCard.tmdb_id || '';
-            var key  = type + '_' + id;
-
-            var stored = jacredSearchById[key];
-
-            // Для карточек сначала пробуем то, что уже притащил фулл
-            if (source === 'card' && stored) return stored;
-
-            var year = '';
-            var dateStr = normalizedCard.release_date || normalizedCard.first_air_date || '';
-            if (dateStr && dateStr.length >= 4) {
-                year = dateStr.substring(0, 4);
-            }
-
-            var titleOriginal = (normalizedCard.original_title || '').trim();
-            var titleLocal    = (normalizedCard.title || '').trim();
-
-            var searchTitle = titleOriginal || titleLocal;
-
-            if (!searchTitle) {
-                return stored || null;
-            }
-
-            var params = { searchTitle: searchTitle, year: year };
-
-            // Фулл всегда перезаписывает (он знает оригинальное имя)
-            // Карточка запишет только если раньше ничего не было
-            if (source === 'full' || !stored) {
-                jacredSearchById[key] = params;
-            }
-
-            return params;
-        }
-
-        // ---------- Поиск лучшего релиза JacRed ----------
-        // ВАЖНО: и фулл, и карточки используют ОДНУ и ту же функцию,
-        // но source = 'full' или 'card'
-        function getBestReleaseFromJacred(normalizedCard, cardId, source, callback) {
+        // ---------- Поиск лучшего релиза JacRed (СТАРАЯ ЛОГИКА, КАК ТЫ ПРОСИЛ) ----------
+        function getBestReleaseFromJacred(normalizedCard, cardId, callback) {
             if (!jacredUrl) {
                 callback(null);
                 return;
             }
 
-            var params = buildSearchParams(normalizedCard, source);
-            if (!params || !params.searchTitle) {
-                callback(null);
-                return;
+            var year = '';
+            var dateStr = normalizedCard.release_date || '';
+            if (dateStr.length >= 4) {
+                year = dateStr.substring(0, 4);
             }
 
-            var searchTitle = params.searchTitle;
-            var year        = params.year || '';
+            function searchJacredApi(searchTitle, searchYear, exactMatch, strategyName, apiCallback) {
+                var apiUrl = JACRED_PROTOCOL + jacredUrl + '/api/v1.0/torrents?search=' +
+                    encodeURIComponent(searchTitle) +
+                    (searchYear ? '&year=' + searchYear : '') +
+                    (exactMatch ? '&exact=true' : '');
 
-            var apiUrl = JACRED_PROTOCOL + jacredUrl + '/api/v1.0/torrents?search=' +
-                encodeURIComponent(searchTitle) +
-                (year ? '&year=' + year : '') +
-                '&exact=true';
+                fetchWithProxy(apiUrl, cardId, function (error, responseText) {
+                    if (error || !responseText) {
+                        apiCallback(null);
+                        return;
+                    }
+                    try {
+                        var torrents = JSON.parse(responseText);
+                        if (!Array.isArray(torrents) || torrents.length === 0) {
+                            apiCallback(null);
+                            return;
+                        }
 
-            fetchWithProxy(apiUrl, cardId, function (error, responseText) {
-                if (error || !responseText) {
+                        var bestRelease = null;
+                        var bestCamRelease = null;
+
+                        for (var i = 0; i < torrents.length; i++) {
+                            var torrent = torrents[i];
+                            var qualityMeta = analyzeTorrentQuality(torrent);
+                            if (!qualityMeta || !qualityMeta.label) continue;
+
+                            if (qualityMeta.isCamrip) {
+                                if (!bestCamRelease || qualityMeta.score > bestCamRelease.meta.score) {
+                                    bestCamRelease = { torrent: torrent, meta: qualityMeta };
+                                }
+                            } else {
+                                if (!bestRelease || qualityMeta.score > bestRelease.meta.score) {
+                                    bestRelease = { torrent: torrent, meta: qualityMeta };
+                                }
+                            }
+                        }
+
+                        var chosen = bestRelease || bestCamRelease;
+                        if (chosen) {
+                            apiCallback({
+                                quality: chosen.meta.label,
+                                title: chosen.torrent.title,
+                                isCamrip: chosen.meta.isCamrip
+                            });
+                        } else {
+                            apiCallback(null);
+                        }
+                    } catch (e) {
+                        console.error('Ошибка при получении качества из JacRed:', e);
+                        apiCallback(null);
+                    }
+                });
+            }
+
+            var searchStrategies = [];
+
+            if (normalizedCard.original_title && /[a-zа-яё0-9]/i.test(normalizedCard.original_title)) {
+                searchStrategies.push({
+                    title: normalizedCard.original_title.trim(),
+                    year: year,
+                    exact: true,
+                    name: 'OriginalTitle Exact Year'
+                });
+            }
+
+            if (normalizedCard.title && /[a-zа-яё0-9]/i.test(normalizedCard.title)) {
+                searchStrategies.push({
+                    title: normalizedCard.title.trim(),
+                    year: year,
+                    exact: true,
+                    name: 'Title Exact Year'
+                });
+            }
+
+            if (normalizedCard.type === 'tv' && (!year || isNaN(year))) {
+                if (normalizedCard.original_title && /[a-zа-яё0-9]/i.test(normalizedCard.original_title)) {
+                    searchStrategies.push({
+                        title: normalizedCard.original_title.trim(),
+                        year: '',
+                        exact: false,
+                        name: 'OriginalTitle No Year'
+                    });
+                }
+                if (normalizedCard.title && /[a-zа-яё0-9]/i.test(normalizedCard.title)) {
+                    searchStrategies.push({
+                        title: normalizedCard.title.trim(),
+                        year: '',
+                        exact: false,
+                        name: 'Title No Year'
+                    });
+                }
+            }
+
+            function executeNextStrategy(index) {
+                if (index >= searchStrategies.length) {
                     callback(null);
                     return;
                 }
-                try {
-                    var torrents = JSON.parse(responseText);
-                    if (!Array.isArray(torrents) || torrents.length === 0) {
-                        callback(null);
-                        return;
-                    }
-
-                    var bestRelease = null;
-                    var bestCamRelease = null;
-
-                    for (var i = 0; i < torrents.length; i++) {
-                        var torrent = torrents[i];
-                        var qualityMeta = analyzeTorrentQuality(torrent);
-                        if (!qualityMeta || !qualityMeta.label) continue;
-
-                        if (qualityMeta.isCamrip) {
-                            if (!bestCamRelease || qualityMeta.score > bestCamRelease.meta.score) {
-                                bestCamRelease = { torrent: torrent, meta: qualityMeta };
-                            }
-                        } else {
-                            if (!bestRelease || qualityMeta.score > bestRelease.meta.score) {
-                                bestRelease = { torrent: torrent, meta: qualityMeta };
-                            }
-                        }
-                    }
-
-                    var chosen = bestRelease || bestCamRelease;
-                    if (chosen) {
-                        callback({
-                            quality: chosen.meta.label,
-                            title: chosen.torrent.title,
-                            isCamrip: chosen.meta.isCamrip
-                        });
+                var strategy = searchStrategies[index];
+                searchJacredApi(strategy.title, strategy.year, strategy.exact, strategy.name, function (result) {
+                    if (result !== null) {
+                        callback(result);
                     } else {
-                        callback(null);
+                        executeNextStrategy(index + 1);
                     }
-                } catch (e) {
-                    console.error('Ошибка при получении качества из JacRed:', e);
-                    callback(null);
-                }
-            });
+                });
+            }
+
+            if (searchStrategies.length > 0) {
+                executeNextStrategy(0);
+            } else {
+                callback(null);
+            }
         }
 
         // ---------- Тип карточки ----------
@@ -476,9 +531,6 @@
             }
         }
 
-        // объявим заранее, ниже реализуем
-        function processAllCards();
-
         function fetchFullQuality(card, render) {
             if (!render || !card) return;
 
@@ -487,33 +539,29 @@
                 title: card.title || card.name || '',
                 original_title: card.original_title || card.original_name || '',
                 type: getCardType(card),
-                release_date: card.release_date || card.first_air_date || '',
-                imdb_id: card.imdb_id || card.imdb || null
+                release_date: card.release_date || card.first_air_date || ''
             };
 
-            var metaKey = normalizedCard.type + '_' + (normalizedCard.id || '');
-            jacredMetaById[metaKey] = normalizedCard;
+            // ВАЖНО: один и тот же ключ и для фулла, и для карточки
+            var qCacheKey = normalizedCard.type + '_' + (normalizedCard.id || '');
 
-            var qCacheKey = normalizedCard.type + '_' + (normalizedCard.id || normalizedCard.imdb_id);
             var cache = getQualityCache(qCacheKey);
 
             if (cache) {
                 updateFullQuality(cache.quality, cache.isCamrip, render);
             } else {
                 showFullPlaceholder(render);
-                getBestReleaseFromJacred(normalizedCard, normalizedCard.id, 'full', function (res) {
-                    var quality  = res && res.quality;
+                getBestReleaseFromJacred(normalizedCard, normalizedCard.id, function (res) {
+                    var quality = res && res.quality;
                     var isCamrip = res && res.isCamrip;
 
                     if (quality && quality !== 'NO') {
-                        if (qCacheKey) {
-                            saveQualityCache(qCacheKey, { quality: quality, isCamrip: isCamrip });
-                        }
+                        saveQualityCache(qCacheKey, { quality: quality, isCamrip: isCamrip }, 'full');
                         updateFullQuality(quality, isCamrip, render);
 
-                        // после того как фулл узнал нормальное качество и
-                        // параметры поиска, обновим мини-карточки того же тайтла
-                        setTimeout(processAllCards, 50);
+                        // ПОСЛЕ ТОГО КАК ФУЛЛ УЗНАЛ НОРМАЛЬНОЕ КАЧЕСТВО –
+                        // ПЕРЕРИСУЕМ ВСЕ КАРТОЧКИ, ЧТОБЫ ОБНОВИТЬ SD -> 4K
+                        setTimeout(processAllCards, 100);
                     } else {
                         clearFullQuality(render);
                     }
@@ -534,21 +582,17 @@
 
         function getCardDataFromElement(cardElement) {
             try {
-                var tmdbId = cardElement.getAttribute('data-tmdb-id') ||
-                             cardElement.getAttribute('data-movie-id') ||
-                             cardElement.getAttribute('data-tv-id') ||
-                             cardElement.getAttribute('data-id') ||
-                             null;
-
-                var cardId = tmdbId;
+                var tmdbId = null;
+                var cardId = cardElement.getAttribute('data-id') ||
+                    cardElement.getAttribute('id');
 
                 if (!cardId) {
                     var parent = cardElement.parentElement;
                     while (parent && !cardId) {
-                        cardId = parent.getAttribute('data-tmdb-id') ||
-                                 parent.getAttribute('data-movie-id') ||
-                                 parent.getAttribute('data-tv-id') ||
-                                 parent.getAttribute('data-id');
+                        cardId = parent.getAttribute('data-id') ||
+                            parent.getAttribute('data-movie-id') ||
+                            parent.getAttribute('data-tmdb-id') ||
+                            parent.getAttribute('data-tv-id');
                         parent = parent.parentElement;
                     }
                 }
@@ -594,20 +638,12 @@
 
                 var cardData = {
                     id: cardId,
-                    tmdb_id: tmdbId || cardId,
+                    tmdb_id: tmdbId,
                     title: title,
                     original_title: originalTitle,
                     type: isTv ? 'tv' : 'movie',
                     release_date: year
                 };
-
-                // если фулл уже открывали — подтягиваем meta
-                var metaKey = cardData.type + '_' + cardData.id;
-                if (jacredMetaById[metaKey]) {
-                    var meta = jacredMetaById[metaKey];
-                    if (meta.original_title) cardData.original_title = meta.original_title;
-                    if (meta.release_date)   cardData.release_date   = meta.release_date;
-                }
 
                 return cardData;
             } catch (e) {
@@ -646,7 +682,7 @@
             }
         }
 
-        // ---- отрисовка качества на мини-карточке ----
+        // >>> addQualityToMiniCard с приоритетом кэша от фулла <<<
         function addQualityToMiniCard(cardElement, cardData) {
             if (!cardData || !cardData.title) return;
             if (!isJacredEnabled()) return;
@@ -655,7 +691,8 @@
             var $slot = $root.find('.card__view, .card__image, .card__img, .card__poster, .card__content, .card').first();
             if (!$slot.length) $slot = $root;
 
-            var qCacheKey = cardData.type + '_' + (cardData.tmdb_id || cardData.id);
+            // тот же ключ, что и в фулл-описании
+            var qCacheKey = cardData.type + '_' + cardData.id;
             var cache = getQualityCache(qCacheKey);
 
             function applyQuality(quality, isCamrip) {
@@ -676,22 +713,27 @@
             }
 
             if (cache && cache.quality) {
+                // Если в кэше уже что-то есть (особенно после фулла) —
+                // просто используем это и никуда не ходим
                 applyQuality(cache.quality, cache.isCamrip);
             } else {
                 // плейсхолдер "…" пока ждём ответ
                 setJacredBadge($slot, undefined);
 
-                getBestReleaseFromJacred(cardData, cardData.id, 'card', function (res) {
+                getBestReleaseFromJacred(cardData, cardData.id, function (res) {
                     if (!$slot || !$slot.length) return;
 
                     if (res && res.quality && res.quality !== 'undefined' && res.quality !== '' && res.quality !== 'null') {
                         applyQuality(res.quality, res.isCamrip);
 
+                        // Запоминаем, но помним: карточка не имеет права затирать
+                        // то, что фулл уже нашёл лучше
                         saveQualityCache(qCacheKey, {
                             quality: res.quality,
                             isCamrip: res.isCamrip
-                        });
+                        }, 'card');
                     } else {
+                        // если ничего нет — просто убираем наш «…»
                         var $holder = $slot.find('.card__quality');
                         $holder.each(function () {
                             var $h = $(this);
@@ -701,8 +743,8 @@
                 });
             }
         }
+        // <<< конец addQualityToMiniCard >>>
 
-        // ---- проход по всем карточкам ----
         function processAllCards() {
             var cards = document.querySelectorAll('.card');
             var batchSize = 5;
@@ -727,9 +769,6 @@
                 processBatch();
             }
         }
-
-        // привязываем реализацию к объявлению
-        initJacredQualitySystem.processAllCards = processAllCards;
 
         var observer = new MutationObserver(function (mutations) {
             var hasNewCards = false;
@@ -763,6 +802,7 @@
     // -----------------------------
     function addSettingsItem() {
         try {
+            // 1) Новый API SettingsApi
             if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addComponent === 'function') {
 
                 Lampa.SettingsApi.addComponent({
@@ -771,6 +811,7 @@
                     icon: '<svg height="200" width="200" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>'
                 });
 
+                // Триггер включения/выключения плагина
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -788,6 +829,7 @@
                     }
                 });
 
+                // Поле для изменения jacred_url
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -811,6 +853,7 @@
                     }
                 });
 
+                // Кнопка сброса кэша качества
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -834,6 +877,7 @@
                 return;
             }
 
+            // 2) Старый API настроек
             if (Lampa.Settings && typeof Lampa.Settings.add === 'function') {
                 Lampa.Settings.add({
                     group: 'jacred_quality',
