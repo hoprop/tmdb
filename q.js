@@ -176,23 +176,37 @@
             return age < ttl ? item : null;
         }
 
-        // ранжирование качества
+        // ранжирование качества (чтоб не даунгрейдить)
         function qualityRank(label) {
             var q = String(label || '').toUpperCase();
-            if (q === '4K')      return 6;
-            if (q === '2K')      return 5;
-            if (q === '1080P')   return 4;
-            if (q === 'HD')      return 3;
-            if (q === 'SD')      return 2;
-            if (q === 'CAMRIP')  return 1;
+            if (q === '4K')            return 6;
+            if (q === '2K')            return 5;
+            if (q === '1080P')         return 4;
+            if (q === 'HD' || q === '720P')   return 3;
+            if (q === 'SD' || q === '480P')   return 2;
+            if (q === 'CAMRIP' || q === 'TS') return 1;
             return 0;
+        }
+
+        // единый формат ключа кэша:
+        //  - если есть tmdb_id → tmdb_<id>
+        //  - иначе fallback: <type>_<id>
+        function makeCacheKey(obj) {
+            if (!obj) return null;
+
+            if (obj.tmdb_id) return 'tmdb_' + String(obj.tmdb_id);
+
+            if (obj.type && obj.id) return String(obj.type) + '_' + String(obj.id);
+            if (obj.id)             return 'id_' + String(obj.id);
+
+            return null;
         }
 
         function saveQualityCache(key, data) {
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
             var now   = Date.now();
 
-            // чистим старое
+            // чистим старые записи
             Object.keys(cache).forEach(function (cacheKey) {
                 if (now - cache[cacheKey].timestamp >= Q_CACHE_TIME) {
                     delete cache[cacheKey];
@@ -211,7 +225,10 @@
                 var newRank = qualityRank(newQuality);
 
                 var shouldReplace = false;
+
+                // апгрейд только ВВЕРХ
                 if (newRank > oldRank) shouldReplace = true;
+                // при равном ранге: CAM/TS → нормальный релиз
                 else if (newRank === oldRank && oldIsCam && !newIsCam) shouldReplace = true;
 
                 if (!shouldReplace) {
@@ -228,19 +245,6 @@
             };
 
             Lampa.Storage.set(CACHE_STORAGE_KEY, cache);
-        }
-
-        // единый формат ключа кэша
-        function makeCacheKey(obj) {
-            if (!obj) return null;
-
-            if (obj.tmdb_id) return 'tmdb_' + String(obj.tmdb_id);
-            if (obj.imdb_id) return 'imdb_' + String(obj.imdb_id);
-
-            if (obj.type && obj.id) return String(obj.type) + '_' + String(obj.id);
-            if (obj.id)             return 'id_' + String(obj.id);
-
-            return null;
         }
 
         // ---------- HTTP: прямой запрос + прокси ----------
@@ -269,28 +273,28 @@
                     }
                 }, PROXY_TIMEOUT);
 
-                fetch(proxyUrl, { signal: signal })
-                    .then(function (response) {
+            fetch(proxyUrl, { signal: signal })
+                .then(function (response) {
+                    clearTimeout(timeoutId);
+                    if (!response.ok) {
+                        throw new Error('Ошибка прокси: ' + response.status);
+                    }
+                    return response.text();
+                })
+                .then(function (data) {
+                    if (!callbackCalled) {
+                        callbackCalled = true;
                         clearTimeout(timeoutId);
-                        if (!response.ok) {
-                            throw new Error('Ошибка прокси: ' + response.status);
-                        }
-                        return response.text();
-                    })
-                    .then(function (data) {
-                        if (!callbackCalled) {
-                            callbackCalled = true;
-                            clearTimeout(timeoutId);
-                            callback(null, data);
-                        }
-                    })
-                    .catch(function () {
-                        clearTimeout(timeoutId);
-                        if (!callbackCalled) {
-                            currentProxyIndex++;
-                            tryNextProxy();
-                        }
-                    });
+                        callback(null, data);
+                    }
+                })
+                .catch(function () {
+                    clearTimeout(timeoutId);
+                    if (!callbackCalled) {
+                        currentProxyIndex++;
+                        tryNextProxy();
+                    }
+                });
             }
 
             var directTimeoutId = setTimeout(function () {
@@ -377,6 +381,8 @@
         }
 
         // ---------- Поиск лучшего релиза JacRed ----------
+        // (всё по-прежнему через /api/v1.0/torrents, просто карточки
+        //  теперь тоже имеют original_title + year, как фулл)
 
         function getBestReleaseFromJacred(normalizedCard, cardId, callback) {
             if (!jacredUrl) {
@@ -446,6 +452,7 @@
 
             var searchStrategies = [];
 
+            // 1) СНАЧАЛА original_title + year (то, что тебе нужно для "A House of Dynamite")
             if (normalizedCard.original_title && /[a-zа-яё0-9]/i.test(normalizedCard.original_title)) {
                 searchStrategies.push({
                     title: normalizedCard.original_title.trim(),
@@ -455,6 +462,7 @@
                 });
             }
 
+            // 2) Потом локальный title + year
             if (normalizedCard.title && /[a-zа-яё0-9]/i.test(normalizedCard.title)) {
                 searchStrategies.push({
                     title: normalizedCard.title.trim(),
@@ -559,8 +567,8 @@
 
             var normalizedCard = {
                 id: card.id,
-                tmdb_id: card.id,
-                imdb_id: card.imdb_id || (card.ids && card.ids.imdb) || null,
+                tmdb_id: card.id, // TMDB id фулла
+                imdb_id: card.imdb_id || card.imdb || null,
                 title: card.title || card.name || '',
                 original_title: card.original_title || card.original_name || '',
                 type: getCardType(card),
@@ -581,14 +589,13 @@
             } else {
                 showFullPlaceholder(render);
                 getBestReleaseFromJacred(normalizedCard, normalizedCard.id, function (res) {
-                    var quality  = res && res.quality;
+                    var quality = res && res.quality;
                     var isCamrip = res && res.isCamrip;
 
                     if (quality && quality !== 'NO') {
                         saveQualityCache(qCacheKey, { quality: quality, isCamrip: isCamrip });
                         updateFullQuality(quality, isCamrip, render);
                     } else {
-                        saveQualityCache(qCacheKey, { quality: null, isCamrip: false });
                         clearFullQuality(render);
                     }
                 });
@@ -616,15 +623,32 @@
 
                 var ds = cardElement.dataset || {};
 
+                // TMDB id — максимально агрессивно
                 var tmdbId =
                       cardElement.getAttribute('data-tmdb-id')
+                   || ds.tmdbId
                    || cardElement.getAttribute('data-card-id')
+                   || ds.cardId
                    || cardElement.getAttribute('data-movie-id')
+                   || ds.movieId
                    || cardElement.getAttribute('data-tv-id')
-                   || cardElement.getAttribute('data-id')
-                   || ds.tmdbId || ds.movieId || ds.tvId || null;
+                   || ds.tvId
+                   || null;
 
-                var cardId = tmdbId;
+                // если всё ещё нет — пробуем вытащить из src постера /get/movie_1290159
+                if (!tmdbId) {
+                    var img = cardElement.querySelector('img, .card__img, .card__poster, .card__image');
+                    if (img) {
+                        var src = img.getAttribute('src') || '';
+                        var m = src.match(/(?:movie|tv)[_/](\d+)/i) || src.match(/_(\d+)\.[a-z0-9]+$/i);
+                        if (m) tmdbId = m[1];
+                    }
+                }
+
+                var cardId =
+                      tmdbId
+                   || cardElement.getAttribute('data-id')
+                   || cardElement.getAttribute('id');
 
                 if (!cardId) {
                     var parent = cardElement.parentElement;
@@ -653,6 +677,7 @@
                             ds.title || ds.name || '';
                 }
 
+                // ORIGINAL_TITLE МАКСИМАЛЬНО АГРЕССИВНО
                 var originalTitleElement = cardElement.querySelector('.card__original-title, .original-title, .card__original-name, .original-name');
                 var originalTitle = originalTitleElement ? originalTitleElement.textContent.trim() : '';
 
@@ -766,7 +791,6 @@
             var normalizedCard = {
                 id: cardData.tmdb_id || cardData.id,
                 tmdb_id: cardData.tmdb_id || null,
-                imdb_id: null,
                 title: cardData.title || '',
                 original_title: cardData.original_title || '',
                 type: cardData.type || 'movie',
@@ -780,20 +804,25 @@
 
             function applyQuality(quality, isCamrip) {
                 if (!$slot || !$slot.length) return;
-                if (!quality) return;
+                var text = quality || '';
+                if (!text) return;
 
-                setJacredBadge($slot, quality);
+                setJacredBadge($slot, text);
 
                 var $holder = $slot.find('.card__quality').first();
                 if (!$holder.length) return;
 
-                if (isCamrip) $holder.addClass('jacq-cam');
-                else          $holder.removeClass('jacq-cam');
+                if (isCamrip) {
+                    $holder.addClass('jacq-cam');
+                } else {
+                    $holder.removeClass('jacq-cam');
+                }
             }
 
-            if (cache) {
+            if (cache && cache.quality) {
                 applyQuality(cache.quality, cache.isCamrip);
             } else {
+                // плейсхолдер "…" пока ждём ответ
                 setJacredBadge($slot, undefined);
 
                 getBestReleaseFromJacred(normalizedCard, normalizedCard.id, function (res) {
@@ -807,13 +836,12 @@
                             isCamrip: res.isCamrip
                         });
                     } else {
+                        // если ничего нет — просто убираем наш «…»
                         var $holder = $slot.find('.card__quality');
                         $holder.each(function () {
                             var $h = $(this);
                             if ($h.find('.jacq-qtext').length) $h.remove();
                         });
-
-                        saveQualityCache(qCacheKey, { quality: null, isCamrip: false });
                     }
                 });
             }
@@ -900,6 +928,7 @@
                         description: 'Показывать бейдж качества из JacRed в списках'
                     },
                     onChange: function () {
+                        // Перезапуск логики
                         window.jacredQualityInitialized = false;
                         applyJacredQuality();
                     }
@@ -923,6 +952,7 @@
                         if (url && Lampa.Noty) {
                             Lampa.Noty.show('JacRed URL: ' + url);
                         }
+                        // На всякий случай чистим кэш и переинициализируем
                         Lampa.Storage.set(CACHE_STORAGE_KEY, {});
                         window.jacredQualityInitialized = false;
                         applyJacredQuality();
@@ -942,6 +972,7 @@
                         description: 'Очистить локальный кэш JacRed качества'
                     },
                     onChange: function () {
+                        // Сбрасываем значение триггера обратно
                         Lampa.Storage.set('jacred_quality_clear_cache', false);
                         Lampa.Storage.set(CACHE_STORAGE_KEY, {});
                         if (Lampa.Noty) {
@@ -971,9 +1002,12 @@
                         applyJacredQuality();
                     }
                 });
+                // В старом API отдельно input и кнопки уже сложнее красиво впихнуть,
+                // поэтому оставляем только тумблер.
                 return;
             }
 
+            // 3) Ни одного API нет — молча выходим
         } catch (e) {
             console.error('JacRedQuality: settings error:', e);
         }
