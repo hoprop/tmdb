@@ -269,6 +269,7 @@
                 .catch(function () {
                     clearTimeout(directTimeoutId);
                     if (!callbackCalled) {
+                        currentProxyIndex++;
                         tryNextProxy();
                     }
                 });
@@ -328,9 +329,9 @@
         }
 
         // ---------- Поиск лучшего релиза JacRed ----------
-        // Всегда сначала ищем по original_title + year (exact=true),
-        // если нет original_title — падаем на title.
-        // Если с годом ничего не нашли — повторяем без года, exact=false.
+        // Только по original_title (если есть) + year, exact=true.
+        // Если нет original_title — берём title, но тоже с year+exact.
+        // Без года НЕ ищем.
 
         function getBestReleaseFromJacred(normalizedCard, cardId, callback) {
             if (!jacredUrl) {
@@ -343,6 +344,12 @@
             if (dateStr) {
                 var ym = String(dateStr).match(/(19|20)\d{2}/);
                 if (ym) year = ym[0];
+            }
+
+            // если года нет — ничего не ищем (по твоей логике "по ориг названию и году")
+            if (!year) {
+                callback(null);
+                return;
             }
 
             function searchJacredApi(searchTitle, searchYear, exactMatch, strategyName, apiCallback) {
@@ -412,21 +419,9 @@
                 return;
             }
 
-            // 1) основной запрос: original_title + year, exact=true
-            searchJacredApi(searchTitle, year, true, 'OriginalTitle Exact Year', function (result) {
-                if (result) {
-                    callback(result);
-                    return;
-                }
-
-                // 2) fallback: то же название, но без года и exact=false
-                searchJacredApi(searchTitle, '', false, 'OriginalTitle No Year', function (result2) {
-                    if (result2) {
-                        callback(result2);
-                    } else {
-                        callback(null);
-                    }
-                });
+            // Единственная стратегия: title/original_title + year, exact=true
+            searchJacredApi(searchTitle, year, true, 'TitleOrOriginal Exact Year', function (result) {
+                callback(result || null);
             });
         }
 
@@ -561,7 +556,9 @@
                 var originalTitle = originalTitleElement ? originalTitleElement.textContent.trim() : '';
                 if (!originalTitle) {
                     originalTitle = cardElement.getAttribute('data-original-title') ||
-                        cardElement.getAttribute('data-original-name') || '';
+                        cardElement.getAttribute('data-original_title') ||
+                        cardElement.getAttribute('data-original-name') ||
+                        cardElement.getAttribute('data-original_name') || '';
                 }
 
                 var isTv = cardElement.classList.contains('card--tv') ||
@@ -631,12 +628,11 @@
             }
         }
 
-        // >>> НОВАЯ addQualityToMiniCard С ИСПОЛЬЗОВАНИЕМ setJacredBadge <<<
+        // >>> addQualityToMiniCard С ИСПОЛЬЗОВАНИЕМ setJacredBadge <<<
         function addQualityToMiniCard(cardElement, cardData) {
             if (!cardData || !cardData.title) return;
             if (!isJacredEnabled()) return;
 
-            // Находим "слот" карточки, как в примере
             var $root = $(cardElement instanceof HTMLElement ? cardElement : cardElement);
             var $slot = $root.find('.card__view, .card__image, .card__img, .card__poster, .card__content, .card').first();
             if (!$slot.length) $slot = $root;
@@ -664,7 +660,6 @@
             if (cache && cache.quality) {
                 applyQuality(cache.quality, cache.isCamrip);
             } else {
-                // плейсхолдер "…" пока ждём ответ
                 setJacredBadge($slot, undefined);
 
                 getBestReleaseFromJacred(cardData, cardData.id, function (res) {
@@ -678,7 +673,6 @@
                             isCamrip: res.isCamrip
                         });
                     } else {
-                        // если ничего нет — просто убираем наш «…»
                         var $holder = $slot.find('.card__quality');
                         $holder.each(function () {
                             var $h = $(this);
@@ -688,7 +682,6 @@
                 });
             }
         }
-        // <<< КОНЕЦ НОВОЙ addQualityToMiniCard >>>
 
         function processAllCards() {
             var cards = document.querySelectorAll('.card:not([data-jacred-quality-processed])');
@@ -748,7 +741,6 @@
     // -----------------------------
     function addSettingsItem() {
         try {
-            // 1) Новый API SettingsApi (современные версии Lampa)
             if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addComponent === 'function') {
 
                 Lampa.SettingsApi.addComponent({
@@ -757,7 +749,6 @@
                     icon: '<svg height="200" width="200" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>'
                 });
 
-                // Триггер включения/выключения плагина
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -775,7 +766,6 @@
                     }
                 });
 
-                // Поле для изменения jacred_url
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -799,7 +789,6 @@
                     }
                 });
 
-                // Кнопка сброса кэша качества
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -823,7 +812,6 @@
                 return;
             }
 
-            // 2) Старый API настроек (на всякий случай)
             if (Lampa.Settings && typeof Lampa.Settings.add === 'function') {
                 Lampa.Settings.add({
                     group: 'jacred_quality',
