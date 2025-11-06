@@ -1,4 +1,4 @@
-(function () {
+(function () { 
     'use strict';
 
     // -----------------------------
@@ -42,7 +42,7 @@
         document.head.appendChild(el);
     })();
 
-    // Установка бейджа качества в карточку
+    // Установка бейджа качества в карточку (аналог setBadge из примера)
     function setJacredBadge($el, value){
         var $holder = $el.find('.card__quality');
         var text = (typeof value === 'undefined') ? '…' : (value === null ? '' : String(value));
@@ -154,42 +154,9 @@
             };
         }
 
-        // Единый ключ кэша: TMDB ID (и для фулла, и для карточек)
-        function makeTmdbCacheKey(tmdbId, type, imdbId) {
-            var base = tmdbId || '';
-
-            // fallback на imdb, если совсем нет tmdb
-            if (!base && imdbId) {
-                base = String(imdbId).replace(/^tt/, '');
-            }
-
-            if (!base) return null;
-
-            var m = String(base).match(/(\d+)/);
-            base = m ? m[1] : String(tmdbId || imdbId);
-
-            return 'tmdb_' + base;
-        }
-
-        // Ранг качества — чтобы не понижать 4K → SD
-        function rankQuality(q) {
-            if (!q) return -1;
-            q = String(q).toUpperCase();
-
-            if (q === '4K' || q === '2160P' || q === 'UHD') return 5;
-            if (q === '1080P' || q === 'FHD' || q === 'FULLHD' || q === 'FULL HD') return 4;
-            if (q === 'HD' || q === '720P') return 3;
-            if (q === 'SD' || q === '480P') return 2;
-            if (q === 'CAM' || q === 'CAMRIP' || q === 'TS') return 1;
-
-            return 0;
-        }
-
         // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ КЭША ----------
 
         function getQualityCache(key) {
-            if (!key) return null;
-
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
             var item  = cache[key];
             if (!item) return null;
@@ -210,40 +177,19 @@
         }
 
         function saveQualityCache(key, data) {
-            if (!key) return;
-
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
 
-            // чистим старые записи (по общему TTL)
             Object.keys(cache).forEach(function (cacheKey) {
                 if (Date.now() - cache[cacheKey].timestamp >= Q_CACHE_TIME) {
                     delete cache[cacheKey];
                 }
             });
 
-            var newQ = data.quality || null;
-            var existing = cache[key];
-            var oldQ = existing && existing.quality ? existing.quality : null;
-
-            var shouldWrite = true;
-            if (oldQ && newQ) {
-                var oldRank = rankQuality(oldQ);
-                var newRank = rankQuality(newQ);
-
-                // если новое качество хуже старого — не понижаем, только таймстамп
-                if (newRank < oldRank) {
-                    shouldWrite = false;
-                    existing.timestamp = Date.now();
-                }
-            }
-
-            if (shouldWrite) {
-                cache[key] = {
-                    quality: newQ,
-                    isCamrip: data.isCamrip || false,
-                    timestamp: Date.now()
-                };
-            }
+            cache[key] = {
+                quality: data.quality || null,
+                isCamrip: data.isCamrip || false,
+                timestamp: Date.now()
+            };
 
             Lampa.Storage.set(CACHE_STORAGE_KEY, cache);
         }
@@ -328,60 +274,315 @@
                 });
         }
 
-        // ---------- Анализ качества одного торрента ----------
+        // ==================================================
+        // НОВАЯ ЛОГИКА ПОИСКА КАЧЕСТВА (из server.js)
+        // ==================================================
 
-        function analyzeTorrentQuality(torrent) {
-            if (!torrent) return null;
+        function normalizeQualityFromText(s){
+            var str = (s || "").toString().toLowerCase();
 
-            var rawQuality = torrent.quality != null ? torrent.quality : '';
-            var title = torrent.title || '';
-            var extra = torrent.release || torrent.source || '';
-            var combined = (title + ' ' + rawQuality + ' ' + extra).toUpperCase();
-            var camText = combined.replace(/HDRIP/gi, '');
+            // CAMRip — самый "плохой"
+            if (/\bcam[-\s]?rip\b|\bcam\b/.test(str)) return "CAMRip";
 
-            var isCamrip = /\b(CAMRIP|CAM|TS|TELESYNC|TELECINE|TC|SCREENER|SCR|HDTS)\b/.test(camText);
-            if (isCamrip) {
-                return { label: 'CAMRIP', score: 50, isCamrip: true };
+            // "звук TS" / "звук с TS" (рус.) или TeleSynch / TS / Telecine / TC
+            var hasZvukTS   = /звук\s*(с)?\s*ts/i.test(str);
+            var isTeleSynch = /\btelesynch\b|\btele\s*synch\b|\bts\b(?![a-z])/i.test(str);
+            var isTelecine  = /\btelecine\b|\btc\b(?![a-z])/i.test(str);
+            if (hasZvukTS || isTeleSynch || isTelecine) return "TS";
+
+            // 4K + HDR → просто 4K
+            var is4k  = /\b(2160p|4k|uhd)\b/.test(str);
+            var hasHDR= /\bhdr10\+?\b|\bhdr\b|\bdolby\s*vision\b|\bdv\b/.test(str);
+            if (is4k && hasHDR) return "4K";
+
+            if (is4k)                         return "4K";
+            if (/\b1080p\b|\b1080i\b/.test(str) || /\bhdtv\s*1080i\b/.test(str)) return "1080p";
+            if (/\b720p\b/.test(str))         return "720p";
+            if (/\b480p\b|\bsd\b/.test(str))  return "SD";
+            if (/\bhd\b/.test(str))           return "1080p";
+            return null;
+        }
+
+        function chooseBetterQuality(a,b){
+            if (!b) return a || null;
+            if (!a) return b;
+            var rank = { "4K":5, "1080p":4, "720p":3, "SD":2, "TS":1, "CAMRip":0 };
+            return (rank[b] || -1) > (rank[a] || -1) ? b : a;
+        }
+
+        function normStr(s){
+            return (s||"")
+              .toLowerCase()
+              .replace(/[._\-–—:,/\\()[\]{}'‘’"“”!?+*#№]/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+        }
+
+        function removeStopWords(s){
+            return (s || "")
+              .replace(/\b(uhd|hdr|hdr10\+?|dolby\s*vision|dv|remux|blu[-\s]?ray|webrip|web[-\s]?dl|hdtv|rip|x26[45]|hevc|av1|avc|h\.26[45]|10[-\s]?bit|8[-\s]?bit|dts|ac3|aac|camrip|telesynch|tele[-\s]?synch|telecine|tc|ts|p(?:2160|1080|720|480))\b/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+        }
+
+        function extractYear(s){
+            var m = (s||"").match(/\b(19|20)\d{2}\b/);
+            return m ? parseInt(m[0],10) : null;
+        }
+
+        function titleMatches(meta, releaseTitle){
+            var t1 = normStr(meta.title || "");
+            var t2 = normStr(meta.title_original || "");
+            if (!t1 && !t2) return true;
+
+            var r = normStr(releaseTitle || "");
+            r = removeStopWords(r);
+
+            var okByTitle =
+                (t1 && r.indexOf(t1) !== -1 && t1.length >= 3) ||
+                (t2 && r.indexOf(t2) !== -1 && t2.length >= 3);
+
+            if (!okByTitle) return false;
+
+            var my = Number(meta.year || 0) || null;
+            if (!my) return true;
+            var ry = extractYear(releaseTitle);
+            return !ry || Math.abs(ry - my) <= 1;
+        }
+
+        function sanitize(s){ return (s || "").replace(/\s+/g, " ").trim(); }
+
+        function isProbableReleaseTitle(s){
+            return /\b(2160p|1080p|720p|480p|4k|uhd|hdr|dolby\s*vision|dv|web[-.\s]?dl|webrip|bluray|bdrip|dvdrip|hdrip|x265|x264|hevc|camrip|telesynch|tele[-\s]?synch|ts|telecine|tc)\b/i.test(s);
+        }
+
+        function dedupe(arr){
+            var seen = {};
+            var out = [];
+            for (var i = 0; i < arr.length; i++){
+                var v = arr[i];
+                if (!seen[v]) {
+                    seen[v] = 1;
+                    out.push(v);
+                }
+            }
+            return out;
+        }
+
+        function pickQualityFromJacredV2Json(data, meta, strictTitle) {
+            if (typeof strictTitle === 'undefined') strictTitle = true;
+
+            var list = null;
+            if (Array.isArray(data && data.Results)) list = data.Results;
+            else if (Array.isArray(data && data.results)) list = data.results;
+            else if (Array.isArray(data)) list = data;
+
+            if (!list || !list.length) return null;
+
+            var best = null;
+
+            for (var i = 0; i < list.length; i++) {
+                var it = list[i];
+                var cat = String(it.Category || it.CategoryDesc || "").toLowerCase();
+                var t   = String(it.Title || it.Name || "").trim();
+
+                var titleOk = !strictTitle || titleMatches(meta, t);
+
+                if (!titleOk) {
+                    if (meta.kind === "movie" && cat.indexOf("tv") !== -1)    continue;
+                    if (meta.kind === "tv"    && cat.indexOf("movie") !== -1) continue;
+                    if (strictTitle) continue;
+                }
+
+                var qFromTitle = normalizeQualityFromText(t);
+                best = chooseBetterQuality(best, qFromTitle);
+
+                var explicit = normalizeQualityFromText(String(it.Quality || it.Resolution || ""));
+                best = chooseBetterQuality(best, explicit);
+
+                if (best === "4K") break;
             }
 
-            var meta = { label: null, score: -1, isCamrip: false };
+            return best;
+        }
 
-            function assign(label, score) {
-                if (score > meta.score) {
-                    meta.label = label;
-                    meta.score = score;
+        function pickQualityFromHtml(html, meta, strictTitle) {
+            if (typeof strictTitle === 'undefined') strictTitle = true;
+            if (!html) return null;
+            var titles = [];
+            var m;
+
+            var linkRe = /<a[^>]*>([^<]+)<\/a>/gi;
+            while ((m = linkRe.exec(html))) {
+                var t = sanitize(m[1]);
+                if (!isProbableReleaseTitle(t)) continue;
+                if (strictTitle && !titleMatches(meta, t)) continue;
+                titles.push(t);
+            }
+
+            var headRe = /<(h\d|strong|b)[^>]*>([^<]+)<\/\1>/gi;
+            while ((m = headRe.exec(html))) {
+                var t2 = sanitize(m[2]);
+                if (!isProbableReleaseTitle(t2)) continue;
+                if (strictTitle && !titleMatches(meta, t2)) continue;
+                titles.push(t2);
+            }
+
+            var best = null;
+            for (var i = 0; i < titles.length; i++) {
+                var tt = titles[i];
+                var q = normalizeQualityFromText(tt);
+                best = chooseBetterQuality(best, q);
+                if (best === "4K") break;
+            }
+            return best;
+        }
+
+        function buildUrls(endpoints, meta, key, opts) {
+            opts = opts || {};
+            var is_serial = opts.is_serial || "";
+            var genres    = opts.genres || "";
+
+            var title  = meta.title || meta.title_original || "";
+            var titleOriginal = meta.title_original || "";
+            var year   = meta.year || "";
+            var imdb   = meta.imdb || "";
+
+            var catsMov = ["2000"], catsTv = ["5000"], catsAll = ["2000","5000"];
+            var kind = (meta.kind || "auto").toLowerCase();
+
+            function pickCats() {
+                if (kind === "movie") return catsMov;
+                if (kind === "tv")    return catsTv;
+                return catsAll;
+            }
+
+            var urls = [];
+
+            function mkHealthy(base) {
+                return base.replace("/indexers/all/", "/indexers/status:healthy/");
+            }
+
+            function withCats(base, q, cats, extra) {
+                var usp = new URLSearchParams();
+                if (key) usp.set("apikey", key);
+                usp.set("Query", q);
+                if (extra.title)          usp.set("title", extra.title);
+                if (extra.title_original) usp.set("title_original", extra.title_original);
+                if (extra.year)           usp.set("year", extra.year);
+                if (extra.is_serial)      usp.set("is_serial", extra.is_serial);
+                if (extra.genres)         usp.set("genres", extra.genres);
+                var useCats = cats || pickCats();
+                for (var i = 0; i < useCats.length; i++) {
+                    usp.append("Category[]", useCats[i]);
+                }
+                return base + "?" + usp.toString();
+            }
+
+            function pushForCats(base, q, extra) {
+                if (kind === "movie") {
+                    urls.push(withCats(base, q, catsMov, extra));
+                } else if (kind === "tv") {
+                    urls.push(withCats(base, q, catsTv, extra));
+                }
+                urls.push(withCats(base, q, ["2000","5000"], extra));
+            }
+
+            // База: только тот домен, который пользователь указал в настройках
+            var eps = endpoints && endpoints.length ? endpoints : [];
+
+            // 1) IMDB healthy (если вдруг будет imdb)
+            if (imdb) {
+                for (var i1 = 0; i1 < eps.length; i1++){
+                    pushForCats(mkHealthy(eps[i1]), imdb, {});
                 }
             }
 
-            var numericQuality = parseInt(String(rawQuality).replace(/[^0-9]/g, ''), 10);
-            if (!isNaN(numericQuality)) {
-                if (numericQuality >= 2160) assign('4K', 800);
-                else if (numericQuality >= 1440) assign('2K', 360);
-                else if (numericQuality >= 1080) assign('1080P', 340);
-                else if (numericQuality >= 720) assign('HD', 220);
-                else if (numericQuality >= 480) assign('SD', 120);
+            var precise = [];
+            if (title && year)         precise.push({ q: title + " " + year, t: title, to: titleOriginal, y: year });
+            if (titleOriginal && year) precise.push({ q: titleOriginal + " " + year, t: title, to: titleOriginal, y: year });
+
+            for (var i2 = 0; i2 < eps.length; i2++){
+                var healthy = mkHealthy(eps[i2]);
+                for (var j2 = 0; j2 < precise.length; j2++) {
+                    var rec2 = precise[j2];
+                    pushForCats(healthy, rec2.q, {
+                        title: rec2.t,
+                        title_original: rec2.to,
+                        year: rec2.y,
+                        is_serial: is_serial,
+                        genres: genres
+                    });
+                }
             }
 
-            if (/\b(2160P|4K|UHD|ULTRA\s*HD)\b/.test(combined)) assign('4K', 800);
-            if (/\b(1440P|2K)\b/.test(combined)) assign('2K', 360);
-            if (/\b(1080P|FHD|FULL\s*HD|BLU[-\s]?RAY|BDRIP|BDREMUX|REMUX|BRRIP)\b/.test(combined)) assign('1080P', 340);
-            if (/\b(900P)\b/.test(combined)) assign('HD', 230);
-            if (/\b(720P|HDTV|HDRIP|WEB[-\s]?DL|WEB[-\s]?RIP|WEBDL|WEBRIP)\b/.test(combined)) assign('HD', 220);
-            if (/\b(540P)\b/.test(combined)) assign('SD', 140);
-            if (/\b(480P|SD|DVDRIP|DVD|TVRIP|VHS)\b/.test(combined)) assign('SD', 120);
+            var soft = [];
+            if (title)         soft.push({ q: title, t: title, to: titleOriginal, y: year || "" });
+            if (titleOriginal) soft.push({ q: titleOriginal, t: title, to: titleOriginal, y: year || "" });
 
-            if (typeof rawQuality === 'string') {
-                var qUpper = rawQuality.toUpperCase();
-                if (!meta.label && /\b(BDRIP|BLURAY|BDREMUX|REMUX)\b/.test(qUpper)) assign('1080P', 320);
-                if (!meta.label && /\b(WEBDL|WEB[-\s]?DL|WEB[-\s]?RIP|HDRIP|HDTV)\b/.test(qUpper)) assign('HD', 210);
-                if (!meta.label && /\b(DVDRIP|DVD|TVRIP)\b/.test(qUpper)) assign('SD', 110);
+            for (var i3 = 0; i3 < eps.length; i3++){
+                var healthy2 = mkHealthy(eps[i3]);
+                for (var j3 = 0; j3 < soft.length; j3++) {
+                    var rec3 = soft[j3];
+                    pushForCats(healthy2, rec3.q, {
+                        title: rec3.t,
+                        title_original: rec3.to,
+                        year: rec3.y,
+                        is_serial: is_serial,
+                        genres: genres
+                    });
+                }
             }
 
-            if (!meta.label) return null;
-            return meta;
+            if (imdb) {
+                for (var i4 = 0; i4 < eps.length; i4++){
+                    pushForCats(eps[i4], imdb, {});
+                }
+            }
+
+            for (var i5 = 0; i5 < eps.length; i5++){
+                for (var j5 = 0; j5 < precise.length; j5++) {
+                    var rec5 = precise[j5];
+                    pushForCats(eps[i5], rec5.q, {
+                        title: rec5.t,
+                        title_original: rec5.to,
+                        year: rec5.y,
+                        is_serial: is_serial,
+                        genres: genres
+                    });
+                }
+                for (var j6 = 0; j6 < soft.length; j6++) {
+                    var rec6 = soft[j6];
+                    pushForCats(eps[i5], rec6.q, {
+                        title: rec6.t,
+                        title_original: rec6.to,
+                        year: rec6.y,
+                        is_serial: is_serial,
+                        genres: genres
+                    });
+                }
+            }
+
+            return dedupe(urls);
         }
 
-        // ---------- Поиск лучшего релиза JacRed ----------
+        function safeGetJac(url, cardId) {
+            return new Promise(function (resolve) {
+                fetchWithProxy(url, cardId, function (err, text) {
+                    if (err || !text) {
+                        resolve({ ok: false, type: "", body: "" });
+                        return;
+                    }
+                    var body = text || "";
+                    var trimmed = body.trim();
+                    var first = trimmed.charAt(0);
+                    var type = (first === '{' || first === '[') ? 'application/json' : 'text/html';
+                    resolve({ ok: true, type: type, body: body });
+                });
+            });
+        }
+
+        // ---------- Поиск лучшего релиза JacRed (НОВАЯ ВЕРСИЯ) ----------
 
         function getBestReleaseFromJacred(normalizedCard, cardId, callback) {
             if (!jacredUrl) {
@@ -391,123 +592,113 @@
 
             var year = '';
             var dateStr = normalizedCard.release_date || '';
-            if (dateStr.length >= 4) {
+            if (dateStr && dateStr.length >= 4) {
                 year = dateStr.substring(0, 4);
             }
 
-            function searchJacredApi(searchTitle, searchYear, exactMatch, strategyName, apiCallback) {
-                var apiUrl = JACRED_PROTOCOL + jacredUrl + '/api/v1.0/torrents?search=' +
-                    encodeURIComponent(searchTitle) +
-                    (searchYear ? '&year=' + searchYear : '') +
-                    (exactMatch ? '&exact=true' : '');
+            var meta = {
+                kind: normalizedCard.type === 'tv' ? 'tv' : 'movie',
+                title: normalizedCard.title || '',
+                title_original: normalizedCard.original_title || '',
+                year: year || '',
+                imdb: normalizedCard.imdb_id || null
+            };
 
-                fetchWithProxy(apiUrl, cardId, function (error, responseText) {
-                    if (error || !responseText) {
-                        apiCallback(null);
-                        return;
-                    }
-                    try {
-                        var torrents = JSON.parse(responseText);
-                        if (!Array.isArray(torrents) || torrents.length === 0) {
-                            apiCallback(null);
-                            return;
-                        }
+            var endpoints = [
+                JACRED_PROTOCOL + jacredUrl + '/api/v2.0/indexers/all/results'
+            ];
 
-                        var bestRelease = null;
-                        var bestCamRelease = null;
+            var is_serial = meta.kind === 'tv' ? '2' : '1';
+            var urls = buildUrls(endpoints, meta, null, { is_serial: is_serial, genres: "" });
 
-                        for (var i = 0; i < torrents.length; i++) {
-                            var torrent = torrents[i];
-                            var qualityMeta = analyzeTorrentQuality(torrent);
-                            if (!qualityMeta || !qualityMeta.label) continue;
-
-                            if (qualityMeta.isCamrip) {
-                                if (!bestCamRelease || qualityMeta.score > bestCamRelease.meta.score) {
-                                    bestCamRelease = { torrent: torrent, meta: qualityMeta };
-                                }
-                            } else {
-                                if (!bestRelease || qualityMeta.score > bestRelease.meta.score) {
-                                    bestRelease = { torrent: torrent, meta: qualityMeta };
-                                }
-                            }
-                        }
-
-                        var chosen = bestRelease || bestCamRelease;
-                        if (chosen) {
-                            apiCallback({
-                                quality: chosen.meta.label,
-                                title: chosen.torrent.title,
-                                isCamrip: chosen.meta.isCamrip
-                            });
-                        } else {
-                            apiCallback(null);
-                        }
-                    } catch (e) {
-                        console.error('Ошибка при получении качества из JacRed:', e);
-                        apiCallback(null);
-                    }
-                });
+            if (!urls || !urls.length) {
+                callback(null);
+                return;
             }
 
-            var searchStrategies = [];
+            var triedBodies = [];
+            var bestStrict = null;
+            var idx = 0;
+            var batchSize = 6;
 
-            if (normalizedCard.original_title && /[a-zа-яё0-9]/i.test(normalizedCard.original_title)) {
-                searchStrategies.push({
-                    title: normalizedCard.original_title.trim(),
-                    year: year,
-                    exact: true,
-                    name: 'OriginalTitle Exact Year'
-                });
-            }
-
-            if (normalizedCard.title && /[a-zа-яё0-9]/i.test(normalizedCard.title)) {
-                searchStrategies.push({
-                    title: normalizedCard.title.trim(),
-                    year: year,
-                    exact: true,
-                    name: 'Title Exact Year'
-                });
-            }
-
-            if (normalizedCard.type === 'tv' && (!year || isNaN(year))) {
-                if (normalizedCard.original_title && /[a-zа-яё0-9]/i.test(normalizedCard.original_title)) {
-                    searchStrategies.push({
-                        title: normalizedCard.original_title.trim(),
-                        year: '',
-                        exact: false,
-                        name: 'OriginalTitle No Year'
-                    });
+            function processStrictBatch() {
+                if (idx >= urls.length || bestStrict === '4K') {
+                    processSoftPass();
+                    return;
                 }
-                if (normalizedCard.title && /[a-zа-яё0-9]/i.test(normalizedCard.title)) {
-                    searchStrategies.push({
-                        title: normalizedCard.title.trim(),
-                        year: '',
-                        exact: false,
-                        name: 'Title No Year'
+
+                var slice = urls.slice(idx, idx + batchSize);
+                idx += batchSize;
+
+                var promises = slice.map(function (u) {
+                    return safeGetJac(u, cardId);
+                });
+
+                Promise.all(promises).then(function (results) {
+                    results.forEach(function (r) {
+                        if (r.ok && r.body) triedBodies.push(r);
                     });
-                }
+
+                    for (var i = 0; i < results.length; i++) {
+                        var r = results[i];
+                        if (!r.ok || !r.body) continue;
+                        var q = null;
+                        if ((r.type || "").indexOf("application/json") !== -1) {
+                            try {
+                                q = pickQualityFromJacredV2Json(JSON.parse(r.body), meta, true);
+                            } catch (e) {}
+                        }
+                        if (!q) q = pickQualityFromHtml(r.body, meta, true);
+                        bestStrict = chooseBetterQuality(bestStrict, q);
+                        if (bestStrict === '4K') break;
+                    }
+
+                    if (bestStrict === '4K' || idx >= urls.length) {
+                        processSoftPass();
+                    } else {
+                        processStrictBatch();
+                    }
+                }).catch(function () {
+                    processSoftPass();
+                });
             }
 
-            function executeNextStrategy(index) {
-                if (index >= searchStrategies.length) {
+            function processSoftPass() {
+                var best = bestStrict;
+                if (!triedBodies.length) {
+                    finish(best);
+                    return;
+                }
+
+                for (var i = 0; i < triedBodies.length; i++) {
+                    var r = triedBodies[i];
+                    var q = null;
+                    if ((r.type || "").indexOf("application/json") !== -1) {
+                        try {
+                            q = pickQualityFromJacredV2Json(JSON.parse(r.body), meta, false);
+                        } catch (e) {}
+                    }
+                    if (!q) q = pickQualityFromHtml(r.body, meta, false);
+                    best = chooseBetterQuality(best, q);
+                    if (best === '4K') break;
+                }
+
+                finish(best);
+            }
+
+            function finish(quality) {
+                if (!quality) {
                     callback(null);
                     return;
                 }
-                var strategy = searchStrategies[index];
-                searchJacredApi(strategy.title, strategy.year, strategy.exact, strategy.name, function (result) {
-                    if (result !== null) {
-                        callback(result);
-                    } else {
-                        executeNextStrategy(index + 1);
-                    }
+                callback({
+                    quality: quality,
+                    title: meta.title || meta.title_original || '',
+                    isCamrip: (quality === 'CAMRip' || quality === 'TS')
                 });
             }
 
-            if (searchStrategies.length > 0) {
-                executeNextStrategy(0);
-            } else {
-                callback(null);
-            }
+            processStrictBatch();
         }
 
         // ---------- Тип карточки ----------
@@ -564,36 +755,13 @@
 
             var normalizedCard = {
                 id: card.id,
-                tmdb_id: card.id, // считаем, что это TMDB ID
                 title: card.title || card.name || '',
                 original_title: card.original_title || card.original_name || '',
                 type: getCardType(card),
-                release_date: card.release_date || card.first_air_date || '',
-                imdb_id: card.imdb_id
+                release_date: card.release_date || card.first_air_date || ''
             };
 
-            var qCacheKey = makeTmdbCacheKey(
-                normalizedCard.tmdb_id,
-                normalizedCard.type,
-                normalizedCard.imdb_id
-            );
-
-            if (!qCacheKey) {
-                // без нормального ключа — без кэша
-                showFullPlaceholder(render);
-                getBestReleaseFromJacred(normalizedCard, normalizedCard.id, function (res) {
-                    var quality = res && res.quality;
-                    var isCamrip = res && res.isCamrip;
-
-                    if (quality && quality !== 'NO') {
-                        updateFullQuality(quality, isCamrip, render);
-                    } else {
-                        clearFullQuality(render);
-                    }
-                });
-                return;
-            }
-
+            var qCacheKey = normalizedCard.type + '_' + (normalizedCard.id || normalizedCard.imdb_id);
             var cache = getQualityCache(qCacheKey);
 
             if (cache) {
@@ -633,37 +801,25 @@
                     return cardDataStorage.get(cardElement);
                 }
 
-                // 1) Пытаемся взять tmdbId из data-атрибутов
-                var tmdbId = cardElement.getAttribute('data-tmdb-id') ||
-                    cardElement.getAttribute('data-id') ||
-                    cardElement.getAttribute('data-movie-id') ||
-                    cardElement.getAttribute('data-tv-id');
+                var tmdbId = null;
+                var cardId = cardElement.getAttribute('data-id') ||
+                    cardElement.getAttribute('id');
 
-                // 2) Если нет — пробуем подняться по DOM вверх
-                if (!tmdbId) {
+                if (!cardId) {
                     var parent = cardElement.parentElement;
-                    while (parent && !tmdbId) {
-                        tmdbId = parent.getAttribute('data-tmdb-id') ||
-                            parent.getAttribute('data-id') ||
+                    while (parent && !cardId) {
+                        cardId = parent.getAttribute('data-id') ||
                             parent.getAttribute('data-movie-id') ||
+                            parent.getAttribute('data-tmdb-id') ||
                             parent.getAttribute('data-tv-id');
                         parent = parent.parentElement;
                     }
                 }
 
-                // 3) Если всё ещё нет — пробуем вытащить из href вида card=1290159&media=movie
-                if (!tmdbId) {
-                    var href = cardElement.getAttribute('href') || '';
-                    var mHref = href.match(/card=(\d+)/);
-                    if (mHref) tmdbId = mHref[1];
+                if (!cardId) {
+                    cardId = getCardIdFromLocal(cardElement);
                 }
-
-                // 4) Последний fallback — старый getCardIdFromLocal
-                if (!tmdbId) {
-                    tmdbId = getCardIdFromLocal(cardElement);
-                }
-
-                if (!tmdbId) return null;
+                if (!cardId) return null;
 
                 var titleElement = cardElement.querySelector('.card__title, .card-title, .title, .card__name, .name');
                 var title = titleElement ? titleElement.textContent.trim() : '';
@@ -700,7 +856,7 @@
                 }
 
                 var cardData = {
-                    id: tmdbId,          // по сути TMDB id
+                    id: cardId,
                     tmdb_id: tmdbId,
                     title: title,
                     original_title: originalTitle,
@@ -746,45 +902,17 @@
             }
         }
 
-        // >>> addQualityToMiniCard с учётом кэша (не понижает качество) <<<
-
+        // >>> НОВАЯ addQualityToMiniCard С ИСПОЛЬЗОВАНИЕМ setJacredBadge <<<
         function addQualityToMiniCard(cardElement, cardData) {
             if (!cardData || !cardData.title) return;
             if (!isJacredEnabled()) return;
 
+            // Находим "слот" карточки, как в примере
             var $root = $(cardElement instanceof HTMLElement ? cardElement : cardElement);
             var $slot = $root.find('.card__view, .card__image, .card__img, .card__poster, .card__content, .card').first();
             if (!$slot.length) $slot = $root;
 
-            // единый tmdb-ключ
-            var qCacheKey = makeTmdbCacheKey(
-                cardData.tmdb_id,
-                cardData.type,
-                null
-            );
-
-            if (!qCacheKey) {
-                // без нормального ключа — пробуем JacRed, но без кэша
-                getBestReleaseFromJacred(cardData, cardData.id, function (res) {
-                    if (!$slot || !$slot.length) return;
-
-                    var q = res && res.quality;
-                    if (q && q !== 'undefined' && q !== '' && q !== 'null') {
-                        setJacredBadge($slot, q);
-
-                        var $holder = $slot.find('.card__quality').first();
-                        if ($holder.length) {
-                            if (res.isCamrip) $holder.addClass('jacq-cam');
-                            else $holder.removeClass('jacq-cam');
-                        }
-                    }
-                });
-                return;
-            }
-
-            // помечаем карточку ключом
-            cardElement.setAttribute('data-jacred-q-key', qCacheKey);
-
+            var qCacheKey = cardData.type + '_' + cardData.id;
             var cache = getQualityCache(qCacheKey);
 
             function applyQuality(quality, isCamrip) {
@@ -804,61 +932,34 @@
                 }
             }
 
-            // если в кэше уже что-то есть — сразу рисуем
             if (cache && cache.quality) {
                 applyQuality(cache.quality, cache.isCamrip);
             } else {
                 // плейсхолдер "…" пока ждём ответ
                 setJacredBadge($slot, undefined);
-            }
 
-            // В любом случае запускаем запрос (чтобы можно было апгрейдить качество)
-            getBestReleaseFromJacred(cardData, cardData.id, function (res) {
-                if (!$slot || !$slot.length) return;
+                getBestReleaseFromJacred(cardData, cardData.id, function (res) {
+                    if (!$slot || !$slot.length) return;
 
-                var cacheNow   = getQualityCache(qCacheKey);
-                var cacheQ     = cacheNow && cacheNow.quality;
-                var cacheRank  = rankQuality(cacheQ);
+                    if (res && res.quality && res.quality !== 'undefined' && res.quality !== '' && res.quality !== 'null') {
+                        applyQuality(res.quality, res.isCamrip);
 
-                var resQ = (res && res.quality && res.quality !== 'undefined' &&
-                           res.quality !== '' && res.quality !== 'null') ? res.quality : null;
-                var resRank = rankQuality(resQ);
-
-                var chosenQ = null;
-                var chosenIsCamrip = false;
-
-                // Берём лучший из: (текущий кэш, ответ JacRed)
-                if (resQ && resRank >= cacheRank) {
-                    // Ответ JacRed не хуже кэша — используем его
-                    chosenQ = resQ;
-                    chosenIsCamrip = !!res.isCamrip;
-                } else if (cacheQ) {
-                    // Ответ хуже кэша или пустой — остаёмся на том, что уже было
-                    chosenQ = cacheQ;
-                    chosenIsCamrip = cacheNow && cacheNow.isCamrip;
-                }
-
-                if (chosenQ) {
-                    applyQuality(chosenQ, chosenIsCamrip);
-
-                    // Если мы взяли новое (лучшее) качество — обновляем кэш
-                    if (resQ && resRank > cacheRank) {
                         saveQualityCache(qCacheKey, {
-                            quality: chosenQ,
-                            isCamrip: chosenIsCamrip
+                            quality: res.quality,
+                            isCamrip: res.isCamrip
+                        });
+                    } else {
+                        // если ничего нет — просто убираем наш «…»
+                        var $holder = $slot.find('.card__quality');
+                        $holder.each(function () {
+                            var $h = $(this);
+                            if ($h.find('.jacq-qtext').length) $h.remove();
                         });
                     }
-                } else {
-                    // Ничего не нашли — убираем наш «…»
-                    var $holder = $slot.find('.card__quality');
-                    $holder.each(function () {
-                        var $h = $(this);
-                        if ($h.find('.jacq-qtext').length) $h.remove();
-                    });
-                }
-            });
+                });
+            }
         }
-        // <<< КОНЕЦ addQualityToMiniCard >>>
+        // <<< КОНЕЦ НОВОЙ addQualityToMiniCard >>>
 
         function processAllCards() {
             var cards = document.querySelectorAll('.card:not([data-jacred-quality-processed])');
@@ -918,7 +1019,7 @@
     // -----------------------------
     function addSettingsItem() {
         try {
-            // 1) Новый API SettingsApi
+            // 1) Новый API SettingsApi (современные версии Lampa)
             if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addComponent === 'function') {
 
                 Lampa.SettingsApi.addComponent({
@@ -927,7 +1028,7 @@
                     icon: '<svg height="200" width="200" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>'
                 });
 
-                // Триггер включения/выключения
+                // Триггер включения/выключения плагина
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -969,7 +1070,7 @@
                     }
                 });
 
-                // Кнопка сброса кэша
+                // Кнопка сброса кэша качества
                 Lampa.SettingsApi.addParam({
                     component: 'jacred_quality',
                     param: {
@@ -993,7 +1094,7 @@
                 return;
             }
 
-            // 2) Старый API настроек
+            // 2) Старый API настроек (на всякий случай)
             if (Lampa.Settings && typeof Lampa.Settings.add === 'function') {
                 Lampa.Settings.add({
                     group: 'jacred_quality',
@@ -1014,6 +1115,7 @@
                 return;
             }
 
+            // 3) Ни одного API нет — молча выходим
         } catch (e) {
             console.error('JacRedQuality: settings error:', e);
         }
