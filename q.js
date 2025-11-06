@@ -269,15 +269,15 @@
             var numericQuality = parseInt(String(rawQuality).replace(/[^0-9]/g, ''), 10);
             if (!isNaN(numericQuality)) {
                 if (numericQuality >= 2160) assign('4K', 800);
-                else if (numericQuality >= 1440) assign('FHD', 360);
-                else if (numericQuality >= 1080) assign('FHD', 340);
+                else if (numericQuality >= 1440) assign('2K', 360);
+                else if (numericQuality >= 1080) assign('1080P', 340);
                 else if (numericQuality >= 720) assign('HD', 220);
                 else if (numericQuality >= 480) assign('SD', 120);
             }
 
             if (/\b(2160P|4K|UHD|ULTRA\s*HD)\b/.test(combined)) assign('4K', 800);
-            if (/\b(1440P|2K)\b/.test(combined)) assign('FHD', 360);
-            if (/\b(1080P|FHD|FULL\s*HD|BLU[-\s]?RAY|BDRIP|BDREMUX|REMUX|BRRIP)\b/.test(combined)) assign('FHD', 340);
+            if (/\b(1440P|2K)\b/.test(combined)) assign('2K', 360);
+            if (/\b(1080P|FHD|FULL\s*HD|BLU[-\s]?RAY|BDRIP|BDREMUX|REMUX|BRRIP)\b/.test(combined)) assign('1080P', 340);
             if (/\b(900P)\b/.test(combined)) assign('HD', 230);
             if (/\b(720P|HDTV|HDRIP|WEB[-\s]?DL|WEB[-\s]?RIP|WEBDL|WEBRIP)\b/.test(combined)) assign('HD', 220);
             if (/\b(540P)\b/.test(combined)) assign('SD', 140);
@@ -285,7 +285,7 @@
 
             if (typeof rawQuality === 'string') {
                 var qUpper = rawQuality.toUpperCase();
-                if (!meta.label && /\b(BDRIP|BLURAY|BDREMUX|REMUX)\b/.test(qUpper)) assign('FHD', 320);
+                if (!meta.label && /\b(BDRIP|BLURAY|BDREMUX|REMUX)\b/.test(qUpper)) assign('1080P', 320);
                 if (!meta.label && /\b(WEBDL|WEB[-\s]?DL|WEB[-\s]?RIP|HDRIP|HDTV)\b/.test(qUpper)) assign('HD', 210);
                 if (!meta.label && /\b(DVDRIP|DVD|TVRIP)\b/.test(qUpper)) assign('SD', 110);
             }
