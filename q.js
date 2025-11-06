@@ -33,7 +33,7 @@
 
         var css = ''
           + '.card__quality.jacq-anim{animation:jacqPop .18s ease-out both;}'
-          // CAMRIP красный фон (мини-карточки)
+          // CAMRIP красный фон (карточки)
           + '.card__quality.jacq-cam{'
           + '  background:#c62828!important;'
           + '  color:#fff!important;'
@@ -44,11 +44,6 @@
           + '  border-radius:0.2em;'
           + '  padding:0.44em;'
           + '  margin-left:0.5em;'
-          + '}'
-          // Красный фон для CAMRIP в фулле
-          + '.jacred-full-quality_cam{'
-          + '  background:#c62828!important;'
-          + '  color:#fff!important;'
           + '}'
           + '@keyframes jacqPop{0%{opacity:0;transform:translateY(-4px) scale(.98);}100%{opacity:1;transform:translateY(0) scale(1);}}'
           + '@media (prefers-reduced-motion: reduce){.card__quality.jacq-anim{animation:none!important;}}';
