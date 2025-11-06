@@ -26,7 +26,7 @@
     }
 
     // -----------------------------
-    // МИНИМАЛЬНЫЙ СТИЛЬ ДЛЯ БЕЙДЖЕЙ + setJacredBadge
+    // МИНИМАЛЬНЫЙ СТИЛЬ ДЛЯ БЕЙДЖЕЙ
     // -----------------------------
     (function addJacredQualityStyle(){
         if (document.getElementById('jacred-quality-style')) return;
@@ -522,7 +522,7 @@
         }
 
         // ==================================================
-        // 1) КАЧЕСТВО В ФУЛЛ-ОПИСАНИИ
+        // 1) КАЧЕСТВО Внутри карточки
         // ==================================================
 
         function clearFullQuality(render) {
@@ -602,7 +602,7 @@
         });
 
         // ==================================================
-        // 2) КАЧЕСТВО НА МИНИ-КАРТОЧКАХ
+        // 2) КАЧЕСТВО НА КАРТОЧКАХ
         // ==================================================
 
         // Нормализация card_data Lampa → формат, понятный JacRed
@@ -824,29 +824,6 @@
                         }
                     }
                 });
-
-                // (опционально) кнопка "обновить видимые плитки"
-                Lampa.SettingsApi.addParam({
-                    component: 'jacred_quality',
-                    param: {
-                        name: 'jacred_quality_refresh_visible',
-                        type: 'trigger',
-                        "default": false
-                    },
-                    field: {
-                        name: 'Обновить видимые плитки',
-                        description: 'Перезапросить качество на текущем экране'
-                    },
-                    onChange: function () {
-                        Lampa.Storage.set('jacred_quality_refresh_visible', false);
-                        if (window.jacredMiniQualityRefresh) {
-                            window.jacredMiniQualityRefresh();
-                        }
-                    }
-                });
-
-                return;
-            }
 
             // 2) Старый API настроек (на всякий случай)
             if (Lampa.Settings && typeof Lampa.Settings.add === 'function') {
