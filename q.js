@@ -1,17 +1,33 @@
-(function () {
+(function () { 
     'use strict';
 
     // -----------------------------
     // НАСТРОЙКИ ПЛАГИНА
     // -----------------------------
-    var ENABLE_STORAGE_KEY = 'jacred_plugin_quality_enabled';      // on/off плагина
-    var CACHE_STORAGE_KEY  = 'jacred_plugin_quality_cache';       // кэш качества
+    var ENABLE_STORAGE_KEY = 'jacred_plugin_quality_enabled'; // on/off плагина (через триггер)
+    var CACHE_STORAGE_KEY  = 'jacred_plugin_quality_cache';   // кэш качества
     var DEFAULT_ENABLE     = 'on';
+
+    // Универсальный чекер "включен ли плагин"
+    function isJacredEnabled() {
+        try {
+            var v = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
+
+            if (v === 'on')  return true;
+            if (v === 'off') return false;
+
+            if (typeof v === 'boolean') return v;
+
+            if (v === 'true'  || v === '1')  return true;
+            if (v === 'false' || v === '0')  return false;
+        } catch (e) {}
+
+        return DEFAULT_ENABLE === 'on';
+    }
 
     // -----------------------------
     // МИНИМАЛЬНЫЙ СТИЛЬ ДЛЯ БЕЙДЖЕЙ + setJacredBadge
     // -----------------------------
-    // Минимальный стиль эффекта появления бейджа
     (function addJacredQualityStyle(){
         if (document.getElementById('jacred-quality-style')) return;
 
@@ -84,8 +100,7 @@
 
     // Основная точка входа
     function applyJacredQuality() {
-        var enabled = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
-        if (enabled !== 'on') {
+        if (!isJacredEnabled()) {
             // если отключено – просто чистим кэш
             Lampa.Storage.set(CACHE_STORAGE_KEY, {});
             return;
@@ -153,7 +168,7 @@
 
             var q = String(item.quality || '').toUpperCase();
 
-            // для TS / CAM / CAMRip — обновление раз в сутки
+            // для TS / CAM / CAMRIP — обновление раз в сутки
             if (/\bTS\b/.test(q) || /\bCAM\b/.test(q) || /\bCAMRIP\b/.test(q)) {
                 ttl = Q_TS_CACHE_TIME;
             }
@@ -645,9 +660,7 @@
         // >>> НОВАЯ addQualityToMiniCard С ИСПОЛЬЗОВАНИЕМ setJacredBadge <<<
         function addQualityToMiniCard(cardElement, cardData) {
             if (!cardData || !cardData.title) return;
-
-            var enabled = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
-            if (enabled !== 'on') return;
+            if (!isJacredEnabled()) return;
 
             // Находим "слот" карточки, как в примере
             var $root = $(cardElement instanceof HTMLElement ? cardElement : cardElement);
@@ -758,41 +771,119 @@
         setTimeout(processAllCards, 100);
     }
 
-   // -----------------------------
-// ПУНКТ НАСТРОЕК В Lampa
-// -----------------------------
-function addSettingsItem() {
-    try {
-        // Если старый API настроек недоступен — тихо выходим,
-        // не ломаем консоль и даём плагину работать "как есть".
-        if (!Lampa.Settings || typeof Lampa.Settings.add !== 'function') {
-            return;
-        }
+    // -----------------------------
+    // ПУНКТ НАСТРОЕК В Lampa
+    // -----------------------------
+    function addSettingsItem() {
+        try {
+            // 1) Новый API SettingsApi (современные версии Lampa)
+            if (Lampa.SettingsApi && typeof Lampa.SettingsApi.addComponent === 'function') {
 
-        Lampa.Settings.add({
-            group: 'jacred_quality',
-            title: 'JacRed качество',
-            subtitle: 'Плагин показа качества по JacRed (отдельно от Lampa)',
-            icon: 'magic',
-            onRender: function (item) {
-                var enabled = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
-                item.toggleClass('on', enabled === 'on');
-            },
-            onChange: function (item) {
-                var enabled = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
-                var next = enabled === 'on' ? 'off' : 'on';
-                Lampa.Storage.set(ENABLE_STORAGE_KEY, next);
+                Lampa.SettingsApi.addComponent({
+                    component: 'jacred_quality',
+                    name: 'JacRed качество',
+                    icon: '<svg height="200" width="200" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>'
+                });
 
-                item.toggleClass('on', next === 'on');
+                // Триггер включения/выключения плагина
+                Lampa.SettingsApi.addParam({
+                    component: 'jacred_quality',
+                    param: {
+                        name: ENABLE_STORAGE_KEY,
+                        type: 'trigger',
+                        "default": (DEFAULT_ENABLE === 'on')
+                    },
+                    field: {
+                        name: 'Включить JacRed качество',
+                        description: 'Показывать бейдж качества из JacRed в списках'
+                    },
+                    onChange: function () {
+                        // Storage сам положит true/false,
+                        // isJacredEnabled умеет это понимать.
+                        // Перезапуск логики
+                        window.jacredQualityInitialized = false;
+                        applyJacredQuality();
+                    }
+                });
 
-                // перезапуск логики
-                applyJacredQuality();
+                // Поле для изменения jacred_url
+                Lampa.SettingsApi.addParam({
+                    component: 'jacred_quality',
+                    param: {
+                        name: 'jacred_url',
+                        type: 'input',
+                        placeholder: 'jacred.xyz',
+                        values: Lampa.Storage.get('jacred_url', 'jacred.xyz')
+                    },
+                    field: {
+                        name: 'JacRed URL',
+                        description: 'Например: jacred.xyz или свой домен'
+                    },
+                    onChange: function () {
+                        var url = (Lampa.Storage.get('jacred_url') || '').trim();
+                        if (url && Lampa.Noty) {
+                            Lampa.Noty.show('JacRed URL: ' + url);
+                        }
+                        // На всякий случай чистим кэш и переинициализируем
+                        Lampa.Storage.set(CACHE_STORAGE_KEY, {});
+                        window.jacredQualityInitialized = false;
+                        applyJacredQuality();
+                    }
+                });
+
+                // Кнопка сброса кэша качества
+                Lampa.SettingsApi.addParam({
+                    component: 'jacred_quality',
+                    param: {
+                        name: 'jacred_quality_clear_cache',
+                        type: 'trigger',
+                        "default": false
+                    },
+                    field: {
+                        name: 'Сбросить кэш качества',
+                        description: 'Очистить локальный кэш JacRed качества'
+                    },
+                    onChange: function () {
+                        // Сбрасываем значение триггера обратно
+                        Lampa.Storage.set('jacred_quality_clear_cache', false);
+                        Lampa.Storage.set(CACHE_STORAGE_KEY, {});
+                        if (Lampa.Noty) {
+                            Lampa.Noty.show('Кэш JacRed качества очищен');
+                        }
+                    }
+                });
+
+                return;
             }
-        });
-    } catch (e) {
-        console.error('JacRedQuality: settings error:', e);
+
+            // 2) Старый API настроек (на всякий случай)
+            if (Lampa.Settings && typeof Lampa.Settings.add === 'function') {
+                Lampa.Settings.add({
+                    group: 'jacred_quality',
+                    title: 'JacRed качество',
+                    subtitle: 'Плагин показа качества по JacRed (отдельно от Lampa)',
+                    icon: 'magic',
+                    onRender: function (item) {
+                        item.toggleClass('on', isJacredEnabled());
+                    },
+                    onChange: function (item) {
+                        var next = isJacredEnabled() ? 'off' : 'on';
+                        Lampa.Storage.set(ENABLE_STORAGE_KEY, next);
+                        item.toggleClass('on', next === 'on');
+                        window.jacredQualityInitialized = false;
+                        applyJacredQuality();
+                    }
+                });
+                // В старом API отдельно input и кнопки уже сложнее красиво впихнуть,
+                // поэтому оставляем только тумблер.
+                return;
+            }
+
+            // 3) Ни одного API нет — молча выходим
+        } catch (e) {
+            console.error('JacRedQuality: settings error:', e);
+        }
     }
-}
 
     // -----------------------------
     // ХУК ИНИЦИАЛИЗАЦИИ LAMPA
