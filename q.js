@@ -42,7 +42,7 @@
           + '.jacred-full-quality{'
           + '  border:1px solid #fff;'
           + '  border-radius:0.2em;'
-          + '  padding:0.35em;'       
+          + '  padding:0.44em;'       
           + '  margin-left:0.5em;'
           + '}'
           + '@keyframes jacqPop{0%{opacity:0;transform:translateY(-4px) scale(.98);}100%{opacity:1;transform:translateY(0) scale(1);}}'
