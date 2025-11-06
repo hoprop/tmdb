@@ -758,35 +758,41 @@
         setTimeout(processAllCards, 100);
     }
 
-    // -----------------------------
-    // ПУНКТ НАСТРОЕК В Lampa
-    // -----------------------------
-    function addSettingsItem() {
-        try {
-            Lampa.Settings.add({
-                group: 'jacred_quality',
-                title: 'JacRed качество',
-                subtitle: 'Плагин показа качества по JacRed (отдельно от Lampa)',
-                icon: 'magic',
-                onRender: function (item) {
-                    var enabled = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
-                    item.toggleClass('on', enabled === 'on');
-                },
-                onChange: function (item) {
-                    var enabled = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
-                    var next = enabled === 'on' ? 'off' : 'on';
-                    Lampa.Storage.set(ENABLE_STORAGE_KEY, next);
-
-                    item.toggleClass('on', next === 'on');
-
-                    // перезапуск логики
-                    applyJacredQuality();
-                }
-            });
-        } catch (e) {
-            console.error('JacRedQuality: settings error:', e);
+   // -----------------------------
+// ПУНКТ НАСТРОЕК В Lampa
+// -----------------------------
+function addSettingsItem() {
+    try {
+        // Если старый API настроек недоступен — тихо выходим,
+        // не ломаем консоль и даём плагину работать "как есть".
+        if (!Lampa.Settings || typeof Lampa.Settings.add !== 'function') {
+            return;
         }
+
+        Lampa.Settings.add({
+            group: 'jacred_quality',
+            title: 'JacRed качество',
+            subtitle: 'Плагин показа качества по JacRed (отдельно от Lampa)',
+            icon: 'magic',
+            onRender: function (item) {
+                var enabled = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
+                item.toggleClass('on', enabled === 'on');
+            },
+            onChange: function (item) {
+                var enabled = Lampa.Storage.get(ENABLE_STORAGE_KEY, DEFAULT_ENABLE);
+                var next = enabled === 'on' ? 'off' : 'on';
+                Lampa.Storage.set(ENABLE_STORAGE_KEY, next);
+
+                item.toggleClass('on', next === 'on');
+
+                // перезапуск логики
+                applyJacredQuality();
+            }
+        });
+    } catch (e) {
+        console.error('JacRedQuality: settings error:', e);
     }
+}
 
     // -----------------------------
     // ХУК ИНИЦИАЛИЗАЦИИ LAMPA
