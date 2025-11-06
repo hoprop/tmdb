@@ -42,7 +42,7 @@
         document.head.appendChild(el);
     })();
 
-    // Установка бейджа качества в карточку (аналог setBadge из примера)
+    // Установка бейджа качества в карточку (аналог setBadge)
     function setJacredBadge($el, value){
         var $holder = $el.find('.card__quality');
         var text = (typeof value === 'undefined') ? '…' : (value === null ? '' : String(value));
@@ -134,7 +134,7 @@
         ];
         var PROXY_TIMEOUT = 5000;
 
-        // нормализация id -> "123456" и общий ключ кэша
+        // ЕДИНЫЙ ключ кэша для фулла и карточек
         function makeCacheKey(type, id, imdbId) {
             var raw = id || imdbId || '';
             var m = String(raw).match(/(\d+)/);
@@ -142,27 +142,7 @@
             return String(type || 'movie') + '_' + clean;
         }
 
-        // Полифилл AbortController (если нет)
-        if (typeof AbortController === 'undefined') {
-            window.AbortController = function () {
-                this.signal = {
-                    aborted: false,
-                    addEventListener: function (event, callback) {
-                        if (event === 'abort') {
-                            this._onabort = callback;
-                        }
-                    }
-                };
-                this.abort = function () {
-                    this.signal.aborted = true;
-                    if (typeof this.signal._onabort === 'function') {
-                        this.signal._onabort();
-                    }
-                };
-            };
-        }
-
-        // >>> ранги качества, чтобы не понижать значение в кэше
+        // Ранг качества, чтобы не понижать с 4K до SD и т.п.
         function getQualityRank(q) {
             if (!q) return -1;
             var u = String(q).toUpperCase().trim();
@@ -189,7 +169,7 @@
             return (map[u] !== undefined) ? map[u] : -1;
         }
 
-        // Обновить все мини-карточки с данным ключом кэша
+        // Обновляет все мини-карточки с данным ключом
         function refreshCardsForKey(key, quality, isCamrip) {
             try {
                 if (!key || !quality) return;
@@ -213,6 +193,26 @@
             } catch (e) {
                 console.error('JacRedQuality: refreshCardsForKey error:', e);
             }
+        }
+
+        // Полифилл AbortController (если нет)
+        if (typeof AbortController === 'undefined') {
+            window.AbortController = function () {
+                this.signal = {
+                    aborted: false,
+                    addEventListener: function (event, callback) {
+                        if (event === 'abort') {
+                            this._onabort = callback;
+                        }
+                    }
+                };
+                this.abort = function () {
+                    this.signal.aborted = true;
+                    if (typeof this.signal._onabort === 'function') {
+                        this.signal._onabort();
+                    }
+                };
+            };
         }
 
         // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ КЭША ----------
@@ -240,7 +240,7 @@
         function saveQualityCache(key, data) {
             var cache = Lampa.Storage.get(CACHE_STORAGE_KEY) || {};
 
-            // удаляем протухшие
+            // чистим протухшее
             Object.keys(cache).forEach(function (cacheKey) {
                 if (Date.now() - cache[cacheKey].timestamp >= Q_CACHE_TIME) {
                     delete cache[cacheKey];
@@ -255,7 +255,7 @@
                 var oldRank = getQualityRank(existing.quality);
                 var newRank = getQualityRank(newQuality);
 
-                // если новое качество не лучше — просто обновляем timestamp и выходим
+                // если новое качество НЕ лучше — только обновим timestamp
                 if (newRank <= oldRank) {
                     existing.timestamp = Date.now();
                     cache[key] = existing;
@@ -599,7 +599,6 @@
                 imdb_id: card.imdb_id
             };
 
-            // единый ключ кэша
             var qCacheKey = makeCacheKey(normalizedCard.type, normalizedCard.id, normalizedCard.imdb_id);
             var cache = getQualityCache(qCacheKey);
 
