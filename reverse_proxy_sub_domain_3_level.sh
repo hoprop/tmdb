@@ -692,7 +692,6 @@ clean_url() {
 
 ###################################
 ### Function to crop the domain to the last two parts
-### ТЕПЕРЬ: ничего не режем, возвращаем как есть
 ###################################
 crop_domain() {
   local DOMAIN_L=$1
@@ -710,7 +709,7 @@ check_cf_token() {
     EMAIL=""
     CFTOKEN=""
 
-    # Если флаг subdomain равен true, запрашиваем субдомен и домен отдельно
+    # Если флаг subdomain = true, спрашиваем A и CNAME отдельно:
     if [[ ${args[subdomain]} == "true" ]]; then
       # A-запись (например: plex.example.top)
       reading " $(text 13) " TEMP_DOMAIN_L
@@ -722,10 +721,11 @@ check_cf_token() {
     else
       # Обычный режим: домен = ровно то, что ввёл пользователь
       while [[ -z "$TEMP_DOMAIN_L" ]]; do
-        reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем домен
-        TEMP_DOMAIN_L=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
+        reading " $(text 13) " TEMP_DOMAIN_L
+        TEMP_DOMAIN_L=$(clean_url "$TEMP_DOMAIN_L")
       done
 
+      # Без извращений с regex и обрезкой — просто используем полный домен
       DOMAIN="$TEMP_DOMAIN_L"
       SUB_DOMAIN="$TEMP_DOMAIN_L"
     fi
@@ -740,13 +740,14 @@ check_cf_token() {
       reading " $(text 16) " CFTOKEN
     done
 
-    # testdomain используем как зону (последние две части) для Cloudflare
+    # testdomain всё ещё берём как зону (последние две части) для Cloudflare
     testdomain=$(echo "${DOMAIN}" | rev | cut -d '.' -f 1-2 | rev)
 
     get_test_response
     info " $(text 17) "
   done
 }
+
 
 ###################################
 ### Processing paths with a loop
@@ -1290,7 +1291,7 @@ swapfile() {
 #!/bin/bash
 # Получаем количество занятого пространства в swap (в мегабайтах)
 SWAP_USED=\$(free -m | grep Swap | awk '{print \$3}')
-# Проверяем, больше ли оно 200 Мб
+# Проверяем, больше ли оно 300 Мб
 if [ "\$SWAP_USED" -gt 200 ]; then
     # Перезапускаем warp-svc.service
     systemctl restart warp-svc.service
@@ -1938,7 +1939,7 @@ settings_steal() {
   "xver": 2,
   "dest": "36077",
   "serverNames": [
-    "${SUB_DOMAIN}"
+    "${DOMAIN}"
   ],
   "privateKey": "${PRIVATE_KEY0}",
   "minClient": "",
@@ -2049,6 +2050,7 @@ EOF
 ### Json routing rules
 ###################################
 json_rules() {
+  # [{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
   SUB_JSON_RULES=$(cat <<EOF
 [{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:apple","geosite:google"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
 EOF
@@ -2307,9 +2309,8 @@ change_db() {
 ###################################
 install_panel() {
   info " $(text 46) "
-  # Используем SUB_DOMAIN, чтобы панель/подписка были по реальному домену (например blog.plex.example.top)
-  SUB_URI=https://${SUB_DOMAIN}/${SUB_PATH}/
-  SUB_JSON_URI=https://${SUB_DOMAIN}/${SUB_JSON_PATH}/
+  SUB_URI=https://${DOMAIN}/${SUB_PATH}/
+  SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
 
   echo -e "n" | bash <(curl -sS "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION >/dev/null 2>&1
   if ! systemctl is-active fail2ban.service; then
@@ -2579,7 +2580,7 @@ data_output() {
   echo
   printf '0\n' | x-ui | grep --color=never -i ':'
   echo
-  out_data " $(text 59) " "https://${SUB_DOMAIN}/${WEB_BASE_PATH}/"
+  out_data " $(text 59) " "https://${DOMAIN}/${WEB_BASE_PATH}/"
   out_data " $(text 60) " "${SUB_URI}user"
   echo
   if [[ $CHOISE_DNS = "2" ]]; then
@@ -2917,8 +2918,8 @@ traffic_stats() {
   ${PACKAGE_UPDATE[int]} >/dev/null 2>&1
   ${PACKAGE_INSTALL[int]} vnstat >/dev/null 2>&1
 
-  hint " $(text 106) \n"
-  reading " $(text 1) " CHOICE_STATS
+  hint " $(text 106) \n"  # Показывает информацию о доступных языках
+  reading " $(text 1) " CHOICE_STATS  # Запрашивает выбор языка
 
   case $CHOICE_STATS in
     1)
