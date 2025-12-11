@@ -694,8 +694,17 @@ clean_url() {
 ### Function to crop the domain to the last two parts
 ###################################
 crop_domain() {
-  local DOMAIN_L=$1
-  echo "$DOMAIN_L"
+  local DOMAIN_L=$1  # Получаем домен как аргумент
+  IFS='.' read -r -a parts <<< "$DOMAIN_L"  # Разбиваем домен на части по точкам.
+
+  # Если в домене больше двух частей (например, для субдоменов), обрезаем до последних двух.
+  if [ ${#parts[@]} -gt 2 ]; then
+    DOMAIN_L="${parts[${#parts[@]}-2]}.${parts[${#parts[@]}-1]}"  # Берем последние две части домена.
+  else
+    DOMAIN_L="${parts[0]}.${parts[1]}"  # Если домен второго уровня, оставляем только его.
+  fi
+
+  echo "$DOMAIN_L"  # Возвращаем результат через echo.
 }
 
 ###################################
@@ -703,31 +712,34 @@ crop_domain() {
 ###################################
 check_cf_token() {
   while ! echo "$test_response" | grep -qE "\"${testdomain}\"|\"#dns_records:edit\"|\"#dns_records:read\"|\"#zone:read\""; do
-    local TEMP_DOMAIN_L
+    local TEMP_DOMAIN_L  # Переменная для временного домена
     DOMAIN=""
     SUB_DOMAIN=""
     EMAIL=""
     CFTOKEN=""
 
-    # Если флаг subdomain = true, спрашиваем A и CNAME отдельно:
+    # Если флаг subdomain равен true, запрашиваем субдомен и домен.
     if [[ ${args[subdomain]} == "true" ]]; then
-      # A-запись (например: plex.example.top)
       reading " $(text 13) " TEMP_DOMAIN_L
       DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
       echo
-      # CNAME (например: blog.plex.example.top)
       reading " $(text 81) " TEMP_DOMAIN_L
       SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
     else
-      # Обычный режим: домен = ровно то, что ввёл пользователь
+      # Если subdomain не задан, продолжаем работать с доменом.
       while [[ -z "$TEMP_DOMAIN_L" ]]; do
-        reading " $(text 13) " TEMP_DOMAIN_L
-        TEMP_DOMAIN_L=$(clean_url "$TEMP_DOMAIN_L")
+        reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем домен
+        TEMP_DOMAIN_L=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
       done
 
-      # Без извращений с regex и обрезкой — просто используем полный домен
-      DOMAIN="$TEMP_DOMAIN_L"
-      SUB_DOMAIN="$TEMP_DOMAIN_L"
+      # Проверяем, если домен соответствует регулярному выражению
+      if [[ "$TEMP_DOMAIN_L" =~ ${regex[domain]} ]]; then
+        DOMAIN=$(crop_domain "$TEMP_DOMAIN_L")  # Обрезаем домен до последних двух частей
+        SUB_DOMAIN="$TEMP_DOMAIN_L"  # Весь домен сохраняем в SUB_DOMAIN
+      else
+        DOMAIN="$TEMP_DOMAIN_L"  # Если домен второго уровня, сохраняем его без изменений
+        SUB_DOMAIN="www.$TEMP_DOMAIN_L"  # Для домена второго уровня добавляем www в SUB_DOMAIN
+      fi
     fi
 
     echo
@@ -740,14 +752,10 @@ check_cf_token() {
       reading " $(text 16) " CFTOKEN
     done
 
-    # testdomain всё ещё берём как зону (последние две части) для Cloudflare
-    testdomain=$(echo "${DOMAIN}" | rev | cut -d '.' -f 1-2 | rev)
-
     get_test_response
     info " $(text 17) "
   done
 }
-
 
 ###################################
 ### Processing paths with a loop
