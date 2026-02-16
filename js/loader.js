@@ -1,1 +1,250 @@
- if(typeof window["\x6c\x6f\x61\x64\x65\x72\x4c\x6f\x63\x61\x74\x69\x6f\x6e"]!=="\x75\x6e\x64\x65\x66\x69\x6e\x65\x64"){x0=window["\x6c\x6f\x61\x64\x65\x72\x4c\x6f\x63\x61\x74\x69\x6f\x6e"];}else{var x0="\x68\x74\x74\x70\x3a\x2f\x2f\x77\x69\x64\x67\x65\x74\x31\x2e\x6f\x74\x74\x70\x6c\x61\x79\x65\x72\x2e\x74\x76\x2f";}var x1=Math["\x63\x65\x69\x6c"](Date["\x6e\x6f\x77"]()/(60*1000));function x2(src){var x3=document.createElement("\x6c\x69\x6e\x6b");x3.type="\x74\x65\x78\x74\x2f\x63\x73\x73";x3.rel="\x73\x74\x79\x6c\x65\x73\x68\x65\x65\x74";x3.async=!1;x3.href=src;document.getElementsByTagName("\x68\x65\x61\x64")[0].appendChild(x3);}x2(x0+"\x63\x73\x73\x2f\x4d\x61\x69\x6e\x2e\x63\x73\x73"+"\x3f\x72\x63\x69\x64\x3d"+x1);function x4(src,x5){var x6=document.createElement("\x73\x63\x72\x69\x70\x74");x6.type="\x74\x65\x78\x74\x2f\x6a\x61\x76\x61\x73\x63\x72\x69\x70\x74";x6.onload=function(){x5();};x6.onerror=function(){x5();};x6.async=!1;x6.src=src;document.getElementsByTagName("\x68\x65\x61\x64")[0].appendChild(x6);}function x7(x8,x9,xa,x5){if(x9.length>0){var xb=0,xc=function(){xb++;if(xb===x9.length){x5();}};for(var xd=0;xd<x9.length;xd++){var xe=x9[xd];if(xa){xe+=("\x3f\x72\x63\x69\x64\x3d"+x1);}x4(x8+xe,xc);}}else{x5();}}var xf={xg:0,xh:1,xi:2,xj:3,xk:4,xl:5,xm:6,xn:7,xo:8,xp:9,xq:10,xr:11,xs:12,xt:14},xu={xv:xf.xg,xw:0};window.xu=xu;function xx(){var xy=(navigator.userAgent).toLowerCase(),xz=String(window.location).toLowerCase(),x10=xf.xg;if(xz.indexOf("\x2f\x6f\x70\x65\x72\x61\x74\x76")>0){x10=xf.xo;}else if(xz.indexOf("\x2f\x6e\x65\x74\x74\x76")>0){x10=xf.xk;}else if(xz.indexOf("\x2f\x64\x75\x6e\x65")>0){x10=xf.xq;}else if(xy.indexOf("\x6d\x61\x70\x6c\x65")>0){x10=xf.xh;var x11=document.getElementById("\x70\x6c\x75\x67\x69\x6e\x4f\x62\x6a\x65\x63\x74\x4e\x4e\x61\x76\x69"),x12="\x78\x78\x78\x2d\x32\x30\x31\x30";try{x12=x11.GetFirmware();}catch(x13){}x12=x12["\x73\x70\x6c\x69\x74"]("\x2d");if(x12[1]){for(var x14=2010;x14<2020;x14++){if(x12[1]["\x69\x6e\x64\x65\x78\x4f\x66"](String(x14))!==-1){xu.xw=x14;break;}}}}else if((xy.indexOf("\x77\x65\x62\x30\x73")>0)||(xy.indexOf("\x77\x65\x62\x6f\x73")>0)||((xy.indexOf("\x77\x65\x62\x61\x70\x70\x6d\x61\x6e\x61\x67\x65\x72")>0)&&(xy.indexOf("\x73\x61\x66\x61\x72\x69\x2f\x35\x33\x37\x2e\x33\x36")>0))||((xy.indexOf("\x73\x61\x66\x61\x72\x69\x2f\x35\x33\x37\x2e\x33\x31")>0)&&(xy.indexOf("\x73\x6d\x61\x72\x74\x74\x76\x2f\x35\x2e\x30")>0))||((xy.indexOf("\x73\x61\x66\x61\x72\x69\x2f\x35\x33\x37\x2e\x33\x31")>0)&&(xy.indexOf("\x73\x6d\x61\x72\x74\x74\x76\x2f\x36\x2e\x30")>0))){x10=xf.xj;}else if((xy.indexOf("\x6e\x65\x74\x63\x61\x73\x74")>0)||(xy.indexOf("\x6c\x67\x20\x73\x69\x6d\x70\x6c\x65\x73\x6d\x61\x72\x74\x2e\x74\x76")>0)){x10=xf.xi;}else if(xy.indexOf("\x64\x75\x6e\x65\x68\x64")>0){x10=xf.xq;}else if((xy.indexOf("\x6f\x70\x65\x72\x61\x20\x74\x76\x20\x73\x74\x6f\x72\x65")>0)||(xy.indexOf("\x73\x6f\x6e\x79\x63\x65\x62\x72\x6f\x77\x73\x65\x72")>0)||(xy.indexOf("\x69\x6e\x65\x74\x74\x76\x62\x72\x6f\x77\x73\x65\x72")>0)||((xy.indexOf("\x74\x76\x20\x73\x74\x6f\x72\x65")>0)&&(xy.indexOf("\x6d\x6f\x64\x65\x6c\x2f")>0))){x10=xf.xo;}else if(xy.indexOf("\x6e\x65\x74\x74\x76")>0){x10=xf.xk;}else if(!!window.tizen){x10=xf.xm;if(!!window.tizen.tv){x10=xf.xm;}}else if(xy.indexOf("\x74\x69\x7a\x65\x6e")>0){x10=xf.xm;}else if((xy.indexOf("\x6f\x70\x65\x72\x61")===0)&&(xy.indexOf("\x6c\x69\x6e\x75\x78\x20\x73\x68\x34")>0)){x10=xf.xn;}else if(xy.indexOf("\x76\x69\x65\x72\x61")>0){x10=xf.xp;}else if((window["\x4a\x53\x54\x56"])||(xy.indexOf("\x71\x74\x65\x6d\x62\x65\x64\x64\x65\x64")>0)){x10=xf.xr;}else if(xy.indexOf("\x70\x6c\x61\x79\x73\x74\x61\x74\x69\x6f\x6e")>0){x10=xf.xs;}if(!!window.gSTB){x10=xf.xl;window.moveTo(0,0);}return x10;}var x15=!1;function x16(){var x17=document.body,x18=document.createElement("\x64\x69\x76"),x19=document.createElement("\x64\x69\x76"),x1a=document.createElement("\x69\x6d\x67");x18.id="\x63\x73\x73\x33";x17.appendChild(x18);x19.id="\x63\x73\x73\x35";x18.appendChild(x19);x1a.id="\x63\x73\x73\x32";x18.appendChild(x1a);if(xu.xv===xf.xg){x1a.style.background="\x72\x67\x62\x28\x30\x2c\x35\x2c\x38\x30\x29";}}function x1b(){if((x15)&&(window.x1c)){x1d();setTimeout(function(){x1e();x1f.onLoad();x1g();},0);}else{x1d();setTimeout(x1b,100);}}function x1h(){var x1i=[ "\x24\x4d\x41\x4e\x41\x47\x45\x52\x5f\x57\x49\x44\x47\x45\x54\x2f\x43\x6f\x6d\x6d\x6f\x6e\x2f\x41\x50\x49\x2f\x57\x69\x64\x67\x65\x74\x2e\x6a\x73","\x24\x4d\x41\x4e\x41\x47\x45\x52\x5f\x57\x49\x44\x47\x45\x54\x2f\x43\x6f\x6d\x6d\x6f\x6e\x2f\x41\x50\x49\x2f\x50\x6c\x75\x67\x69\x6e\x2e\x6a\x73","\x24\x4d\x41\x4e\x41\x47\x45\x52\x5f\x57\x49\x44\x47\x45\x54\x2f\x43\x6f\x6d\x6d\x6f\x6e\x2f\x41\x50\x49\x2f\x54\x56\x4b\x65\x79\x56\x61\x6c\x75\x65\x2e\x6a\x73" ],x1j=[],x1k=["\x6a\x73\x2f\x6c\x69\x62\x2f\x77\x65\x62\x4f\x53\x6a\x73\x2d\x30\x2e\x31\x2e\x30\x2f\x77\x65\x62\x4f\x53\x2e\x6a\x73"],x1l=["\x24\x57\x45\x42\x41\x50\x49\x53\x2f\x77\x65\x62\x61\x70\x69\x73\x2f\x77\x65\x62\x61\x70\x69\x73\x2e\x6a\x73"],x1m=[ "\x6a\x73\x2f\x6c\x69\x62\x2f\x6a\x73\x6f\x6e\x32\x2e\x6d\x69\x6e\x2e\x6a\x73","\x6a\x73\x2f\x4f\x54\x54\x57\x69\x64\x67\x65\x74\x2e\x6a\x73" ],x1n=function(){x15=!0;},x1o=function(){x7(x0,x1m,!0,x1n);};xu.xv=xx();var css0=document.getElementsByTagName("\x64\x69\x76")[0];if(css0){switch(xu.xv){case xf.xi:css0.innerHTML="\x3c\x6f\x62\x6a\x65\x63\x74\x20\x74\x79\x70\x65\x3d\x27\x61\x70\x70\x6c\x69\x63\x61\x74\x69\x6f\x6e\x2f\x78\x2d\x6e\x65\x74\x63\x61\x73\x74\x2d\x69\x6e\x66\x6f\x27\x20\x69\x64\x3d\x27\x6e\x65\x74\x63\x61\x73\x74\x5f\x64\x65\x76\x69\x63\x65\x27\x20\x77\x69\x64\x74\x68\x3d\x27\x30\x27\x20\x68\x65\x69\x67\x68\x74\x3d\x27\x30\x27\x3e\x3c\x2f\x6f\x62\x6a\x65\x63\x74\x3e";break;case xf.xq:css0.innerHTML="\x3c\x6f\x62\x6a\x65\x63\x74\x20\x74\x79\x70\x65\x3d\x27\x61\x70\x70\x6c\x69\x63\x61\x74\x69\x6f\x6e\x2f\x78\x2d\x64\x75\x6e\x65\x2d\x73\x74\x62\x2d\x61\x70\x69\x27\x20\x69\x64\x3d\x27\x64\x75\x6e\x65\x61\x70\x69\x27\x20\x77\x69\x64\x74\x68\x3d\x27\x30\x27\x20\x68\x65\x69\x67\x68\x74\x3d\x27\x30\x27\x3e\x3c\x2f\x6f\x62\x6a\x65\x63\x74\x3e";break;default:if(xu.xv!==xf.xh){css0.innerHTML="";if(document["\x62\x6f\x64\x79"]){document["\x62\x6f\x64\x79"].removeChild(css0);}}}}x16();switch(xu.xv){case xf.xh:x7("",x1i,!1,x1o);break;case xf.xi:x7("",x1j,!1,x1o);break;case xf.xj:x7(x0,x1k,!1,x1o);break;case xf.xm:x7("",x1l,!1,x1o);break;default:x1o();}}var x1p,x1q=0,x1r=[0x5c,0x7c,0x2f,0x2d];function x1s(){x1p=document.createElement("\x64\x69\x76");x1p.style.cssText="\x77\x69\x64\x74\x68\x3a\x36\x65\x6d\x3b\x68\x65\x69\x67\x68\x74\x3a\x31\x2e\x32\x65\x6d\x3b\x74\x6f\x70\x3a\x35\x25\x3b\x6c\x65\x66\x74\x3a\x33\x25\x3b\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x3a\x72\x67\x62\x28\x34\x30\x2c\x36\x35\x2c\x39\x37\x29\x3b\x63\x6f\x6c\x6f\x72\x3a\x72\x67\x62\x28\x32\x34\x30\x2c\x32\x34\x30\x2c\x32\x34\x30\x29\x3b\x70\x6f\x73\x69\x74\x69\x6f\x6e\x3a\x61\x62\x73\x6f\x6c\x75\x74\x65\x3b\x7a\x2d\x69\x6e\x64\x65\x78\x3a\x31\x30\x30\x3b\x66\x6f\x6e\x74\x2d\x73\x69\x7a\x65\x3a\x33\x65\x6d\x3b\x74\x65\x78\x74\x2d\x61\x6c\x69\x67\x6e\x3a\x63\x65\x6e\x74\x65\x72\x3b\x62\x6f\x72\x64\x65\x72\x2d\x72\x61\x64\x69\x75\x73\x3a\x30\x2e\x32\x65\x6d\x3b";document.body.appendChild(x1p);}function x1d(){x1p.innerHTML="\x4c\x6f\x61\x64\x69\x6e\x67\x20"+String.fromCharCode(x1r[x1q++]);if(x1q>3){x1q=0;}}function x1e(){try{document.body.removeChild(x1p);}catch(x13){}}var x1t;function x1u(){x1t=document.createElement("\x64\x69\x76");x1t.style.cssText="\x77\x69\x64\x74\x68\x3a\x39\x34\x25\x3b\x68\x65\x69\x67\x68\x74\x3a\x31\x2e\x32\x65\x6d\x3b\x74\x6f\x70\x3a\x31\x32\x25\x3b\x6c\x65\x66\x74\x3a\x33\x25\x3b\x70\x6f\x73\x69\x74\x69\x6f\x6e\x3a\x61\x62\x73\x6f\x6c\x75\x74\x65\x3b\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x3a\x74\x72\x61\x6e\x73\x70\x61\x72\x65\x6e\x74\x3b\x7a\x2d\x69\x6e\x64\x65\x78\x3a\x31\x30\x30\x3b\x66\x6f\x6e\x74\x2d\x73\x69\x7a\x65\x3a\x31\x2e\x36\x65\x6d\x3b\x74\x65\x78\x74\x2d\x61\x6c\x69\x67\x6e\x3a\x63\x65\x6e\x74\x65\x72\x3b\x62\x6f\x72\x64\x65\x72\x2d\x72\x61\x64\x69\x75\x73\x3a\x30\x2e\x32\x65\x6d\x3b";document.body.appendChild(x1t);}function x1g(){document.body.removeChild(x1t);}function x1v(x1w){x1t.style.background="\x72\x67\x62\x28\x31\x35\x30\x2c\x38\x30\x2c\x38\x30\x29";x1t.innerHTML=x1w;}var x1x=!1,x1y=[];function onLoad(){if(x1x){return function(){};}x1s();x1u();window.onerror=function(error,x1z,x20){if(xu.xv!==xf.xj){x1v(error+"\x7c"+x1z+"\x28"+x20+"\x29");}x1y.push({error:error,x1z:x1z,x20:x20});};x1h();x1b();x1x=!0;return function(){};}function onUnload(){x1f.onUnload();}function onShow(){x1f.onShow();}setTimeout(function(){if(document.body){document.body.onload=onLoad();}},3500);
+(function () {
+  'use strict';
+
+  // -----------------------------
+  // FIX MIXED CONTENT:
+  //  - default loaderLocation -> HTTPS
+  //  - upgrade http:// -> https://
+  //  - add protocol if missing
+  // -----------------------------
+  var loaderLocation = (typeof window.loaderLocation !== 'undefined' && window.loaderLocation)
+    ? String(window.loaderLocation)
+    : 'https://widget1.ottplayer.tv/';
+
+  // normalize
+  if (loaderLocation.indexOf('http://') === 0) loaderLocation = 'https://' + loaderLocation.slice(7);
+  if (loaderLocation.indexOf('//') === 0) loaderLocation = 'https:' + loaderLocation;
+  if (loaderLocation.indexOf('http') !== 0) loaderLocation = 'https://' + loaderLocation.replace(/^\/+/, '');
+  if (loaderLocation.slice(-1) !== '/') loaderLocation += '/';
+
+  var x0 = loaderLocation;
+
+  // rcid = cache-buster per minute
+  var x1 = Math.ceil(Date.now() / (60 * 1000));
+
+  function x2(src) {
+    var link = document.createElement('link');
+    link.type = 'text/css';
+    link.rel = 'stylesheet';
+    link.async = false;
+    link.href = src;
+    document.getElementsByTagName('head')[0].appendChild(link);
+  }
+
+  // CSS
+  x2(x0 + 'css/Main.css' + '?rcid=' + x1);
+
+  function x4(src, cb) {
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.onload = function () { cb(); };
+    s.onerror = function () { cb(); };
+    s.async = false;
+    s.src = src;
+    document.getElementsByTagName('head')[0].appendChild(s);
+  }
+
+  function x7(base, arr, addRcid, done) {
+    if (arr.length > 0) {
+      var loaded = 0;
+      var onOne = function () {
+        loaded++;
+        if (loaded === arr.length) done();
+      };
+      for (var i = 0; i < arr.length; i++) {
+        var p = arr[i];
+        if (addRcid) p += ('?rcid=' + x1);
+        x4(base + p, onOne);
+      }
+    } else done();
+  }
+
+  // ---- constants / platform map (как у тебя)
+  var xf = { xg: 0, xh: 1, xi: 2, xj: 3, xk: 4, xl: 5, xm: 6, xn: 7, xo: 8, xp: 9, xq: 10, xr: 11, xs: 12, xt: 14 };
+  var xu = { xv: xf.xg, xw: 0 };
+  window.xu = xu;
+
+  function xx() {
+    var ua = (navigator.userAgent).toLowerCase();
+    var loc = String(window.location).toLowerCase();
+    var t = xf.xg;
+
+    if (loc.indexOf('/operatv') > 0) t = xf.xo;
+    else if (loc.indexOf('/nettv') > 0) t = xf.xk;
+    else if (loc.indexOf('/dune') > 0) t = xf.xq;
+    else if (ua.indexOf('maple') > 0) {
+      t = xf.xh;
+      var po = document.getElementById('pluginObjectNNavi'), fw = 'xxx-2010';
+      try { fw = po.GetFirmware(); } catch (e) { }
+      fw = fw.split('-');
+      if (fw[1]) {
+        for (var y = 2010; y < 2020; y++) {
+          if (fw[1].indexOf(String(y)) !== -1) { xu.xw = y; break; }
+        }
+      }
+    }
+    else if (
+      (ua.indexOf('web0s') > 0) ||
+      (ua.indexOf('webos') > 0) ||
+      ((ua.indexOf('webappmanager') > 0) && (ua.indexOf('safari/537.36') > 0)) ||
+      ((ua.indexOf('safari/537.31') > 0) && (ua.indexOf('smarttv/5.0') > 0)) ||
+      ((ua.indexOf('safari/537.31') > 0) && (ua.indexOf('smarttv/6.0') > 0))
+    ) t = xf.xj;
+    else if ((ua.indexOf('netcast') > 0) || (ua.indexOf('lg simplesmart.tv') > 0)) t = xf.xi;
+    else if (ua.indexOf('dunehd') > 0) t = xf.xq;
+    else if (
+      (ua.indexOf('opera tv store') > 0) ||
+      (ua.indexOf('sonycebrowser') > 0) ||
+      (ua.indexOf('inettvbrowser') > 0) ||
+      ((ua.indexOf('tv store') > 0) && (ua.indexOf('model/') > 0))
+    ) t = xf.xo;
+    else if (ua.indexOf('nettv') > 0) t = xf.xk;
+    else if (!!window.tizen) { t = xf.xm; if (!!window.tizen.tv) t = xf.xm; }
+    else if (ua.indexOf('tizen') > 0) t = xf.xm;
+    else if ((ua.indexOf('opera') === 0) && (ua.indexOf('linux sh4') > 0)) t = xf.xn;
+    else if (ua.indexOf('viera') > 0) t = xf.xp;
+    else if ((window.JSTV) || (ua.indexOf('qtembedded') > 0)) t = xf.xr;
+    else if (ua.indexOf('playstation') > 0) t = xf.xs;
+
+    if (!!window.gSTB) { t = xf.xl; window.moveTo(0, 0); }
+    return t;
+  }
+
+  var x15 = false;
+
+  function x16() {
+    var body = document.body;
+    var d1 = document.createElement('div');
+    var d2 = document.createElement('div');
+    var img = document.createElement('img');
+
+    d1.id = 'css3';
+    body.appendChild(d1);
+    d2.id = 'css5';
+    d1.appendChild(d2);
+    img.id = 'css2';
+    d1.appendChild(img);
+
+    if (xu.xv === xf.xg) img.style.background = 'rgb(0,5,80)';
+  }
+
+  // loader spinner
+  var x1p, x1q = 0, x1r = [0x5c, 0x7c, 0x2f, 0x2d];
+  function x1s() {
+    x1p = document.createElement('div');
+    x1p.style.cssText =
+      'width:6em;height:1.2em;top:5%;left:3%;background:rgb(40,65,97);color:rgb(240,240,240);position:absolute;z-index:100;font-size:3em;text-align:center;border-radius:0.2em;';
+    document.body.appendChild(x1p);
+  }
+  function x1d() {
+    x1p.innerHTML = 'Loading ' + String.fromCharCode(x1r[x1q++]);
+    if (x1q > 3) x1q = 0;
+  }
+  function x1e() {
+    try { document.body.removeChild(x1p); } catch (e) { }
+  }
+
+  var x1t;
+  function x1u() {
+    x1t = document.createElement('div');
+    x1t.style.cssText =
+      'width:94%;height:1.2em;top:12%;left:3%;position:absolute;background:transparent;z-index:100;font-size:1.6em;text-align:center;border-radius:0.2em;';
+    document.body.appendChild(x1t);
+  }
+  function x1g() { document.body.removeChild(x1t); }
+  function x1v(msg) {
+    x1t.style.background = 'rgb(150,80,80)';
+    x1t.innerHTML = msg;
+  }
+
+  function x1b() {
+    if ((x15) && (window.x1c)) {
+      x1d();
+      setTimeout(function () {
+        x1e();
+        x1f.onLoad();
+        x1g();
+      }, 0);
+    } else {
+      x1d();
+      setTimeout(x1b, 100);
+    }
+  }
+
+  function x1h() {
+    var maple = [
+      '$MANAGER_WIDGET/Common/API/Widget.js',
+      '$MANAGER_WIDGET/Common/API/Plugin.js',
+      '$MANAGER_WIDGET/Common/API/TVKeyValue.js'
+    ];
+    var lg = [];
+    var webos = ['js/lib/webOSjs-0.1.0/webOS.js'];
+    var tizen = ['$WEBAPIS/webapis/webapis.js'];
+    var common = ['js/lib/json2.min.js', 'js/OTTWidget.js'];
+
+    var afterCommon = function () { x15 = true; };
+    var loadCommon = function () { x7(x0, common, true, afterCommon); };
+
+    xu.xv = xx();
+
+    // оригинальная вставка object для некоторых платформ (оставил как было логикой)
+    var css0 = document.getElementsByTagName('div')[0];
+    if (css0) {
+      switch (xu.xv) {
+        case xf.xi:
+          css0.innerHTML = "<object type='application/x-netcast-info' id='netcast_device' width='0' height='0'></object>";
+          break;
+        case xf.xq:
+          css0.innerHTML = "<object type='application/x-dune-stb-api' id='duneapi' width='0' height='0'></object>";
+          break;
+        default:
+          if (xu.xv !== xf.xh) {
+            css0.innerHTML = '';
+            if (document.body) document.body.removeChild(css0);
+          }
+      }
+    }
+
+    x16();
+
+    switch (xu.xv) {
+      case xf.xh: x7('', maple, false, loadCommon); break;
+      case xf.xi: x7('', lg, false, loadCommon); break;
+      case xf.xj: x7(x0, webos, false, loadCommon); break;
+      case xf.xm: x7('', tizen, false, loadCommon); break;
+      default: loadCommon(); break;
+    }
+  }
+
+  var x1x = false, x1y = [];
+
+  function onLoad() {
+    if (x1x) return function () { };
+
+    x1s();
+    x1u();
+
+    window.onerror = function (error, url, line) {
+      if (xu.xv !== xf.xj) x1v(error + '|' + url + '(' + line + ')');
+      x1y.push({ error: error, url: url, line: line });
+    };
+
+    x1h();
+    x1b();
+
+    x1x = true;
+    return function () { };
+  }
+
+  function onUnload() { try { x1f.onUnload(); } catch (e) { } }
+  function onShow() { try { x1f.onShow(); } catch (e) { } }
+
+  setTimeout(function () {
+    if (document.body) document.body.onload = onLoad();
+  }, 3500);
+
+  // expose if needed
+  window.onUnload = onUnload;
+  window.onShow = onShow;
+
+})();
