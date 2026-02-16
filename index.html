@@ -2,18 +2,16 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OTTPlayer</title>
 
     <script>
-      // База (HTTPS автоматически)
-      var base = location.origin + "/tmdb/";
-      window.loaderLocation = base;
-
-      // ВЕРСИЯ ПРИЛОЖЕНИЯ
+      // Версия приложения 
       var APP_VERSION = "2.006";
 
-      (function load() {
+      
+      var base = location.origin + "/tmdb/";
+
+      function load() {
         var s = document.createElement("script");
         s.type = "text/javascript";
         s.async = false;
@@ -27,15 +25,20 @@
           document.body.appendChild(eb);
         };
 
-        // БЕЗ Date.now() — стабильная версия
+        // Передаём базу loader'у
+        window.loaderLocation = base;
+
+        // Максимальный кэш (НЕ Date.now())
         s.src = base + "js/loader.js?v=" + APP_VERSION;
 
         document.head.appendChild(s);
-      })();
+      }
+
+      load();
     </script>
   </head>
 
-  <!-- ВАЖНО: loader сам стартует, onload НЕ нужен -->
+  <!-- loader сам управляет запуском -->
   <body onunload="if(window.onUnload) try{onUnload()}catch(e){}">
     <div id="objects">
       <object id="pluginSef" border="0" classid="clsid:SAMSUNG-INFOLINK-SEF"></object>
