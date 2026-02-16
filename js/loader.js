@@ -267,8 +267,14 @@ function onUnload() {
 function onShow() {
     x1f.onShow();
 }
-setTimeout(function() {
-    if (document.body) {
-        document.body.onload = onLoad();
-    }
-}, 3500);
+try{
+  // один раз, без двойного вызова
+  if(window.addEventListener){
+    window.addEventListener('load', onLoad, { once: true });
+  }else{
+    window.onload = onLoad;
+  }
+}catch(e){
+  // fallback
+  window.onload = onLoad;
+}
