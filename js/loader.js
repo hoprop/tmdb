@@ -73,6 +73,19 @@ window.xu = xu;
 window.xf = xf;
 var x1y = window.x1y || [];
 window.x1y = x1y;
+// ==========================
+// GA stub (OTTWidget expects ga)
+// ==========================
+window.ga = window.ga || function () {
+  (window.ga.q = window.ga.q || []).push(arguments);
+};
+window.ga.l = window.ga.l || +new Date();
+
+// optional: some builds use gtag too
+window.dataLayer = window.dataLayer || [];
+window.gtag = window.gtag || function () {
+  window.dataLayer.push(arguments);
+};
 
 
 function xx() {
