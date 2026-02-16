@@ -1,38 +1,42 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="Cache-Control" content="no-cache" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OTTPlayer</title>
 
     <script>
-      // 1) Всегда грузим по HTTPS, чтобы не было Mixed Content
-      var base = location.origin + "/tmdb/"; // https://hoprop.github.io/tmdb/
-
-      // 2) Перед загрузкой loader.js задаём базу (он использует window.loaderLocation)
+      // База (HTTPS автоматически)
+      var base = location.origin + "/tmdb/";
       window.loaderLocation = base;
 
-      // 3) Подгружаем loader.js (один раз)
+      // ВЕРСИЯ ПРИЛОЖЕНИЯ
+      var APP_VERSION = "2.006";
+
       (function load() {
         var s = document.createElement("script");
         s.type = "text/javascript";
         s.async = false;
+
         s.onerror = function () {
           document.body.style.background = "#000000";
           var eb = document.createElement("div");
           eb.style.cssText =
             "color:red;width:94%;height:1.2em;top:12%;left:3%;position:absolute;background:transparent;z-index:100;font-size:1.6em;text-align:center;border-radius:0.2em;";
-          document.body.appendChild(eb);
           eb.innerHTML = "Application load failed";
+          document.body.appendChild(eb);
         };
-        s.src = base + "js/loader.js?rcid=" + Date.now();
+
+        // БЕЗ Date.now() — стабильная версия
+        s.src = base + "js/loader.js?v=" + APP_VERSION;
+
         document.head.appendChild(s);
       })();
     </script>
   </head>
 
-  <!-- ВАЖНО: onload убрали, чтобы loader не стартовал 2 раза -->
-  <body onunload="if(window.onUnload) onUnload();">
+  <!-- ВАЖНО: loader сам стартует, onload НЕ нужен -->
+  <body onunload="if(window.onUnload) try{onUnload()}catch(e){}">
     <div id="objects">
       <object id="pluginSef" border="0" classid="clsid:SAMSUNG-INFOLINK-SEF"></object>
       <object id="pluginPlayer" border="0" classid="clsid:SAMSUNG-INFOLINK-PLAYER"></object>
