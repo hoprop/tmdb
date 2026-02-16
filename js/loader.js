@@ -253,19 +253,6 @@ function onLoad() {
             x1z: x1z,
             x20: x20
         });
-        // ==========================
-// GA stub (OTTWidget expects ga)
-// ==========================
-window.ga = window.ga || function () {
-  (window.ga.q = window.ga.q || []).push(arguments);
-};
-window.ga.l = window.ga.l || +new Date();
-
-// optional: some builds use gtag too
-window.dataLayer = window.dataLayer || [];
-window.gtag = window.gtag || function () {
-  window.dataLayer.push(arguments);
-};
     }
     ;
     x1h();
