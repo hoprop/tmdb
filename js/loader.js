@@ -70,7 +70,10 @@ x2(x0 + "css/Main.css" + "?rcid=" + x1);
 var xf = { xg:0, xh:1, xi:2, xj:3, xk:4, xl:5, xm:6, xn:7, xo:8, xp:9, xq:10, xr:11, xs:12, xt:14 };
 var xu = { xv: xf.xg, xw: 0 };
 window.xu = xu;
-window.xf = xf; // <-- ключевой фикс, чтобы OTTWidget.js видел xf
+window.xf = xf;
+var x1y = window.x1y || [];
+window.x1y = x1y;
+
 
 function xx() {
   var xy = (navigator.userAgent).toLowerCase();
